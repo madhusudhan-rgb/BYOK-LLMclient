@@ -1,0 +1,4 @@
+open ai key = "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" openai/gpt-oss-120b
+nvidia ai key = "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" nvidia/nemotron-3-ultra-550b-a55b:free
+llama 3.1  = "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" llama-3.1-70b-versatile
+qwen = "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" qwen/qwen3-coder:free

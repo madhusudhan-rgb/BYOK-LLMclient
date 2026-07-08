@@ -1,9 +1,9 @@
-import "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavbarProvider, useNavbar } from "../context/NavbarContext";
+
 
 const ACCENT   = "#00cc2c";
 const INACTIVE = "rgba(255,255,255,0.3)";
@@ -43,7 +43,7 @@ function TabContent() {
         },
       }}
     >
-      <Tabs.Screen
+<Tabs.Screen
         name="index"
         options={{
           tabBarIcon: ({ color, focused }) => (
@@ -51,38 +51,57 @@ function TabContent() {
           ),
         }}
       />
-      <Tabs.Screen
+<Tabs.Screen
         name="explore"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "search" : "search-outline"} size={26} color={color} />
+            <Ionicons name={focused ? "chatbox-ellipses" : "chatbox-ellipses-outline"} size={26} color={color} />
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="tab6"
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name="code" size={focused ? 28 : 25} color={color} />
           ),
         }}
-      />
-      {/* <Tabs.Screen
-        name="tab3"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "chatbubble" : "chatbubble-outline"} size={26} color={color} />
-          ),
-        }}
       /> */}
-      <Tabs.Screen
+     
+      {/* <Tabs.Screen
         name="contact"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "settings" : "settings-outline"} size={26} color={color} />
+            <Ionicons name={focused ? "information" : "information-outline"} size={30} color={color} />
+          ),
+        }}
+      /> */}
+       <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
           ),
         }}
       />
+      <Tabs.Screen
+          name="login"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="signup"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+        name = "contact"
+        options = {{
+          href : null,
+
+        }}/>
     </Tabs>
   );
 }

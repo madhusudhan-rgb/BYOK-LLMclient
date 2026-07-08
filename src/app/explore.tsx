@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Bot, BOTS, BotType } from "../config/bots";
+import { Bot, BotType, getBots } from "../config/bots";
 
 type Message = {
   id: string;
@@ -42,7 +42,27 @@ const TYPE_BADGE: Record<BotType, { label: string; color: string }> = {
   text:  { label: "Text",  color: "#64c579" },
   image: { label: "Image", color: "#61a9c8" },
   video: { label: "Video", color: "#f97316" },
+  
 };
+
+function isPlaceholderKey(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return true;
+
+  return [
+    "test",
+    "test-or",
+    "test-groq",
+    "your-",
+    "your",
+    "placeholder",
+    "example",
+    "demo",
+    "fake",
+    "sample",
+    "changeme",
+  ].some(token => normalized.includes(token));
+}
 
 function BotAvatar({ bot, size = 40 }: { bot: Bot; size?: number }) {
   return (
@@ -58,12 +78,13 @@ export default function Explore() {
   const [messages,  setMessages]  = useState<Message[]>([]);
   const [input,     setInput]     = useState("");
   const [loading,   setLoading]   = useState(false);
+  const bots = getBots();
 
   const historyRef = useRef<History[]>([]);
   const listRef    = useRef<FlatList<Message>>(null);
   const abortRef   = useRef<AbortController | null>(null);
 
-  const filtered = BOTS.filter(b =>
+  const filtered = bots.filter(b =>
     b.name.toLowerCase().includes(search.toLowerCase()) ||
     b.subtitle.toLowerCase().includes(search.toLowerCase())
   );
@@ -107,15 +128,28 @@ export default function Explore() {
 
   // ── Text (streaming) ──────────────────────────────────────────
   const sendText = async (prompt: string, botMsgId: string) => {
+    if (!activeBot) throw new Error("No bot selected.");
+    if (!activeBot.apiUrl?.trim()) throw new Error("This bot is not configured for chat.");
+    if (!activeBot.apiKey?.trim() || isPlaceholderKey(activeBot.apiKey)) {
+      throw new Error(`Please add a real API key for ${activeBot.name} in .env, then restart the app.`);
+    }
+
     historyRef.current.push({ role: "user", content: prompt });
     abortRef.current = new AbortController();
 
-    const res = await fetch(activeBot!.apiUrl, {
+    const isGroq = activeBot.apiUrl.includes("groq.com");
+    const isOpenRouter = activeBot.apiUrl.includes("openrouter.ai");
+
+    const res = await fetch(activeBot.apiUrl, {
       method: "POST",
       signal: abortRef.current.signal,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${activeBot!.apiKey}`,
+        ...(isGroq
+          ? { Authorization: `Bearer ${activeBot.apiKey}` }
+          : isOpenRouter
+            ? { Authorization: `Bearer ${activeBot.apiKey}` }
+            : { Authorization: `Bearer ${activeBot.apiKey}` }),
       },
       body: JSON.stringify({
         model: activeBot!.model,
@@ -167,7 +201,9 @@ export default function Explore() {
 
   // ── Image generation ──────────────────────────────────────────
   const sendImage = async (prompt: string, botMsgId: string) => {
-    if (activeBot!.imageFormat === "pollinations") {
+    if (!activeBot) throw new Error("No bot selected.");
+
+    if (activeBot.imageFormat === "pollinations") {
       const encoded  = encodeURIComponent(prompt);
       const seed     = Date.now();
       const imageUrl = `https://image.pollinations.ai/prompt/${encoded}?model=${activeBot!.model}&width=1024&height=1024&seed=${seed}&nologo=true`;
@@ -177,11 +213,23 @@ export default function Explore() {
       return;
     }
 
-    const res = await fetch(activeBot!.apiUrl, {
+    if (!activeBot.apiUrl?.trim()) throw new Error("This bot is not configured for image generation.");
+    if (!activeBot.apiKey?.trim() || isPlaceholderKey(activeBot.apiKey)) {
+      throw new Error(`Please add a real API key for ${activeBot.name} in .env, then restart the app.`);
+    }
+
+    const isGroq = activeBot.apiUrl.includes("groq.com");
+    const isOpenRouter = activeBot.apiUrl.includes("openrouter.ai");
+
+    const res = await fetch(activeBot.apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${activeBot!.apiKey}`,
+        ...(isGroq
+          ? { Authorization: `Bearer ${activeBot.apiKey}` }
+          : isOpenRouter
+            ? { Authorization: `Bearer ${activeBot.apiKey}` }
+            : { Authorization: `Bearer ${activeBot.apiKey}` }),
       },
       body: JSON.stringify({
         model: activeBot!.model,
@@ -245,7 +293,7 @@ export default function Explore() {
       <SafeAreaView style={styles.safe}>
         <View style={styles.listHeader}>
           <Text style={styles.listTitle}>AI Bots</Text>
-          <Text style={styles.listSub}>{BOTS.length} available</Text>
+          <Text style={styles.listSub}>{bots.length} available</Text>
         </View>
 
         <View style={styles.searchRow}>
@@ -346,7 +394,7 @@ export default function Explore() {
             value={input}
             onChangeText={setInput}
             placeholder={placeholder}
-            placeholderTextColor="#444"
+            placeholderTextColor="#faf3f3"
             style={styles.chatInput}
             onSubmitEditing={sendMessage}
             returnKeyType="send"
@@ -369,30 +417,30 @@ export default function Explore() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#0d0d0d" },
+  safe: { flex: 1, backgroundColor: "#000000" },
   avatar: {
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#9ce40ebe",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: "rgba(124, 15, 15, 0)",
     alignItems: "center",
     justifyContent: "center",
   },
   listHeader: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 4 },
-  listTitle: { color: "#fff", fontSize: 26, fontWeight: "800" },
-  listSub: { color: "#444", fontSize: 13, marginTop: 2 },
+  listTitle: { color: "#ffffff", fontSize: 26, fontWeight: "800" },
+  listSub: { color: "#f0eaea", fontSize: 13, marginTop: 2 },
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     marginHorizontal: 16,
     marginVertical: 12,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#b0fb25ce",
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
     paddingHorizontal: 14,
   },
-  searchInput: { flex: 1, color: "#fff", fontSize: 15, paddingVertical: 12 },
+  searchInput: { flex: 1, color: "#ffffff", fontSize: 15, paddingVertical: 12 },
   list: { paddingHorizontal: 16, paddingBottom: 24 },
   empty: { color: "#444", textAlign: "center", marginTop: 40, fontSize: 14 },
   card: {
@@ -446,7 +494,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   imageBubble: { padding: 0 },
-  userBubble: { alignSelf: "flex-end", backgroundColor: "#0a84ff", borderBottomRightRadius: 4 },
+  userBubble: { alignSelf: "flex-end", backgroundColor: "#11f501", borderBottomRightRadius: 4 },
   botBubble: {
     alignSelf: "flex-start",
     backgroundColor: "#1a1a1a",
