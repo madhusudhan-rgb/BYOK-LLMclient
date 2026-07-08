@@ -9,22 +9,49 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
 
+const socialLinks = [
+  {
+    label: "Instagram",
+    url: "https://www.instagram.com/airbusissocool102/",
+    image: require("../../assets/images/insta.jpg"),
+    imageStyle: { borderRadius: 14 },
+  },
+  {
+    label: "TikTok",
+    url: "https://www.tiktok.com/@airbusissocool102",
+    image: require("../../assets/images/tt.jpg"),
+    imageStyle: { borderRadius: 14 },
+  },
+  {
+    label: "GitHub",
+    url: "https://github.com/madhusudhan-rgb",
+    image: require("../../assets/images/github.png"),
+    imageStyle: { borderRadius: 34 },
+  },
+  {
+    label: "X",
+    url: "https://x.com/twan1nbk",
+    image: require("../../assets/images/x.png"),
+    imageStyle: { borderRadius: 40 },
+  },
+] as const;
+
 export default function Contact() {
-  const scaleContact    = useRef(new Animated.Value(1)).current;
-  const scaleTerms      = useRef(new Animated.Value(1)).current;
-  const scaleComingSoon = useRef(new Animated.Value(1)).current;
-  const scalerndm       = useRef(new Animated.Value(1)).current;
+  const scaleTerms = useRef(new Animated.Value(1));
+  const scaleComingSoon = useRef(new Animated.Value(1));
+  const scalerndm = useRef(new Animated.Value(1));
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfig,  setModalConfig]  = useState<ModalConfig | null>(null);
 
   const showModal = (config: ModalConfig) => { setModalConfig(config); setModalVisible(true); };
 
-  const bounce = (scale: Animated.Value) => {
+  const bounce = (scaleRef: React.RefObject<Animated.Value>) => {
+    const scale = scaleRef.current;
     Animated.sequence([
       Animated.timing(scale, { toValue: 0.94, duration: 80, useNativeDriver: true }),
       Animated.timing(scale, { toValue: 1,    duration: 80, useNativeDriver: true }),
@@ -41,7 +68,7 @@ export default function Contact() {
     title: "Terms & Conditions",
     message:
       "The app and its owner do not claim ownership of any third-party content presented (except the API key).\n\n" +
-      "This app is provided for entertainment purposes only, and the developer is not responsible for any damage, harm, or loss resulting from its use.\n\nIF THERE IS ANY NOTICE OF USERS TRYING TO ABUSE THE API CODES ( you are able to put your own api codes due to the app being open source but you are not allowed to use the already hardcoded api codes for your own purposes) BY FIDDLING WITHT THE APK SERIOUS CONSEQUENCES WILL BE PLACED\n\n" +
+      "This app is provided for entertainment purposes only, and the developer is not responsible for any damage, harm, or loss resulting from its use.\n\nIF THERE IS ANY NOTICE OF USERS TRYING TO ABUSE THE API CODES ( you are able to put your own api codes due to the app being open source but you are not allowed to use the already hardcoded api codes for your own purposes) BY FIDDLING WITHT THE APK SERIOUS CONSEQUENCES WILL BE PLACED\n\nOpenAI, NVIDIA, Meta, AND THEIR RESPECTIVE LOGOS ARE TRADEMARKS OF THEIR OWNERS. THIS APP IS INDEPENDENT AND IS NOT AFFILIATED NOR ENDORSED BY THE COMPANIES PRESENTED.\n\nAll your passwords and usernames are stored locally. We had plans to implement a backend solution by connecting supabase but reverted back to local json file storage for credentials.\n\nThe developer dont have access to any of your data as already stated everything is locally done except the api calls. " +
       "By continuing, you agree to these terms.",
     buttons: [
       {
@@ -96,9 +123,9 @@ export default function Contact() {
               onPress: showPrivacyAlert,
             },
             {
-              scale: scaleComingSoon, icon: "🔒", label: "# COMING SOON",
-              style: "muted" as const,
-              onPress: () => showModal({ title: "🔒 Coming Soon", message: "This feature is under development. Stay tuned!", buttons: [{ text: "Got it", style: "cancel" }] }),
+              scale: scaleComingSoon, icon: "?", label: "What and why this app?",
+              style: "secondary" as const,
+              onPress: () => showModal({ title: "Information", message: "I am a 17 yr old ( as of 7/4/26 2:18pm est ) and i wanted to learn something productive during the summer instead of fooling around.\nCoding seemed to be the best option as its becoming more of a generalized thing\nI built this simply to get better at typescript and it might not be the best but hey it works!!!\n\n\n( I did use Ai to debug the config files and check for compiling issues when i made the apk )", buttons: [{ text: "Got it", style: "cancel" }] }),
             },
             {
               scale: scalerndm, icon: "🔗", label: "Resources",
@@ -107,47 +134,34 @@ export default function Contact() {
                 title: "Resources",
                 message: "API powered by Groq : https://groq.com and OpenRouter :https://openrouter.ai\n\nBackground images sourced from Pinterest. All images provided are owned by their respective owners or the users who post the images in the Website.",
                 buttons: [
-                  { text: "Image#1",    onPress: () => Linking.openURL("https://www.pinterest.com/pin/1107955945860244149/") },
-                  {text : "Image#2", onPress: ()=> Linking.openURL("https://www.pinterest.com/pin/632615078954601091/")},
+                  { text: "Image#1",    onPress: () => Linking.openURL("https://www.pinterest.com/pin/630011435389349458/") },
+                  {text : "Image#2", onPress: ()=> Linking.openURL("https://www.pinterest.com/pin/1107955945860730767/")},
                   { text: "OK", style: "cancel" },
                 ],
               }),
             },
           ].map(({ scale, icon, label, style, onPress }) => (
             <Pressable key={label} onPress={() => { bounce(scale); onPress(); }}>
-              <Animated.View style={[styles.btn, styles[`btn_${style}`], { transform: [{ scale }] }]}>
+              <Animated.View style={[styles.btn, styles[`btn_${style}`], { transform: [{ scale: scale.current }] }]}>
                 <Text style={styles.btnIcon}>{icon}</Text>
-                <Text style={[styles.btnText, style === "muted" && styles.btnTextMuted]}>{label}</Text>
+                <Text style={styles.btnText}>{label}</Text>
               </Animated.View>
             </Pressable>
           ))}
-          <View style = {styles.socialmedia}>
-            <Pressable onPress={()=>Linking.openURL("https://www.instagram.com/airbusissocool102/")}>
-          <Image
-            style = {{width : 60, height: 60, borderRadius : 14, marginRight : 200, marginTop : 0}}
-            source = {require("../../assets/images/insta.jpg")}
-          /><Text style ={{color: "white"}}>Instagram</Text>
-          </Pressable>
-          <Pressable onPress = {()=> Linking.openURL("https://www.tiktok.com/@airbusissocool102")}>
-            <Image
-              style = {{width : 60, height : 60, borderRadius : 14, marginLeft : -190}}
-              source = {require("../../assets/images/tt.jpg")} />
-              <Text style ={{color: "white", marginLeft : -180}}>Tiktok</Text>
-          </Pressable>
-          <Pressable onPress = {()=> Linking.openURL("https://github.com/madhusudhan-rgb")}>
-            <Image
-              style = {{width : 60, height : 60, borderRadius : 34, marginLeft : -120}}
-              source = {require("../../assets/images/github.png")} />
-              <Text style ={{color: "white", marginLeft : -110}}>Github</Text>
-          </Pressable>
-           <Pressable onPress = {()=> Linking.openURL("https://x.com/twan1nbk")}>
-            <Image
-              style = {{width : 60, height : 60, borderRadius : 40, marginLeft : -60}}
-              source = {require("../../assets/images/x.png")} />
-              <Text style ={{color: "white", marginLeft : -50}}>X.COM</Text>
-          </Pressable>
-          <Text style ={{marginLeft : -290, marginTop: 100, color: "white", fontSize : 16}}>You can support me if you want!!!!</Text>
-          
+          <View style={styles.socialmedia}>
+            <Text style={styles.supportText}>You can support me if you want!!!!</Text>
+            <View style={styles.socialRow}>
+              {socialLinks.map((item) => (
+                <Pressable
+                  key={item.label}
+                  style={styles.socialItem}
+                  onPress={() => Linking.openURL(item.url)}
+                >
+                  <Image style={[styles.socialImage, item.imageStyle]} source={item.image} />
+                  <Text style={styles.socialLabel}>{item.label}</Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
         </View>
       </View>
@@ -173,12 +187,35 @@ const styles = StyleSheet.create({
   btnTextMuted: { color: "rgba(255,255,255,0.35)" },
   socialmedia: {
     marginTop: 30,
-    flexDirection: "row",
-    borderWidth :1.5,
-    gap: 20,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.12)",
     backgroundColor: "rgba(26,25,25,0.3)",
-    padding: 12,
+    padding: 14,
     borderRadius: 20,
-    height : 200
+    gap: 12,
+  },
+  supportText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  socialRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  socialItem: {
+    alignItems: "center",
+    minWidth: 70,
+    gap: 6,
+  },
+  socialImage: {
+    width: 60,
+    height: 60,
+  },
+  socialLabel: {
+    color: "white",
+    fontSize: 12,
   },
 });

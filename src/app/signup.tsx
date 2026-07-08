@@ -1,0 +1,116 @@
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  ImageBackground,
+  Pressable
+} from "react-native";
+import { router } from "expo-router";
+import { register } from "../utils/auth";
+
+export default function Signup() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSignup = async () => {
+    const success = await register(username, password);
+
+    if (success) {
+      Alert.alert("Success", "Account created!");
+      router.push("/login");
+    } else {
+      Alert.alert("Error", "Username already exists");
+    }
+  };
+
+  return (
+    
+    <ImageBackground 
+   source={require("../../assets/images/bg4.jpg")}
+   style = {styles.background}>
+    <View style={styles.container}>
+      <View style = {styles.formContainer}>
+      <Text style={styles.title}>Create an Account</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        onChangeText={setUsername}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        onChangeText={setPassword}
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleSignup}>
+        <Text style={styles.buttonText}>Sign Up</Text>
+      </TouchableOpacity>
+      <Text style = {{color : "white", fontWeight : "200", marginLeft : 60, marginTop : 20}}>Already have an account ? </Text>
+      <Pressable onPress = {() => router.push("/login")}>
+        <Text style = {{fontWeight : "700", color : "lightgreen", marginLeft : 190, marginTop : -17, fontSize : 16}}> Login </Text>
+      </Pressable>
+      </View>
+    </View>
+    </ImageBackground>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 20,
+    
+  },
+   background: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 28,
+    color: "white",
+    marginBottom: 20,
+    marginLeft : 10,
+    fontWeight : "700"
+  },
+  input: {
+    backgroundColor: "#eaf1ea33",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 10,
+    color: "white",
+    borderColor : "rgba(255, 255, 255, 0.3)",
+    borderWidth : 1
+  },
+  button: {
+    backgroundColor: "#00cc2c",
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 10,
+    width : 100,
+    marginLeft : 104
+  },
+  buttonText: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  formContainer: {
+    backgroundColor: "rgba(40, 37, 37, 0.49)",
+    padding: 20,
+    borderRadius: 15,
+    width : 350,
+    height : 290,
+    marginLeft : 12,
+    borderWidth : 1,
+    borderColor : "rgba(255, 252, 252, 0.58)"
+  },
+});

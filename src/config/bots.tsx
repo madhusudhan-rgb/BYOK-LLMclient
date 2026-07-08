@@ -20,36 +20,24 @@ export type Bot = {
   systemPrompt: string;
 };
 
-import { env } from "../utils/env";
 
-const OPENROUTER_CHAT = "https://openrouter.ai/api/v1/chat/completions";
-const OR_KEY_1 = env.OPENROUTER_API_KEY_1;
-const OR_KEY_2 = env.OPENROUTER_API_KEY_2;
-const GROQ_API_KEY = env.GROQ_API_KEY;
-const OPENAI_API_KEY = env.OPENAI_API_KEY;
-const QWEN_API_KEY = env.QWEN_API_KEY;
+
+
+export function getBots(): Bot[] {
+  return BOTS;
+}
 
 export const BOTS: Bot[] = [
   // ── Text ─────────────────────────────────────────────────────
-  {
-    id: "gemini",
-    name: "Gemma 4 31B",
-    subtitle: "DECOMISSIONED",
-    icon: { name: "google", color: "#d80a0a" },
-    type: "text",
-    apiUrl: OPENROUTER_CHAT,
-    apiKey: OR_KEY_1,
-    model: "google/gemma-4-31b-it:free",
-    systemPrompt: "You are a helpful assistant.",
-  },
+  
   {
     id: "nemotron",
     name: "Nemotron Ultra",
     subtitle: "NVIDIA · via OpenRouter",
-    icon: { name: "code", color: "#a78bfa" },
+    icon: { name: "code", color: "#000000" },
     type: "text",
-    apiUrl: OPENROUTER_CHAT,
-    apiKey: OR_KEY_2,
+    apiUrl: "https://openrouter.ai/api/v1/chat/completions",
+    apiKey: "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",
     model: "nvidia/nemotron-3-ultra-550b-a55b:free",
     systemPrompt: "You are a helpful assistant.",
   },
@@ -57,32 +45,32 @@ export const BOTS: Bot[] = [
     id: "openai-gpt-oss",
     name: "GPT-OSS 120B",
     subtitle: "OpenAI · via Groq",
-    icon: { name: "open-a-i", color: "#e1ece3" },
+    icon: { name: "open-a-i", color: "#000000" },
     type: "text",
     apiUrl: "https://api.groq.com/openai/v1/chat/completions",
-    apiKey: GROQ_API_KEY,
+    apiKey: "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",
     model: "openai/gpt-oss-120b",
     systemPrompt: "You are a helpful assistant.",
   },
   {
     id: "Llama 3.1",
-    name: "Llama 3.1",
-    subtitle: "Llama 3.1 via groq",
-    icon: { name: "code", color: "#e1ece3" },
+    name: "Llama 3.1 - DECOMISSIONED",
+    subtitle: "DECOMISSIONED",
+    icon: { name: "code", color: "#000000" },
     type: "text",
     apiUrl: "https://api.groq.com/openai/v1/chat/completions",
-    apiKey: GROQ_API_KEY,
-    model: "openai/gpt-oss-120b",
+    apiKey:"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",
+    model: "llama-3.1-70b-versatile",
     systemPrompt: "You are a helpful assistant.",
   },
   {
     id: "Qwen ai",
     name: "Qwen ai",
     subtitle: "DECOMISSIONED",
-    icon: { name: "code", color: "#11b730" },
+    icon: { name: "code", color: "#000000" },
     type: "text",
     apiUrl: "https://openrouter.ai/api/v1/chat/completions",
-    apiKey: QWEN_API_KEY,
+    apiKey: "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",
     model: "qwen/qwen3-coder:free",
     systemPrompt: "You are a helpful assistant.",
   },
@@ -92,7 +80,7 @@ export const BOTS: Bot[] = [
     id: "pollinations-flux",
     name: "FLUX Schnell",
     subtitle: "Pollinations",
-    icon: { name: "code", color: "#38bdf8" },
+    icon: { name: "code", color: "#000000" },
     type: "image",
     imageFormat: "pollinations",
     apiUrl: "",
@@ -104,7 +92,7 @@ export const BOTS: Bot[] = [
     id: "pollinations-sd",
     name: "Stable Diffusion",
     subtitle: "Pollinations",
-    icon: { name: "code", color: "#818cf8" },
+    icon: { name: "code", color: "#000000" },
     type: "image",
     imageFormat: "pollinations",
     apiUrl: "",
