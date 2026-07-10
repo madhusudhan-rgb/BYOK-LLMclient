@@ -1,5 +1,5 @@
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Image,
@@ -13,6 +13,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Bot, BotType, getBots } from "../config/bots";
+import { ImageBackground } from "react-native";
+import { supabase } from "../utils/supabase";
+import { getCurrentUser } from "../utils/auth";
 
 type Message = {
   id: string;
@@ -22,27 +25,99 @@ type Message = {
 };
 type History = { role: "system" | "user" | "assistant"; content: string };
 
-const chatCache: Record<string, { messages: Message[]; history: History[] }> = {};
+// ── Supabase chat persistence ───────────────────────────────────
 
-function getChat(bot: Bot) {
-  if (!chatCache[bot.id]) {
+async function loadSessionFromSupabase(userId: string, botId: string): Promise<{ messages: Message[]; history: History[] } | null> {
+  const { data, error } = await supabase
+    .from("chat_sessions")
+    .select("messages")
+    .eq("user_id", userId)
+    .eq("bot_id", botId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error || !data) return null;
+
+  const stored = data.messages as any[];
+  if (!stored || stored.length === 0) return null;
+
+  // Map stored messages back to Message+History
+  const messages: Message[] = stored.map((m: any, i: number) => ({
+    id: `s-${i}`,
+    role: m.role === "user" ? "user" : "assistant",
+    text: m.content || m.text || "",
+    imageUrl: m.image_url || undefined,
+  }));
+
+  // Build history from messages (skip system prompt – it's on the bot config)
+  const history: History[] = messages.map((m) => ({
+    role: m.role,
+    content: m.text,
+  }));
+
+  return { messages, history };
+}
+
+async function saveSessionToSupabase(userId: string, botId: string, messages: Message[], history: History[]) {
+  // Save the conversation messages as a JSON array
+  const storedMessages = messages.map((m) => ({
+    role: m.role,
+    content: m.text,
+    image_url: m.imageUrl || null,
+  }));
+
+  // Upsert: try to find existing row, update it; otherwise insert
+  const { data: existing } = await supabase
+    .from("chat_sessions")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("bot_id", botId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (existing) {
+    await supabase
+      .from("chat_sessions")
+      .update({ messages: storedMessages })
+      .eq("id", existing.id);
+  } else {
+    await supabase
+      .from("chat_sessions")
+      .insert({ user_id: userId, bot_id: botId, messages: storedMessages });
+  }
+}
+
+async function deleteSessionFromSupabase(userId: string, botId: string) {
+  await supabase
+    .from("chat_sessions")
+    .delete()
+    .eq("user_id", userId)
+    .eq("bot_id", botId);
+}
+
+// ── Local fallback cache (when not logged in) ───────────────────
+const localCache: Record<string, { messages: Message[]; history: History[] }> = {};
+
+function getChatLocal(bot: Bot) {
+  if (!localCache[bot.id]) {
     const greeting =
       bot.type === "image"
         ? `Hi! I'm ${bot.name}. Describe what you'd like me to draw.`
         : `Hi! I'm ${bot.name}. Ask me anything.`;
-    chatCache[bot.id] = {
+    localCache[bot.id] = {
       messages: [{ id: "0", role: "assistant", text: greeting }],
       history: bot.systemPrompt ? [{ role: "system", content: bot.systemPrompt }] : [],
     };
   }
-  return chatCache[bot.id];
+  return localCache[bot.id];
 }
 
 const TYPE_BADGE: Record<BotType, { label: string; color: string }> = {
   text:  { label: "Text",  color: "#64c579" },
   image: { label: "Image", color: "#61a9c8" },
   video: { label: "Video", color: "#f97316" },
-  
 };
 
 function isPlaceholderKey(value: string) {
@@ -50,21 +125,21 @@ function isPlaceholderKey(value: string) {
   if (!normalized) return true;
 
   return [
-    "test",
-    "test-or",
-    "test-groq",
-    "your-",
-    "your",
-    "placeholder",
-    "example",
-    "demo",
-    "fake",
-    "sample",
-    "changeme",
+    "test", "test-or", "test-groq",
+    "your-", "your", "placeholder",
+    "example", "demo", "fake", "sample", "changeme",
   ].some(token => normalized.includes(token));
 }
 
 function BotAvatar({ bot, size = 40 }: { bot: Bot; size?: number }) {
+  if ("image" in bot.icon) {
+    return (
+      <Image
+        source={bot.icon.image}
+        style={{ width: size, height: size, borderRadius: size / 2 }}
+      />
+    );
+  }
   return (
     <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}>
       <AntDesign name={bot.icon.name} size={size * 0.52} color={bot.icon.color} />
@@ -78,53 +153,107 @@ export default function Explore() {
   const [messages,  setMessages]  = useState<Message[]>([]);
   const [input,     setInput]     = useState("");
   const [loading,   setLoading]   = useState(false);
+  const [userId,    setUserId]    = useState<string | null>(null);
   const bots = getBots();
 
   const historyRef = useRef<History[]>([]);
+  const messagesRef = useRef<Message[]>([]);
   const listRef    = useRef<FlatList<Message>>(null);
   const abortRef   = useRef<AbortController | null>(null);
+  const currentBotIdRef = useRef<string>("");
 
   const filtered = bots.filter(b =>
     b.name.toLowerCase().includes(search.toLowerCase()) ||
     b.subtitle.toLowerCase().includes(search.toLowerCase())
   );
 
-  const openBot = (bot: Bot) => {
-    const cache = getChat(bot);
+  const openBot = async (bot: Bot) => {
+    currentBotIdRef.current = bot.id;
+    setActiveBot(bot);
+    setMessages([]);
+    setInput("");
+
+    // Try Supabase first if logged in
+    if (userId) {
+      const loaded = await loadSessionFromSupabase(userId, bot.id);
+      if (loaded) {
+        historyRef.current = loaded.history;
+        setMessages(loaded.messages);
+        return;
+      }
+    }
+
+    // Fallback to local cache
+    const cache = getChatLocal(bot);
     historyRef.current = cache.history;
     setMessages([...cache.messages]);
-    setInput("");
-    setActiveBot(bot);
   };
 
-  const closeBot = () => {
+  // Keep messagesRef in sync with messages state
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  const closeBot = async () => {
     abortRef.current?.abort();
-    if (activeBot) {
-      chatCache[activeBot.id].messages = messages;
-      chatCache[activeBot.id].history  = historyRef.current;
-    }
+    await persistCurrentChat();
     setActiveBot(null);
     setMessages([]);
   };
 
-  const resetChat = () => {
+  const persistCurrentChat = async () => {
+    if (!currentBotIdRef.current) return;
+    const msgs = messagesRef.current;
+    // Save to local cache always
+    localCache[currentBotIdRef.current] = {
+      messages: msgs,
+      history: historyRef.current,
+    };
+    // Save to Supabase if logged in
+    if (userId) {
+      try {
+        await saveSessionToSupabase(userId, currentBotIdRef.current, msgs, historyRef.current);
+      } catch (err) {
+        console.error("Failed to save chat to Supabase:", err);
+      }
+    }
+  };
+
+  const resetChat = async () => {
     if (!activeBot) return;
     abortRef.current?.abort();
+
     const greeting =
       activeBot.type === "image"
         ? `Hi! I'm ${activeBot.name}. Describe what you'd like me to draw.`
         : `Hi! I'm ${activeBot.name}. Ask me anything.`;
-    const fresh = {
-      messages: [{ id: "0", role: "assistant" as const, text: greeting }],
-      history: activeBot.systemPrompt
-        ? [{ role: "system" as const, content: activeBot.systemPrompt }]
-        : [],
-    };
-    chatCache[activeBot.id] = fresh;
-    historyRef.current = fresh.history;
-    setMessages([...fresh.messages]);
+    const freshMessages: Message[] = [{ id: "0", role: "assistant", text: greeting }];
+    const freshHistory: History[] = activeBot.systemPrompt
+      ? [{ role: "system", content: activeBot.systemPrompt }]
+      : [];
+
+    setMessages(freshMessages);
+    historyRef.current = freshHistory;
     setLoading(false);
+
+    // Delete from Supabase if logged in
+    if (userId) {
+      try {
+        await deleteSessionFromSupabase(userId, activeBot.id);
+        // Also clear local cache entry
+        delete localCache[activeBot.id];
+      } catch (err) {
+        console.error("Failed to delete session:", err);
+      }
+    }
   };
+
+  // Load current user on mount
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      if (user) setUserId(user.id);
+    });
+  }, []);
 
   // ── Text (streaming) ──────────────────────────────────────────
   const sendText = async (prompt: string, botMsgId: string) => {
@@ -273,6 +402,8 @@ export default function Explore() {
       } else {
         await sendText(prompt, botMsgId);
       }
+      // Persist after successful message
+      await persistCurrentChat();
     } catch (err: any) {
       if (err?.name === "AbortError") return;
       setMessages(prev =>
@@ -287,9 +418,12 @@ export default function Explore() {
     }
   };
 
-  // ── Bot List ──────────────────────────────────────────────────
+  //Bot List 
   if (!activeBot) {
     return (
+      <ImageBackground  
+      source = {require("../../assets/images/bg7.jpg")}
+      style = {styles.background}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.listHeader}>
           <Text style={styles.listTitle}>AI Bots</Text>
@@ -332,14 +466,16 @@ export default function Explore() {
           }}
         />
       </SafeAreaView>
+      </ImageBackground>
     );
   }
 
-  // ── Chat View ─────────────────────────────────────────────────
+  // Chat View
   const placeholder =
     activeBot.type === "image" ? "Describe an image…" : `Message ${activeBot.name}…`;
 
   return (
+    <ImageBackground source={require("../../assets/images/bg7.jpg")} style={styles.background}>
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -413,13 +549,14 @@ export default function Explore() {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#000000" },
+  safe: { flex: 1 },
   avatar: {
-    backgroundColor: "#9ce40ebe",
+    backgroundColor: "#c3c7be1a",
     borderWidth: 1,
     borderColor: "rgba(124, 15, 15, 0)",
     alignItems: "center",
@@ -427,39 +564,39 @@ const styles = StyleSheet.create({
   },
   listHeader: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 4 },
   listTitle: { color: "#ffffff", fontSize: 26, fontWeight: "800" },
-  listSub: { color: "#f0eaea", fontSize: 13, marginTop: 2 },
+  listSub: { color: "#f1e8e8", fontSize: 13, marginTop: 2 },
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     marginHorizontal: 16,
     marginVertical: 12,
-    backgroundColor: "#b0fb25ce",
+    backgroundColor: "#f5f5f501",
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    borderColor: "rgba(255, 255, 255, 0.14)",
     paddingHorizontal: 14,
   },
-  searchInput: { flex: 1, color: "#ffffff", fontSize: 15, paddingVertical: 12 },
+  searchInput: { flex: 1, color: "#e1d6d6", fontSize: 15, paddingVertical: 12 },
   list: { paddingHorizontal: 16, paddingBottom: 24 },
-  empty: { color: "#444", textAlign: "center", marginTop: 40, fontSize: 14 },
+  empty: { color: "#47444401", textAlign: "center", marginTop: 40, fontSize: 14 },
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#141414",
+    backgroundColor: "#242222b8",
     borderRadius: 16,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    borderColor: "rgba(255, 250, 250, 0)",
     gap: 14,
   },
   cardBody: { flex: 1 },
   cardNameRow: { flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" },
-  cardName: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  cardName: { color: "#fdf2f2", fontSize: 16, fontWeight: "700" },
   badge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
   badgeText: { fontSize: 10, fontWeight: "700" },
-  cardSub: { color: "#555", fontSize: 12, marginTop: 3 },
+  cardSub: { color: "#f0e6e6", fontSize: 12, marginTop: 3 },
   chatHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -507,23 +644,24 @@ const styles = StyleSheet.create({
   inputBar: {
     flexDirection: "row",
     alignItems: "flex-end",
-    padding: 12,
+    padding: 10,
     paddingBottom: Platform.OS === "ios" ? 12 : 16,
     borderTopWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
     backgroundColor: "#141414",
-    gap: 8,
+    gap: 9,
   },
   chatInput: {
     flex: 1,
     backgroundColor: "#1e1e1e",
-    color: "#fff",
+    color: "#dfd5d5",
     borderRadius: 22,
     paddingHorizontal: 16,
-    paddingTop: 11,
-    paddingBottom: 11,
+    paddingTop:12,
+    paddingBottom: 30,
     fontSize: 15,
     maxHeight: 120,
+    marginBottom : 24,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
   },
@@ -531,6 +669,11 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: "#00cc2c",
     alignItems: "center", justifyContent: "center",
+    marginBottom : 34
   },
   sendBtnStop: { backgroundColor: "#cc2200" },
+  background: {
+    flex: 1,
+    resizeMode: "cover",
+  },
 });

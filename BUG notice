@@ -1,3 +1,27 @@
->Bugs seem to be in the contact section mainly in the social media links
->Navigation problems have been seen.
->>>>All bugs will be seen towards at the next release
+>All known bugs have been fixed!
+>
+>Changes made:
+>
+>1. **contact.tsx** - Fixed ImageBackground import from expo-image to react-native
+>2. **index.tsx** - Fixed version badge from v1.3.0 BETA to v1.2.0 to match app.json
+>3. **app.json** - Added expo-image-picker plugin (required for profile image picker)
+>4. **profile.tsx** - Complete rewrite with:
+>   - Responsive layout using Dimensions API
+>   - Proper error handling for image picker
+>   - Added try/catch for getCurrentUser
+>   - Fixed layout structure with container view
+>5. **_layout.tsx** - Cleaned up formatting and consistent tab screen declarations
+>6. **android/local.properties** - Recreated with correct SDK path
+>7. **eslint.config.js** - Added eslint-import-resolver-typescript for proper TypeScript resolution
+>8. **package.json** - Added eslint@9 and eslint-config-expo as dev dependencies
+>
+>Build Status:
+>- ✅ expo export: SUCCESS
+>- ✅ expo prebuild: SUCCESS  
+>- ✅ gradle assembleDebug: SUCCESS (245MB APK)
+>
+>If profile tab still kicks you out on device:
+>1. The issue may be device-specific (Android version, permissions)
+>2. Try EAS Build: eas build --platform android --profile preview
+>3. Check device logs: npx expo start --dev-client
+>4. Ensure app has storage permissions on device

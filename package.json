@@ -1,5 +1,5 @@
 {
-  "name": "Chat",
+  "name": "Aichatbots",
   "main": "expo-router/entry",
   "version": "1.1.0",
   "scripts": {
@@ -13,14 +13,17 @@
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@expo/vector-icons": "^15.0.2",
-    "emailjs-com": "^3.2.0",
+    "@react-native-async-storage/async-storage": "^2.1.0",
+    "@supabase/supabase-js": "^2.110.2",
     "dotenv": "^16.3.1",
-    "expo": "~57.0.1",
+    "emailjs-com": "^3.2.0",
+    "expo": "~57.0.4",
     "expo-constants": "~57.0.2",
     "expo-font": "~57.0.0",
     "expo-image": "~57.0.0",
-    "expo-linking": "~57.0.1",
-    "expo-splash-screen": "~57.0.1",
+    "expo-image-picker": "~57.0.0",
+    "expo-linking": "~57.0.2",
+    "expo-splash-screen": "~57.0.2",
     "expo-symbols": "~57.0.0",
     "expo-system-ui": "~57.0.0",
     "expo-web-browser": "~57.0.0",
@@ -39,7 +42,10 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
-    "expo-router": "~57.0.2",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "^57.0.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "expo-router": "~57.0.4",
     "typescript": "~6.0.3"
   },
   "private": true
