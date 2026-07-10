@@ -1,25 +1,26 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { Link } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
   Image,
   ImageBackground,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
 import { useNavbar } from "../context/NavbarContext";
-import { Link } from "expo-router";
 
 export default function HomeScreen() {
   const { setShowNavbar } = useNavbar();
   const scaleFeedback = useRef(new Animated.Value(1));
   const bannerStart = 220;
-  const bannerEnd = -600;
+  const bannerEnd = -900;
   const bannerX = useRef(new Animated.Value(bannerStart));
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -37,8 +38,8 @@ export default function HomeScreen() {
   const bounce = (scaleRef: React.RefObject<Animated.Value>, cb?: () => void) => {
     const scale = scaleRef.current;
     Animated.sequence([
-      Animated.timing(scale, { toValue: 0.93, duration: 80, useNativeDriver: true }),
-      Animated.timing(scale, { toValue: 1, duration: 80, useNativeDriver: true }),
+      Animated.timing(scale, { toValue: 0.93, duration: 200, useNativeDriver: true }),
+      Animated.timing(scale, { toValue: 6, duration:200, useNativeDriver: true }),
     ]).start(cb);
   };
 
@@ -62,7 +63,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
-        Animated.timing(bannerX.current, { toValue: bannerEnd, duration: 10000, easing: Easing.linear, useNativeDriver: true }),
+        Animated.timing(bannerX.current, { toValue: bannerEnd, duration: 13000, easing: Easing.linear, useNativeDriver: true }),
         Animated.timing(bannerX.current, { toValue: bannerStart, duration: 0, useNativeDriver: true }),
       ])
     );
@@ -86,7 +87,7 @@ export default function HomeScreen() {
               showModal({
                 title: "About",
                 message:
-                  "App is in development.\n\nWe use groq, openrouter and some opensource models to power our app with their provided api keys\n\nWe do not own anything related to the AI except the API codes\n\nOpenAI, NVIDIA, Meta, Google AND THEIR RESPECTIVE LOGOS ARE TRADEMARKS OF THEIR OWNERS. THIS APP IS INDEPENDENT AND IS NOT AFFILIATED NOR ENDORSED BY THE COMPANIES PRESENTED.",
+                  "App is in development.\n\nWe use groq, openrouter and some opensource models to power our app with their provided api keys\n\nWe do not own anything related to the AI except the API codes\n\nFELLOW USERS PLEASE USE THE APP RESPONSIBLY\n\nOpenAI, NVIDIA, Meta, Alibaba, Fluxschnell, Bytedance, Mistral Ai AND THEIR RESPECTIVE LOGOS ARE TRADEMARKS OF THEIR OWNERS. THIS APP IS INDEPENDENT AND IS NOT AFFILIATED NOR ENDORSED BY THE COMPANIES PRESENTED.\n\n",
                 buttons: [{ text: "Got it", style: "cancel" }],
               })
             }
@@ -104,6 +105,7 @@ export default function HomeScreen() {
                 buttons: [
                   { text: "Good", onPress: () => sendFeedback("Good") },
                   { text: "Bad", onPress: () => sendFeedback("Bad"), style: "danger" },
+                  {text : "UPDATES", onPress : ()=> Linking.openURL("https://github.com/madhusudhan-rgb/TSX-proj")},
                   { text: "Cancel", style: "cancel" },
                 ],
               });
@@ -127,28 +129,40 @@ export default function HomeScreen() {
                 <Text style={styles.bannerText}>Nemotron - Nvidia</Text>
               </View>
               <View style={styles.bannerItem}>
-                <Image source={require("../../assets/images/gem.png")} style={styles.bannerImage} />
-                <Text style={styles.bannerText}> Gemma - Google</Text>
+                <Image source={require("../../assets/images/qwen.webp")} style={styles.bannerImage} />
+                <Text style={styles.bannerText}> Qwen - Alibaba</Text>
               </View>
               <View style={styles.bannerItem}>
-                <Image source={require("../../assets/images/llama.jpg")} style={styles.bannerImage} />
+                <Image source={require("../../assets/images/llama.png")} style={styles.bannerImage} />
                 <Text style={styles.bannerText}>LLama 3.1 - Meta</Text>
               </View>
               <View style={styles.bannerItem}>
-                <Text style={styles.bannerText}>More updates coming soon!!! stay updated</Text>
+                <Image source={require("../../assets/images/mistral.webp")} style={styles.bannerImage} />
+                <Text style={styles.bannerText}>Mistral - Mistral AI</Text>
+              </View>
+              <View style={styles.bannerItem}>
+                <Image source={require("../../assets/images/byte.png")} style={styles.bannerImage} />
+                <Text style={styles.bannerText}>Bytedance-seed-3.0 - Bytedance</Text>
+              </View>
+              <View style={styles.bannerItem}>
+                <Image source={require("../../assets/images/flux.png")} style={styles.bannerImage} />
+                <Text style={styles.bannerText}>Flux - FluxSchnell</Text>
+              </View>
+              <View style={styles.bannerItem}>
+                <Text style={styles.bannerText}></Text>
               </View>
             </Animated.View>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.badge}>v1.3.0 BETA</Text>
+            <Text style={styles.badge}>v1.3.0</Text>
             <Text style={styles.title}>Welcome</Text>
-            <Text style={styles.subtitle}>Access your personal AI assistant.</Text>
+            <Text style={styles.subtitle}>Acess the Ai playground</Text>
 
-            <Link href="/explore" asChild>
+            <Link href="/login" asChild>
               <Pressable style={{ width: "100%" }}>
                 <View style={styles.primaryBtn}>
-                  <Text style={styles.primaryBtnText}>Get Started</Text>
+                  <Text style={styles.primaryBtnText}>Login/Sign up</Text>
                 </View>
               </Pressable>
             </Link>
@@ -176,7 +190,7 @@ const styles = StyleSheet.create({
   },
   iconBtnText: { color: "#fff", fontSize: 20, fontWeight: "700" },
   content: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, gap: 24 },
-  banner: { width: "100%", height: 34, borderRadius: 999, overflow: "hidden", justifyContent: "center", position : "absolute", top: 700},
+  banner: { width: "120%", height: 34, borderRadius: 999, overflow: "hidden", justifyContent: "center", position : "absolute", top: 700},
   bannerTrack: { flexDirection: "row", alignSelf: "flex-start", paddingHorizontal: 8, gap: 8 },
   bannerItem: {
     flexDirection: "row",
@@ -190,12 +204,13 @@ const styles = StyleSheet.create({
   bannerText: { color: "#ffffff", fontSize: 12, fontWeight: "600", letterSpacing: 0.3 },
   card: {
     width: "100%",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(22, 20, 20, 0)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderColor: "rgba(255, 255, 255, 0)",
     borderRadius: 24,
     padding: 28,
     alignItems: "center",
+    marginBottom : 100
   },
   badge: { color: "#00cc2c", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 10 },
   title: { color: "#fff", fontSize: 32, fontWeight: "800", letterSpacing: 0.5 },
@@ -208,6 +223,9 @@ const styles = StyleSheet.create({
     marginTop: 18,
     alignItems: "center",
     justifyContent: "center",
+    width : 150,
+    height :50,
+    marginLeft : 80
   },
   primaryBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
 });

@@ -7,7 +7,8 @@ import {
   Alert,
   StyleSheet,
   ImageBackground,
-  Pressable
+  Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import { register } from "../utils/auth";
@@ -15,15 +16,33 @@ import { register } from "../utils/auth";
 export default function Signup() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
-    const success = await register(username, password);
+    if (!username.trim() || !password.trim()) {
+      Alert.alert("Error", "Please enter both username and password");
+      return;
+    }
 
-    if (success) {
-      Alert.alert("Success", "Account created!");
-      router.push("/login");
-    } else {
-      Alert.alert("Error", "Username already exists");
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const success = await register(username.trim(), password);
+
+      if (success) {
+        Alert.alert("Success", "Account created! You can now log in.");
+        router.push("/login");
+      } else {
+        Alert.alert("Error", "Username already exists or signup failed");
+      }
+    } catch (err) {
+      Alert.alert("Error", err instanceof Error ? err.message : "Signup failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,8 +68,16 @@ export default function Signup() {
         onChangeText={setPassword}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        <Text style={styles.buttonText}>Sign Up</Text>
+      <TouchableOpacity
+        style={[styles.button, loading && { opacity: 0.6 }]}
+        onPress={handleSignup}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Sign Up</Text>
+        )}
       </TouchableOpacity>
       <Text style = {{color : "white", fontWeight : "200", marginLeft : 60, marginTop : 20}}>Already have an account ? </Text>
       <Pressable onPress = {() => router.push("/login")}>

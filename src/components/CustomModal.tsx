@@ -70,14 +70,14 @@ const s = StyleSheet.create({
   },
   box: {
     width: "100%",
-    backgroundColor: "#12211af1",
+    backgroundColor: "rgba(0, 0, 0, 0.14)",
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
     overflow: "hidden",
   },
   title: {
-    color: "#fff",
+    color: "#fcfbfb",
     fontSize: 17,
     fontWeight: "700",
     textAlign: "center",
@@ -86,7 +86,7 @@ const s = StyleSheet.create({
     paddingBottom: 8,
   },
   message: {
-    color: "rgba(255,255,255,0.6)",
+    color: "rgb(241, 236, 236)",
     fontSize: 14,
     lineHeight: 21,
     textAlign: "center",
@@ -103,8 +103,8 @@ const s = StyleSheet.create({
   },
   btnBorder: { borderRightWidth: 1, borderColor: "rgba(255,255,255,0.08)" },
   btnCancel: { backgroundColor: "rgba(255,255,255,0.03)" },
-  btnDanger: { backgroundColor: "rgba(255,59,48,0.12)" },
-  btnText: { color: "#00cc2c", fontWeight: "700", fontSize: 15 },
-  btnTextCancel: { color: "rgba(255,255,255,0.35)" },
-  btnTextDanger: { color: "#ff3b30" },
+  btnDanger: { backgroundColor: "rgba(152, 152, 152, 0)" },
+  btnText: { color: "#36d558", fontWeight: "700", fontSize: 15 },
+  btnTextCancel: { color: "rgb(255, 255, 255)" },
+  btnTextDanger: { color: "rgb(255, 56, 46)" },
 });

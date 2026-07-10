@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -16,15 +17,28 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [hidden, setHidden] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    const success = await login(username, password);
+    if (!username.trim() || !password.trim()) {
+      Alert.alert("Error", "Please enter both username and password");
+      return;
+    }
 
-    if (success) {
-      Alert.alert("Success", "Logged in!");
-      router.replace("/profile");
-    } else {
-      Alert.alert("Error", "Invalid credentials");
+    setLoading(true);
+    try {
+      const success = await login(username.trim(), password);
+
+      if (success) {
+        Alert.alert("Success", "Logged in!");
+        router.replace("/profile");
+      } else {
+        Alert.alert("Error", "Invalid credentials");
+      }
+    } catch (err) {
+      Alert.alert("Error", err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,8 +79,16 @@ export default function Login() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginText}>Login</Text>
+        <TouchableOpacity
+          style={[styles.loginButton, loading && { opacity: 0.6 }]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.loginText}>Login</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push("/signup")}>
