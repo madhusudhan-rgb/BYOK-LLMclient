@@ -1,11 +1,17 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import { DATABASE_CONFIG } from "../config/database";
 
-export const supabase = createClient(
-  DATABASE_CONFIG.endpoint,
-  DATABASE_CONFIG.publicKey
-);
-
+const supabaseUrl = DATABASE_CONFIG.endpoint;
+const supabaseAnonKey = DATABASE_CONFIG.publicKey;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
 // ── Profile type ────────────────────────────────────────────────
 export type Profile = {
   id: string;
@@ -31,3 +37,4 @@ export type ChatSession = {
   created_at: string;
   updated_at: string;
 };
+

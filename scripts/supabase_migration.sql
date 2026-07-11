@@ -98,8 +98,7 @@ CREATE POLICY "Users can upload their own avatar"
   ON storage.objects FOR INSERT
   WITH CHECK (
     bucket_id = 'avatars' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = 'avatars'
+    auth.role() = 'authenticated'
   );
 
 -- Anyone can read avatars (public)

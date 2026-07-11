@@ -20,7 +20,10 @@
 
     "android": {
       "package": "com.madhusudhant.myapp",
-      "permissions": [],
+      "permissions": [
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE"
+      ],
       "predictiveBackGestureEnabled": false
     },
 
