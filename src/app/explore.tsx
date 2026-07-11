@@ -421,9 +421,7 @@ export default function Explore() {
   //Bot List 
   if (!activeBot) {
     return (
-      <ImageBackground  
-      source = {require("../../assets/images/bg7.jpg")}
-      style = {styles.background}>
+      
       <SafeAreaView style={styles.safe}>
         <View style={styles.listHeader}>
           <Text style={styles.listTitle}>AI Bots</Text>
@@ -466,7 +464,7 @@ export default function Explore() {
           }}
         />
       </SafeAreaView>
-      </ImageBackground>
+      
     );
   }
 
@@ -475,7 +473,7 @@ export default function Explore() {
     activeBot.type === "image" ? "Describe an image…" : `Message ${activeBot.name}…`;
 
   return (
-    <ImageBackground source={require("../../assets/images/bg7.jpg")} style={styles.background}>
+    
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -549,12 +547,12 @@ export default function Explore() {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
-    </ImageBackground>
+    
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
+  safe: { flex: 1, backgroundColor : "rgba(9, 9, 9, 0.95)" },
   avatar: {
     backgroundColor: "#c3c7be1a",
     borderWidth: 1,
