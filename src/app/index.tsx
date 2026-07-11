@@ -155,7 +155,7 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.badge}>v1.3.0</Text>
+            <Text style={styles.badge}>v1.2.0</Text>
             <Text style={styles.title}>Welcome</Text>
             <Text style={styles.subtitle}>Acess the Ai playground</Text>
 

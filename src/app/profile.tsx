@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -34,24 +34,41 @@ function ProfileContent() {
   const [editingName, setEditingName] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const loadUser = useCallback(async () => {
-    try {
-      const current = await getCurrentUser();
-      setUser(current);
-      if (current) {
-        setProfileImage(current.avatar_url);
-        setDisplayName(current.display_name || current.username);
-      }
-    } catch (error) {
-      console.error("Failed to load user:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadUser();
-  }, [loadUser]);
+  // Reload user data every time this screen gets focus
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      (async () => {
+        try {
+          const current = await getCurrentUser();
+          console.log("PROFILE LOADED:", current);
+          if (!cancelled) {
+            setUser(current);
+            if (current) {
+              setProfileImage(current.avatar_url);
+              setDisplayName(current.display_name || current.username);
+            } else {
+              setProfileImage(null);
+              setDisplayName("");
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load user:", error);
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [])
+  );
 
   const pickImage = async () => {
+    if (!user) {
+      Alert.alert("Login Required", "Please log in to change your profile picture.");
+      return;
+    }
+
+    const previousAvatar = profileImage;
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
@@ -60,7 +77,9 @@ function ProfileContent() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // SDK 54+: MediaType is a string type, not a runtime enum.
+        // Pass the string directly — no deprecation warning, works on all versions.
+        mediaTypes: 'images',
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.7,
@@ -68,15 +87,24 @@ function ProfileContent() {
 
       if (!result.canceled && result.assets && result.assets[0]) {
         const uri = result.assets[0].uri;
-        // Show the picked image locally immediately
+
+        // Show picked image locally right away for snappy UX
         setProfileImage(uri);
-        // Upload to Supabase
+
         try {
           const publicUrl = await uploadAvatar(uri);
+          console.log("Uploaded avatar:", publicUrl);
+
           await updateProfile({ avatar_url: publicUrl });
+
           setProfileImage(publicUrl);
+          setUser((prev: any) =>
+            prev ? { ...prev, avatar_url: publicUrl } : prev
+          );
         } catch (err) {
           const message = err instanceof Error ? err.message : "Unknown error";
+          // Revert to previous avatar on failure
+          setProfileImage(previousAvatar);
           Alert.alert("Upload Issue", message);
           console.error("Avatar upload failed:", message);
         }
@@ -97,7 +125,9 @@ function ProfileContent() {
     try {
       await updateProfile({ display_name: trimmed });
       setEditingName(false);
-      setUser((prev: any) => prev ? { ...prev, display_name: trimmed } : prev);
+      setUser((prev: any) =>
+        prev ? { ...prev, display_name: trimmed } : prev
+      );
     } catch (err) {
       Alert.alert("Error", "Failed to save name");
     } finally {
@@ -124,12 +154,25 @@ function ProfileContent() {
     >
       <View style={styles.container}>
         <View style={styles.prof}>
-          {/* Profile Image */}
-          <Pressable onPress={pickImage} style={styles.imageContainer}>
-            <Image source={avatarSource} style={styles.profimg} />
+          {/* Menu button — absolute top-right of card */}
+          <Pressable
+            style={styles.profileButton}
+            onPress={() => setOpen(!open)}
+          >
+            <Ionicons name="menu" size={28} color="white" />
           </Pressable>
 
-          {/* Display Name - Editable */}
+          {/* Profile image */}
+          <Pressable onPress={pickImage} style={styles.imageContainer}>
+            {/* key forces Image to remount when URL changes, clearing old cached bitmap */}
+            <Image
+              key={profileImage ?? "default"}
+              source={avatarSource}
+              style={styles.profimg}
+            />
+          </Pressable>
+
+          {/* Display name — editable */}
           {editingName ? (
             <View style={styles.editNameRow}>
               <TextInput
@@ -140,19 +183,28 @@ function ProfileContent() {
                 placeholderTextColor="#888"
                 autoFocus
               />
-              <Pressable style={styles.saveNameBtn} onPress={saveDisplayName} disabled={saving}>
+              <Pressable
+                style={styles.saveNameBtn}
+                onPress={saveDisplayName}
+                disabled={saving}
+              >
                 <Text style={styles.saveNameText}>{saving ? "..." : "Save"}</Text>
               </Pressable>
-              <Pressable onPress={() => { setEditingName(false); setDisplayName(user?.display_name || user?.username || ""); }}>
+              <Pressable
+                onPress={() => {
+                  setEditingName(false);
+                  setDisplayName(user?.display_name || user?.username || "");
+                }}
+              >
                 <Ionicons name="close" size={20} color="#fff" />
               </Pressable>
             </View>
           ) : (
-            <Pressable onPress={() => setEditingName(true)}>
+            <Pressable onPress={() => setEditingName(true)} style={styles.nameContainer}>
               <Text style={styles.Proftext}>
                 {displayName || "Tap to set name"}
               </Text>
-              <Text style={{ fontSize: 12, color: "#888", textAlign: "center", marginTop: 2 }}>
+              <Text style={styles.usernameText}>
                 @{user?.username || "guest"}
               </Text>
             </Pressable>
@@ -165,15 +217,7 @@ function ProfileContent() {
             </Pressable>
           )}
 
-          {/* Menu Button */}
-          <Pressable
-            style={styles.profileButton}
-            onPress={() => setOpen(!open)}
-          >
-            <Ionicons name="menu" size={28} color="white" />
-          </Pressable>
-
-          {/* Popup Menu */}
+          {/* Popup menu */}
           {open && (
             <View style={styles.popup}>
               {!user && (
@@ -198,10 +242,7 @@ function ProfileContent() {
                 <Text style={styles.optionText}>More info</Text>
               </Pressable>
 
-              <Pressable
-                style={styles.option}
-                onPress={() => setOpen(false)}
-              >
+              <Pressable style={styles.option} onPress={() => setOpen(false)}>
                 <Text style={styles.optionText}>Close</Text>
               </Pressable>
             </View>
@@ -216,11 +257,13 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
+
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+
   prof: {
     width: SCREEN_WIDTH * 0.9,
     maxWidth: 360,
@@ -229,12 +272,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
     padding: 20,
+    paddingTop: 56,
     alignItems: "center",
-    marginTop : -550
+    minHeight: 240,
   },
 
   imageContainer: {
-    marginTop: 10,
+    marginBottom: 12,
   },
 
   profimg: {
@@ -243,17 +287,29 @@ const styles = StyleSheet.create({
     borderRadius: 39,
   },
 
+  nameContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
   Proftext: {
-    marginTop: 20,
     fontSize: 16,
     fontWeight: "bold",
     color: "white",
+    textAlign: "center",
+  },
+
+  usernameText: {
+    fontSize: 12,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 2,
   },
 
   editNameRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 16,
+    marginBottom: 16,
     gap: 8,
   },
 
@@ -287,7 +343,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 20,
     paddingVertical: 8,
-    marginTop: 14,
+    marginTop: 4,
   },
 
   logoutText: {
@@ -298,14 +354,14 @@ const styles = StyleSheet.create({
 
   profileButton: {
     position: "absolute",
-    top: 20,
-    right: 20,
+    top: 16,
+    right: 16,
   },
 
   popup: {
     position: "absolute",
-    top: 65,
-    right: 20,
+    top: 56,
+    right: 16,
     width: 200,
     backgroundColor: "#222",
     borderRadius: 12,
@@ -315,6 +371,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+    zIndex: 10,
   },
 
   option: {
