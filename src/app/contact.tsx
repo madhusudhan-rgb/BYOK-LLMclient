@@ -3,7 +3,6 @@ import {
   Animated,
   BackHandler,
   Image,
-  ImageBackground,
   Linking,
   Platform,
   Pressable,
@@ -67,8 +66,7 @@ export default function Contact() {
   showModal({
     title: "Terms & Conditions",
     message:
-      "The app and its owner do not claim ownership of any third-party content presented (except the API key).\n\n" +
-      "This app is provided for entertainment purposes only, and the developer is not responsible for any damage, harm, or loss resulting from its use.\n\nIF THERE IS ANY NOTICE OF USERS TRYING TO ABUSE THE API CODES ( you are able to put your own api codes due to the app being open source but you are not allowed to use the already hardcoded api codes for your own purposes) BY FIDDLING WITHT THE APK SERIOUS CONSEQUENCES WILL BE PLACED\n\nScroll down for more\n\nOpenAI, NVIDIA, Meta, Alibaba, Mistral AI ,Bytedance, and THEIR RESPECTIVE LOGOS ARE TRADEMARKS OF THEIRS. THIS APP IS INDEPENDENT AND IS NOT AFFILIATED WITH NOR ENDORSED BY THE COMPANIES PRESENTED.\n\nAll your account information is stored safely from anyone trying to abuse\n\nAlthough there is no 100% guarentee please note that this app is still in early development\n\nYour chats with the AI models is stored unless you decide to reset the chat history. All your history is safeguarded and wont be looked through except in certain circumstances resulting from legal causes\n\nYOUR DATA MAY BE USED TO FURTHER IMRPOVE USER EXPEREINCE\n\n" +
+      "The app and its owner do not claim ownership of any third-party content presented (except the API key).\n\nTO VIEW THE FULL PRIVACY POLICY CLICK ON PRIVACY POLICY!\n\n" +
       "By continuing, you agree to these terms.",
     buttons: [
       {
@@ -94,85 +92,128 @@ export default function Contact() {
           }),
       },
       {
-        text: "Cpyright-policy",
+        text: "Cpyright-plcy",
         onPress: () =>
           Linking.openURL(
-            "https://creativecommons.org/publicdomain/zero/1.0/legalcode.en"
+            "https://github.com/madhusudhan-rgb/TSX-proj/blob/MAIN2/LICENSE"
           ),
       },
+      {
+        text : "PRIVACY POLICY",
+        onPress: ()=> Linking.openURL("https://github.com/madhusudhan-rgb/TSX-proj/blob/MAIN2/PRIVACY%20POLICY")
+      }
     ],
   });
 };
-  return (
-    <ImageBackground source={require("../../assets/images/bg1.jpg")} style={styles.background}>
-      <View style={styles.overlay} />
-      <CustomModal visible={modalVisible} config={modalConfig} onClose={() => setModalVisible(false)} />
+ return (
+  <View style={styles.container}>
+    <CustomModal
+      visible={modalVisible}
+      config={modalConfig}
+      onClose={() => setModalVisible(false)}
+    />
 
-      <View style={styles.bg}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Additional Info</Text>
-          <Text style={styles.subtitle}>Contact, legal, and resource links</Text>
-        </View>
+    <View style={styles.bg}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Additional Info</Text>
+        <Text style={styles.subtitle}>
+          Contact, legal, and resource links
+        </Text>
+      </View>
 
-        <View style={styles.card}>
-          {[
-            
-            {
-              scale: scaleTerms, icon: "📄", label: "Terms & Conditions",
-              style: "secondary" as const,
-              onPress: showPrivacyAlert,
-            },
-            {
-              scale: scaleComingSoon, icon: "?", label: "What and why this app?",
-              style: "secondary" as const,
-              onPress: () => showModal({ title: "Information", message: "I am a 17 yr old ( as of 7/4/26 2:18pm est ) and i wanted to learn something productive during the summer instead of fooling around.\nCoding seemed to be the best option as its becoming more of a generalized thing\nI built this simply to get better at typescript and it might not be the best but hey it works!!!\n\n\n( I did use Ai to debug the config files and check for compiling issues when i made the apk )", buttons: [{ text: "Got it", style: "cancel" }] }),
-            },
-            {
-              scale: scalerndm, icon: "🔗", label: "Resources",
-              style: "green" as const,
-              onPress: () => showModal({
+      <View style={styles.card}>
+        {[
+          {
+            scale: scaleTerms,
+            icon: "📄",
+            label: "Terms & Conditions",
+            style: "secondary" as const,
+            onPress: showPrivacyAlert,
+          },
+          {
+            scale: scaleComingSoon,
+            icon: "?",
+            label: "What and why this app?",
+            style: "secondary" as const,
+            onPress: () =>
+              showModal({
+                title: "Information",
+                message:
+                  "I am a 17 yr old ( as of 7/4/26 2:18pm est ) and i wanted to learn something productive during the summer instead of fooling around.\nCoding seemed to be the best option as its becoming more of a generalized thing\nI built this simply to get better at typescript and it might not be the best but hey it works!!!\n\n\n( I did use Ai to debug the config files and check for compiling issues when i made the apk )",
+                buttons: [{ text: "Got it", style: "cancel" }],
+              }),
+          },
+          {
+            scale: scalerndm,
+            icon: "🔗",
+            label: "Resources",
+            style: "green" as const,
+            onPress: () =>
+              showModal({
                 title: "Resources",
-                message: "API powered by Groq : https://groq.com and OpenRouter :https://openrouter.ai\n\nBackground images sourced from Pinterest. All images provided are owned by their respective owners or the users who post the images in the Website.",
+                message:
+                  "API powered by Groq : https://groq.com and OpenRouter :https://openrouter.ai\n",
                 buttons: [
-                  { text: "Image#1",    onPress: () => Linking.openURL("https://www.pinterest.com/pin/630011435389349458/") },
-                  { text : "Image#2", onPress: ()=> Linking.openURL("https://www.pinterest.com/pin/1107955945860730767/")},
-                  {text : "Image#3", onPress: ()=> Linking.openURL("https://www.pinterest.com/pin/840906561705707566/")},
+                  
                   { text: "OK", style: "cancel" },
                 ],
               }),
-            },
-          ].map(({ scale, icon, label, style, onPress }) => (
-            <Pressable key={label} onPress={() => { bounce(scale); onPress(); }}>
-              <Animated.View style={[styles.btn, styles[`btn_${style}`], { transform: [{ scale: scale.current }] }]}>
-                <Text style={styles.btnIcon}>{icon}</Text>
-                <Text style={styles.btnText}>{label}</Text>
-              </Animated.View>
-            </Pressable>
-          ))}
-          <View style={styles.socialmedia}>
-            <Text style={styles.supportText}>You can support The dev (me) if you want!!!!</Text>
-            <View style={styles.socialRow}>
-              {socialLinks.map((item) => (
-                <Pressable
-                  key={item.label}
-                  style={styles.socialItem}
-                  onPress={() => Linking.openURL(item.url)}
-                >
-                  <Image style={[styles.socialImage, item.imageStyle]} source={item.image} />
-                  <Text style={styles.socialLabel}>{item.label}</Text>
-                </Pressable>
-              ))}
-            </View>
+          },
+        ].map(({ scale, icon, label, style, onPress }) => (
+          <Pressable
+            key={label}
+            onPress={() => {
+              bounce(scale);
+              onPress();
+            }}
+          >
+            <Animated.View
+              style={[
+                styles.btn,
+                styles[`btn_${style}`],
+                { transform: [{ scale: scale.current }] },
+              ]}
+            >
+              <Text style={styles.btnIcon}>{icon}</Text>
+              <Text style={styles.btnText}>{label}</Text>
+            </Animated.View>
+          </Pressable>
+        ))}
+
+        <View style={styles.socialmedia}>
+          <Text style={styles.supportText}>
+            You can support The dev (me) if you want!!!!
+          </Text>
+
+          <View style={styles.socialRow}>
+            {socialLinks.map((item) => (
+              <Pressable
+                key={item.label}
+                style={styles.socialItem}
+                onPress={() => Linking.openURL(item.url)}
+              >
+                <Image
+                  style={[styles.socialImage, item.imageStyle]}
+                  source={item.image}
+                />
+                <Text style={styles.socialLabel}>{item.label}</Text>
+              </Pressable>
+            ))}
           </View>
         </View>
       </View>
-    </ImageBackground>
-  );
+    </View>
+  </View>
+);
+  
 }
 
 const styles = StyleSheet.create({
-  background: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.55)" },
+  
+ container: {
+  flex: 1,
+  backgroundColor: "#111",
+},
   bg: { flex: 1, justifyContent: "center", padding: 24 },
   header: { marginBottom: 24 },
   title: { color: "#fff", fontSize: 28, fontWeight: "800" },
