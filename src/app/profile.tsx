@@ -147,11 +147,7 @@ function ProfileContent() {
     : require("../../assets/images/profile.jpg");
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/bg4.jpg")}
-      style={styles.background}
-      resizeMode="cover"
-    >
+    
       <View style={styles.container}>
         <View style={styles.prof}>
           {/* Menu button — absolute top-right of card */}
@@ -249,19 +245,21 @@ function ProfileContent() {
           )}
         </View>
       </View>
-    </ImageBackground>
+    
   );
 }
 
 const styles = StyleSheet.create({
   background: {
     flex: 1,
+    
   },
 
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor : "rgb(3, 3, 3)"
   },
 
   prof: {
