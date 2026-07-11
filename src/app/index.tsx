@@ -71,111 +71,165 @@ export default function HomeScreen() {
     return () => animation.stop();
   }, [bannerEnd, bannerStart]);
 
-  return (
-    <ImageBackground
-      source={require("../../assets/images/bg.jpg")}
-      resizeMode="cover"
-      style={styles.background}
-    >
-      <View style={styles.overlay} />
-      <CustomModal visible={modalVisible} config={modalConfig} onClose={() => setModalVisible(false)} />
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.topBar}>
-          <Pressable
-            style={styles.iconBtn}
-            onPress={() =>
-              showModal({
-                title: "About",
-                message:
-                  "App is in development.\n\nWe use groq, openrouter and some opensource models to power our app with their provided api keys\n\nWe do not own anything related to the AI except the API codes\n\nFELLOW USERS PLEASE USE THE APP RESPONSIBLY\n\nOpenAI, NVIDIA, Meta, Alibaba, Fluxschnell, Bytedance, Mistral Ai AND THEIR RESPECTIVE LOGOS ARE TRADEMARKS OF THEIR OWNERS. THIS APP IS INDEPENDENT AND IS NOT AFFILIATED NOR ENDORSED BY THE COMPANIES PRESENTED.\n\n",
-                buttons: [{ text: "Got it", style: "cancel" }],
-              })
-            }
-          >
-            <Text style={styles.iconBtnText}>?</Text>
-          </Pressable>
+  
+    return (
+  <View style={styles.container}>
+    <CustomModal
+      visible={modalVisible}
+      config={modalConfig}
+      onClose={() => setModalVisible(false)}
+    />
 
-          <Pressable
-            style={styles.iconBtn}
-            onPress={() => {
-              bounce(scaleFeedback);
-              showModal({
-                title: "Rate Us",
-                message: "How are we doing? Your feedback helps us improve.",
-                buttons: [
-                  { text: "Good", onPress: () => sendFeedback("Good") },
-                  { text: "Bad", onPress: () => sendFeedback("Bad"), style: "danger" },
-                  {text : "UPDATES", onPress : ()=> Linking.openURL("https://github.com/madhusudhan-rgb/TSX-proj")},
-                  { text: "Cancel", style: "cancel" },
-                ],
-              });
-            }}
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.topBar}>
+        <Pressable
+          style={styles.iconBtn}
+          onPress={() =>
+            showModal({
+              title: "About",
+              message:
+                "App is in development.\n\nWe use groq, openrouter and some opensource models to power our app with their provided api keys\n\nWe do not own anything related to the AI except the API codes\n\nFELLOW USERS PLEASE USE THE APP RESPONSIBLY\n\nOpenAI, NVIDIA, Meta, Alibaba, Fluxschnell, Bytedance, Mistral Ai AND THEIR RESPECTIVE LOGOS ARE TRADEMARKS OF THEIR OWNERS. THIS APP IS INDEPENDENT AND IS NOT AFFILIATED NOR ENDORSED BY THE COMPANIES PRESENTED.\n\n",
+              buttons: [{ text: "Got it", style: "cancel" }],
+            })
+          }
+        >
+          <Text style={styles.iconBtnText}>?</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.iconBtn}
+          onPress={() => {
+            bounce(scaleFeedback);
+            showModal({
+              title: "Rate Us",
+              message: "How are we doing? Your feedback helps us improve.",
+              buttons: [
+                { text: "Good", onPress: () => sendFeedback("Good") },
+                {
+                  text: "Bad",
+                  onPress: () => sendFeedback("Bad"),
+                  style: "danger",
+                },
+                {
+                  text: "UPDATES",
+                  onPress: () =>
+                    Linking.openURL(
+                      "https://github.com/madhusudhan-rgb/TSX-proj"
+                    ),
+                },
+                { text: "Cancel", style: "cancel" },
+              ],
+            });
+          }}
+        >
+          <Animated.View
+            style={{ transform: [{ scale: scaleFeedback.current }] }}
           >
-            <Animated.View style={{ transform: [{ scale: scaleFeedback.current }] }}>
-              <MaterialIcons name="feedback" size={22} color="#fffcfc" />
-            </Animated.View>
-          </Pressable>
+            <MaterialIcons
+              name="feedback"
+              size={22}
+              color="#fffcfc"
+            />
+          </Animated.View>
+        </Pressable>
+      </View>
+
+      <View style={styles.content}>
+        <View style={styles.banner}>
+          <Animated.View
+            style={[
+              styles.bannerTrack,
+              { transform: [{ translateX: bannerX.current }] },
+            ]}
+          >
+            <View style={styles.bannerItem}>
+              <Image
+                source={require("../../assets/images/openai.png")}
+                style={styles.bannerImage}
+              />
+              <Text style={styles.bannerText}>Gpt-0ss-120b - Open ai</Text>
+            </View>
+
+            <View style={styles.bannerItem}>
+              <Image
+                source={require("../../assets/images/nvda.webp")}
+                style={styles.bannerImage}
+              />
+              <Text style={styles.bannerText}>Nemotron - Nvidia</Text>
+            </View>
+
+            <View style={styles.bannerItem}>
+              <Image
+                source={require("../../assets/images/qwen.webp")}
+                style={styles.bannerImage}
+              />
+              <Text style={styles.bannerText}>Qwen - Alibaba</Text>
+            </View>
+
+            <View style={styles.bannerItem}>
+              <Image
+                source={require("../../assets/images/llama.png")}
+                style={styles.bannerImage}
+              />
+              <Text style={styles.bannerText}>LLama 3.1 - Meta</Text>
+            </View>
+
+            <View style={styles.bannerItem}>
+              <Image
+                source={require("../../assets/images/mistral.webp")}
+                style={styles.bannerImage}
+              />
+              <Text style={styles.bannerText}>Mistral - Mistral AI</Text>
+            </View>
+
+            <View style={styles.bannerItem}>
+              <Image
+                source={require("../../assets/images/byte.png")}
+                style={styles.bannerImage}
+              />
+              <Text style={styles.bannerText}>
+                Bytedance-seed-3.0 - Bytedance
+              </Text>
+            </View>
+
+            <View style={styles.bannerItem}>
+              <Image
+                source={require("../../assets/images/flux.png")}
+                style={styles.bannerImage}
+              />
+              <Text style={styles.bannerText}>Flux - FluxSchnell</Text>
+            </View>
+
+            <View style={styles.bannerItem}>
+              <Text style={styles.bannerText}></Text>
+            </View>
+          </Animated.View>
         </View>
 
-        <View style={styles.content}>
-          <View style={styles.banner}>
-            <Animated.View style={[styles.bannerTrack, { transform: [{ translateX: bannerX.current }] }]}>
-              <View style={styles.bannerItem}>
-                <Image source={require("../../assets/images/openai.png")} style={styles.bannerImage} />
-                <Text style={styles.bannerText}>Gpt-0ss-120b - Open ai</Text>
-              </View>
-              <View style={styles.bannerItem}>
-                <Image source={require("../../assets/images/nvda.webp")} style={styles.bannerImage} />
-                <Text style={styles.bannerText}>Nemotron - Nvidia</Text>
-              </View>
-              <View style={styles.bannerItem}>
-                <Image source={require("../../assets/images/qwen.webp")} style={styles.bannerImage} />
-                <Text style={styles.bannerText}> Qwen - Alibaba</Text>
-              </View>
-              <View style={styles.bannerItem}>
-                <Image source={require("../../assets/images/llama.png")} style={styles.bannerImage} />
-                <Text style={styles.bannerText}>LLama 3.1 - Meta</Text>
-              </View>
-              <View style={styles.bannerItem}>
-                <Image source={require("../../assets/images/mistral.webp")} style={styles.bannerImage} />
-                <Text style={styles.bannerText}>Mistral - Mistral AI</Text>
-              </View>
-              <View style={styles.bannerItem}>
-                <Image source={require("../../assets/images/byte.png")} style={styles.bannerImage} />
-                <Text style={styles.bannerText}>Bytedance-seed-3.0 - Bytedance</Text>
-              </View>
-              <View style={styles.bannerItem}>
-                <Image source={require("../../assets/images/flux.png")} style={styles.bannerImage} />
-                <Text style={styles.bannerText}>Flux - FluxSchnell</Text>
-              </View>
-              <View style={styles.bannerItem}>
-                <Text style={styles.bannerText}></Text>
-              </View>
-            </Animated.View>
-          </View>
+        <View style={styles.card}>
+          <Text style={styles.badge}>v1.2.0</Text>
+          <Text style={styles.title}>Welcome</Text>
+          <Text style={styles.subtitle}>Access the AI Playground</Text>
 
-          <View style={styles.card}>
-            <Text style={styles.badge}>v1.2.0</Text>
-            <Text style={styles.title}>Welcome</Text>
-            <Text style={styles.subtitle}>Acess the Ai playground</Text>
-
-            <Link href="/login" asChild>
-              <Pressable style={{ width: "100%" }}>
-                <View style={styles.primaryBtn}>
-                  <Text style={styles.primaryBtnText}>Login/Sign up</Text>
-                </View>
-              </Pressable>
-            </Link>
-          </View>
+          <Link href="/login" asChild>
+            <Pressable style={{ width: "100%" }}>
+              <View style={styles.primaryBtn}>
+                <Text style={styles.primaryBtnText}>Login / Sign Up</Text>
+              </View>
+            </Pressable>
+          </Link>
         </View>
-      </SafeAreaView>
-    </ImageBackground>
-  );
+      </View>
+    </SafeAreaView>
+  </View>
+);
 }
 
 const styles = StyleSheet.create({
-  background: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.4)" },
+ container: {
+  flex: 1,
+  backgroundColor: "#111",
+},
   safeArea: { flex: 1 },
   topBar: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16, paddingTop: 8 },
   iconBtn: {
