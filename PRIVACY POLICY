@@ -1,0 +1,231 @@
+# Privacy Policy & Terms of Use
+**Last Updated:** July 11, 2026
+By using this App, you agree to this Privacy Policy and Terms of Use.
+
+# 2. Information We Collect
+
+Depending on how you use the App, we may collect:
+
+### Account Information
+
+* Username
+* Email address (if provided)
+* Profile picture
+* User ID
+
+### AI Conversations
+
+* Messages you send to AI models
+* AI-generated responses
+* Conversation timestamps
+
+### Device Information
+
+* Device model
+* Operating system version
+* App version
+* Anonymous crash logs
+* Diagnostic information
+
+### Usage Information
+
+* Features used
+* App performance data
+* Error reports
+* General analytics
+
+---
+
+# 3. How We Use Your Information
+
+Your information may be used to:
+
+* Provide AI chat functionality.
+* Synchronize your account across devices.
+* Save your conversation history.
+* Improve app performance.
+* Fix bugs.
+* Prevent abuse and fraud.
+* Respond to support requests.
+* Develop future features.
+
+---
+
+# 4. AI Providers
+
+The App communicates with third-party AI providers, which may include:
+
+* OpenAI
+* NVIDIA
+* Meta
+* Alibaba
+* Mistral AI
+* ByteDance
+* Google
+* Other AI providers added in future updates.
+
+When you send a prompt, your message may be transmitted to the selected AI provider for processing. Each provider has its own Privacy Policy and Terms of Service.
+
+---
+
+# 5. Storage of Your Information
+
+Your account information and chat history may be stored on secure cloud servers.
+
+Reasonable technical and organizational measures are used to help protect your information. However, no online service can guarantee absolute security.
+
+---
+
+# 6. Chat History
+
+Your conversations may be stored so they remain available when you return to the App.
+
+You may delete your conversation history using the available in-app options.
+
+Deleting conversations may permanently remove them from your account.
+
+---
+
+# 7. API Keys
+
+This project is open source.
+
+Users may supply their own API keys.
+
+Developer-provided API keys are intended solely for use within the App.
+
+Attempting to extract, redistribute, automate, abuse, or otherwise use developer-provided API credentials outside their intended purpose is prohibited. Access may be revoked without notice.
+
+---
+
+# 8. User Responsibilities
+
+You agree not to:
+
+* Abuse or interfere with the App.
+* Attempt unauthorized access.
+* Reverse engineer the backend for malicious purposes.
+* Use automated systems to abuse developer resources.
+* Upload malicious software.
+* Violate applicable laws while using the App.
+
+---
+
+# 9. Intellectual Property
+
+OpenAI, NVIDIA, Meta, Alibaba, Google, Mistral AI, ByteDance, and all other company names, product names, logos, and trademarks remain the property of their respective owners.
+
+Their appearance within the App does not imply sponsorship, endorsement, partnership, or affiliation.
+
+---
+
+# 10. Open Source
+
+The App's source code is publicly available.
+
+Open-source availability does not grant permission to misuse developer infrastructure, services, or API credentials.
+
+---
+
+# 11. Children's Privacy
+
+This App is not intended for children under 13 years of age (or the minimum age required in your country).
+
+If we become aware that personal information has been collected from a child without appropriate consent, we will take reasonable steps to remove it.
+
+---
+
+# 12. Data Retention
+
+We retain information only as long as reasonably necessary to:
+
+* Maintain your account.
+* Provide requested services.
+* Meet legal obligations.
+* Resolve disputes.
+* Enforce these Terms.
+
+---
+
+# 13. Data Deletion
+
+You may request deletion of your account and associated data.
+
+Where technically feasible and legally permitted, your information will be deleted from our systems within a reasonable period after your request.
+
+---
+
+# 14. Your Rights
+
+Depending on your location, you may have rights to:
+
+* Access your information.
+* Correct inaccurate information.
+* Delete your information.
+* Request a copy of your information.
+* Object to certain processing.
+* Withdraw consent where applicable.
+
+---
+
+# 15. Third-Party Services
+
+The App may integrate services such as:
+
+* Supabase
+* Expo
+* AI model providers
+* Analytics providers
+* Crash reporting services
+
+Each service maintains its own privacy practices.
+
+---
+
+# 16. Disclaimer
+
+The App is provided "AS IS" and "AS AVAILABLE."
+
+The developer makes no guarantees regarding:
+
+* Accuracy of AI responses.
+* Availability.
+* Reliability.
+* Fitness for a particular purpose.
+
+AI responses may be incorrect, incomplete, offensive, or outdated. Users should independently verify important information.
+
+The App should not be used as a substitute for professional medical, legal, financial, engineering, or other expert advice.
+
+---
+
+# 17. Limitation of Liability
+
+To the maximum extent permitted by law, the developer shall not be liable for any direct, indirect, incidental, consequential, special, or punitive damages arising from:
+
+* Use of the App.
+* Inability to use the App.
+* AI-generated content.
+* Data loss.
+* Service interruptions.
+* Third-party services.
+
+---
+
+# 18. Changes to This Policy
+
+This Privacy Policy may be updated from time to time.
+
+The latest version will always be available within the App.
+
+Continued use of the App after changes become effective constitutes acceptance of the revised policy.
+
+---
+
+# 19. Contact
+
+Questions regarding this Privacy Policy may be directed to the developer using the contact information provided in the App or the project's official repository.
+
+---
+
+By creating an account or using this App, you acknowledge that you have read, understood, and agreed to this Privacy Policy and Terms of Use.
