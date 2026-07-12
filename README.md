@@ -1,48 +1,71 @@
-# Aichatbots Playground 🤖
+# 🤖 AI Chatbots Playground
 
 A free and open-source AI playground app that lets you experiment with multiple AI chatbots in one place.
 
+---
+
 ## 📲 Download
 
-Go to the **Releases** page and download the latest APK.
+Head over to the **Releases** page and download the latest APK.
 
-If you experience any bugs, try downloading an older version. Updates and bug fixes are released periodically.
+If you run into any bugs, try downloading an older version.  
+Bug fixes and improvements are added periodically.
+
+---
 
 ## 📸 Screenshots
 
 <p align="center">
   <img width="200" src="https://github.com/user-attachments/assets/0ce54759-b8fd-4a70-9203-29cff13474c0" />
   <img width="200" src="https://github.com/user-attachments/assets/1b4ad477-6b9e-44c8-a96e-a239f31063f7" />
+</p>
+
+<p align="center">
   <img width="200" src="https://github.com/user-attachments/assets/9737b512-c831-40e2-86b9-ced6a78ab53f" />
   <img width="200" src="https://github.com/user-attachments/assets/f47b47b6-7092-43d4-a803-6bafea656a88" />
 </p>
 
+---
+
 ## ✨ Features
 
 - 💬 Chat with multiple AI models
-- 🔄 Switch between different AI assistants
-- 🔐 User accounts and authentication
+- 🔄 Easily switch between AI assistants
+- 🔐 User authentication
 - 👤 Profile pictures and usernames
 - 🕒 Chat history
 - 🔎 Search functionality
 - ⚡ Fast AI responses
-- 🌐 Open-source and completely free
+- 🌎 Completely free and open-source
+
+---
 
 ## 🛠️ Built With
 
-- React Native + Expo
+- React Native
+- Expo
 - TypeScript
 - Supabase
 - AI APIs
 
-## 🚀 About
+---
 
-Aichatbots Playground is a learning-focused project built to explore AI integrations, mobile development, and backend systems.
+## 🚀 About The Project
 
-The project is completely free with no subscriptions, paywalls, or locked features.
+AI Chatbots Playground is a project focused on exploring AI integrations, mobile development, and backend systems.
+
+The goal is to create a simple and accessible place where users can test different AI models without subscriptions, paywalls, or locked features.
+
+---
 
 ## 🐛 Bugs & Feedback
 
-Found a bug or have a suggestion?
+Found a bug or have an idea?
 
-Open an issue on GitHub and I'll take a look.
+Feel free to open a GitHub issue and share your feedback.
+
+---
+
+## 📜 License
+
+This project is open-source and available for anyone to explore, modify, and contribute to.
