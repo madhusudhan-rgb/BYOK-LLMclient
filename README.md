@@ -9,7 +9,7 @@ A free and open-source AI playground app that lets you experiment with multiple 
 Head over to the **Releases** page and download the latest APK.
 
 If you run into any bugs, try downloading an older version.  
-Bug fixes and improvements are added periodically.
+Bug fixes and improvements are added periodically.<br>
 The ui is kind of bland and dull which i will make better in the next 3 or 4 updates as it will take me time to design stuff and im not that good at those kinds of things
 The profile part is fully backend.
 make your own profile, Set your own pfp and display name and have fun
