@@ -1,6 +1,0 @@
-cd C:\Users\madyx\MyApp if the os is in original file or go to the main file and type cmd in the searchbar in folder 
-npx expo start
-npx expo install react-native-maps
-npx expo install react-native-webview expo-location
-npx expo install @react-native-async-storage/async-storage
-have expo running on your android

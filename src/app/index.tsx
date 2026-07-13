@@ -73,6 +73,7 @@ export default function HomeScreen() {
 
   
     return (
+      <ImageBackground source = {require("../../assets/images/bg.avif")} style  ={styles.bgg}>
   <View style={styles.container}>
     <CustomModal
       visible={modalVisible}
@@ -222,13 +223,17 @@ export default function HomeScreen() {
       </View>
     </SafeAreaView>
   </View>
+  </ImageBackground>
 );
 }
 
+
 const styles = StyleSheet.create({
  container: {
-  flex: 1,
-  backgroundColor: "#111",
+ flex:1
+},
+bgg:{
+  flex:1
 },
   safeArea: { flex: 1 },
   topBar: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16, paddingTop: 8 },
@@ -255,31 +260,31 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   bannerImage: { width: 25, height: 25, borderRadius: 2, marginRight: 6 },
-  bannerText: { color: "#ffffff", fontSize: 12, fontWeight: "600", letterSpacing: 0.3 },
+  bannerText: { color: "#000000", fontSize: 12, fontWeight: "600", letterSpacing: 0.3 },
   card: {
     width: "100%",
-    backgroundColor: "rgba(22, 20, 20, 0)",
+    backgroundColor: "rgba(42, 40, 40, 0.2)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0)",
+    borderColor: "rgba(0, 0, 0, 0.14)",
     borderRadius: 24,
     padding: 28,
     alignItems: "center",
     marginBottom : 100
   },
   badge: { color: "#00cc2c", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 10 },
-  title: { color: "#fff", fontSize: 32, fontWeight: "800", letterSpacing: 0.5 },
+  title: { color: "#fcf8f8", fontSize: 32, fontWeight: "800", letterSpacing: 0.5 },
   subtitle: { color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 8, textAlign: "center", lineHeight: 20 },
   primaryBtn: {
     backgroundColor: "#00cc2c",
-    paddingVertical: 14,
-    paddingHorizontal: 32,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
     borderRadius: 50,
     marginTop: 18,
     alignItems: "center",
     justifyContent: "center",
-    width : 150,
+    width : 140,
     height :50,
     marginLeft : 80
   },
-  primaryBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  primaryBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
 });

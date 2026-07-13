@@ -14,29 +14,29 @@ import { router } from "expo-router";
 import { login } from "../utils/auth";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [Apikey, setapikey] = useState("");
+  const [Apiurlendpoint, setapiurl] = useState("");
   const [hidden, setHidden] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
-      Alert.alert("Error", "Please enter both username and password");
+    if (!Apikey.trim() || !Apiurlendpoint.trim()) {
+      Alert.alert("Error", "Please enter both the api key and Api url endpoint");
       return;
     }
 
     setLoading(true);
     try {
-      const success = await login(username.trim(), password);
+      const success = await login(Apikey.trim(), Apiurlendpoint);
 
       if (success) {
-        Alert.alert("Success", "Logged in!");
-        router.replace("/profile");
+        Alert.alert("Success");
+        router.replace("/apikeys");
       } else {
         Alert.alert("Error", "Invalid credentials");
       }
     } catch (err) {
-      Alert.alert("Error", err instanceof Error ? err.message : "Login failed");
+      Alert.alert("Error", err instanceof Error ? err.message : "failed");
     } finally {
       setLoading(false);
     }
@@ -50,24 +50,24 @@ export default function Login() {
       <View style={styles.overlay} />
 
       <View style={styles.card}>
-        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.title}>Personal API key integration</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Username"
-          placeholderTextColor="#888"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="Your own api key"
+          placeholderTextColor="#928c8c"
+          value={Apikey}
+          onChangeText={setapikey}
         />
 
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
-            placeholder="Password"
-            placeholderTextColor="#888"
+            placeholder="url endpoint https://...."
+            placeholderTextColor="#aba6a6"
             secureTextEntry={hidden}
-            value={password}
-            onChangeText={setPassword}
+            value={Apiurlendpoint}
+            onChangeText={setapiurl}
           />
 
           <TouchableOpacity onPress={() => setHidden(!hidden)}>
@@ -87,16 +87,11 @@ export default function Login() {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.loginText}>Login</Text>
+            <Text style={styles.loginText}>Configure</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("/signup")}>
-          <Text style={styles.signupText}>
-            Don't have an account?{" "}
-            <Text style={styles.signupLink}>Create one</Text>
-          </Text>
-        </TouchableOpacity>
+        
       </View>
     </ImageBackground>
   );

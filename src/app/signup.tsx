@@ -49,7 +49,7 @@ export default function Signup() {
   return (
     
     <ImageBackground 
-   source={require("../../assets/images/bg4.jpg")}
+   source={require("../../assets/images/bg4.png")}
    style = {styles.background}>
     <View style={styles.container}>
       <View style = {styles.formContainer}>

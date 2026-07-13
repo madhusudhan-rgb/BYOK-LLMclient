@@ -24,17 +24,17 @@ function TabContent() {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
-          bottom: 12,
-          left: 24,
-          right: 24,
-          height: 65,
+          bottom: 5,
+          left : 90,
+          height: 55,
+          width : 410,
           borderRadius: 50,
           backgroundColor: "rgba(18, 18, 18, 0.32)",
-          borderTopWidth: 0,
+          borderTopWidth: 2,
           borderWidth: 1,
           borderColor: "rgba(255,255,255,0.08)",
           display: showNavbar ? "flex" : "none",
-          paddingHorizontal: 8,
+          paddingHorizontal: 1,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 8 },
           shadowOpacity: 0.4,
@@ -54,7 +54,7 @@ function TabContent() {
         name="index"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "home" : "home-outline"} size={26} color={color} />
+            <Ionicons name={focused ? "home" : "home-outline"} size={23} color={color} />
           ),
         }}
       />
@@ -62,7 +62,7 @@ function TabContent() {
         name="explore"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "chatbox-ellipses" : "chatbox-ellipses-outline"} size={26} color={color} />
+            <Ionicons name={focused ? "chatbox-ellipses" : "chatbox-ellipses-outline"} size={23} color={color} />
           ),
         }}
       />
@@ -70,7 +70,7 @@ function TabContent() {
         name="profile"
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
+            <Ionicons name={focused ? "person" : "person-outline"} size={17} color={color} />
           ),
         }}
       />
@@ -92,6 +92,11 @@ function TabContent() {
           href: null,
         }}
       />
+      <Tabs.Screen
+      name = "apikeys"
+      options = {{
+        href : null
+      }}/>
     </Tabs>
   );
 }
