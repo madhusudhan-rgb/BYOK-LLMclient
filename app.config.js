@@ -40,6 +40,10 @@ module.exports = ({ config: expoConfig }) => {
         "OPENROUTER_API_KEY_2",
         "EXPO_PUBLIC_OPENROUTER_API_KEY_2",
       ]),
+      OPENROUTER_API_KEY_3: readEnvValue([
+        "OPENROUTER_API_KEY_3",
+        "EXPO_PUBLIC_OPENROUTER_API_KEY_3",
+      ]),
       GROQ_API_KEY_1: readEnvValue(["GROQ_API_KEY_1", "EXPO_PUBLIC_GROQ_API_KEY_1"]),
       GROQ_API_KEY_2: readEnvValue(["GROQ_API_KEY_2", "EXPO_PUBLIC_GROQ_API_KEY_2"]),
       OPENAI_API_KEY: readEnvValue(["OPENAI_API_KEY", "EXPO_PUBLIC_OPENAI_API_KEY"]),
