@@ -18,15 +18,11 @@ make your own profile, Set your own pfp and display name and have fun
 
 ## 📸 Screenshots
 
-<p align="center">
-  <img width="200" src="https://github.com/user-attachments/assets/0ce54759-b8fd-4a70-9203-29cff13474c0" />
-  <img width="200" src="https://github.com/user-attachments/assets/1b4ad477-6b9e-44c8-a96e-a239f31063f7" />
-</p>
+<img width="200" height="400" alt="1000001858" src="https://github.com/user-attachments/assets/b4c64764-4546-4a19-9c5d-61198e27b22c" />
+<img width="200" height="400" alt="1000001852" src="https://github.com/user-attachments/assets/a075fe0c-fdaf-4211-943d-433f8ca22e9d" />
+<img width="200" height="400" alt="1000001861" src="https://github.com/user-attachments/assets/c8a20397-6e4e-4e76-b9e9-3eee0db7af47" />
+<img width="200" height="400" alt="1000001855" src="https://github.com/user-attachments/assets/8e11c791-6071-49fd-b71a-ce91c00a9c24" />
 
-<p align="center">
-  <img width="200" src="https://github.com/user-attachments/assets/9737b512-c831-40e2-86b9-ced6a78ab53f" />
-  <img width="200" src="https://github.com/user-attachments/assets/f47b47b6-7092-43d4-a803-6bafea656a88" />
-</p>
 
 ---
 
