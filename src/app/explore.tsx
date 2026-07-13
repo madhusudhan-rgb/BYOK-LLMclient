@@ -10,12 +10,14 @@ import {
   Text,
   TextInput,
   View,
+  ImageBackground
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Bot, BotType, getBots } from "../config/bots";
-import { ImageBackground } from "react-native";
+
 import { supabase } from "../utils/supabase";
 import { getCurrentUser } from "../utils/auth";
+import { Link } from "expo-router";
 
 type Message = {
   id: string;
@@ -421,6 +423,7 @@ export default function Explore() {
   //Bot List 
   if (!activeBot) {
     return (
+      <ImageBackground source = {require("../../assets/images/chatbg2.avif")} style = {styles.chatbg2}>
       
       <SafeAreaView style={styles.safe}>
         <View style={styles.listHeader}>
@@ -464,6 +467,7 @@ export default function Explore() {
           }}
         />
       </SafeAreaView>
+      </ImageBackground>
       
     );
   }
@@ -473,7 +477,7 @@ export default function Explore() {
     activeBot.type === "image" ? "Describe an image…" : `Message ${activeBot.name}…`;
 
   return (
-    
+    <ImageBackground source = {require("../../assets/images/chatbg2.avif")} style = {styles.chatbg}>
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -492,6 +496,12 @@ export default function Explore() {
           <Pressable style={styles.resetBtn} onPress={resetChat}>
             <Text style={styles.resetBtnText}>Reset</Text>
           </Pressable>
+          <Link href="/apikeys" asChild>
+          <Pressable style = {styles.api_log}
+          >
+            <Text style = {{color : 'white'}}>Put your own apikey</Text>
+          </Pressable>
+          </Link>
         </View>
 
         <FlatList
@@ -547,12 +557,24 @@ export default function Explore() {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
-    
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor : "rgba(9, 9, 9, 0.95)" },
+  safe: { flex: 1,},
+  chatbg:{
+ flex: 1
+  },
+chatbg2 :{
+  flex:1
+},
+  api_log : {
+    backgroundColor: "#00cc2c",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
   avatar: {
     backgroundColor: "#c3c7be1a",
     borderWidth: 1,
@@ -569,13 +591,13 @@ const styles = StyleSheet.create({
     gap: 8,
     marginHorizontal: 16,
     marginVertical: 12,
-    backgroundColor: "#f5f5f501",
+    backgroundColor: "#fefefe",
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.14)",
     paddingHorizontal: 14,
   },
-  searchInput: { flex: 1, color: "#e1d6d6", fontSize: 15, paddingVertical: 12 },
+  searchInput: { flex: 1, color: "#000000", fontSize: 15, paddingVertical: 12 },
   list: { paddingHorizontal: 16, paddingBottom: 24 },
   empty: { color: "#47444401", textAlign: "center", marginTop: 40, fontSize: 14 },
   card: {
@@ -601,8 +623,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
-    backgroundColor: "#141414",
+    borderColor: "rgba(255, 255, 255, 0)",
+    backgroundColor: "rgba(154, 96, 96, 0)",
     gap: 10,
   },
   backBtn: {
@@ -612,7 +634,7 @@ const styles = StyleSheet.create({
   },
   chatHeaderCenter: { flex: 1 },
   chatHeaderName: { color: "#fff", fontSize: 15, fontWeight: "700" },
-  chatHeaderSub: { color: "#444", fontSize: 11, marginTop: 1 },
+  chatHeaderSub: { color: "#f9eded", fontSize: 11, marginTop: 1 },
   resetBtn: {
     backgroundColor: "#00cc2c",
     borderRadius: 12,
@@ -629,10 +651,10 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   imageBubble: { padding: 0 },
-  userBubble: { alignSelf: "flex-end", backgroundColor: "#11f501", borderBottomRightRadius: 4 },
+  userBubble: { alignSelf: "flex-end", backgroundColor: "#10101070", borderBottomRightRadius: 4 },
   botBubble: {
     alignSelf: "flex-start",
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#1a1a1a87",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
     borderBottomLeftRadius: 4,
@@ -645,21 +667,22 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingBottom: Platform.OS === "ios" ? 12 : 16,
     borderTopWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
-    backgroundColor: "#141414",
+    borderColor: "rgba(255, 255, 255, 0)",
+    backgroundColor: "#985e5e00",
     gap: 9,
+
   },
   chatInput: {
     flex: 1,
     backgroundColor: "#1e1e1e",
     color: "#dfd5d5",
     borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingTop:12,
-    paddingBottom: 30,
+    paddingHorizontal: 12,
+    paddingTop:10,
+    paddingBottom: 20,
     fontSize: 15,
     maxHeight: 120,
-    marginBottom : 24,
+    marginBottom : 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
   },
@@ -667,7 +690,7 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: "#00cc2c",
     alignItems: "center", justifyContent: "center",
-    marginBottom : 34
+    marginBottom : 24
   },
   sendBtnStop: { backgroundColor: "#cc2200" },
   background: {

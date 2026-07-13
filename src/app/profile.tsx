@@ -136,6 +136,7 @@ function ProfileContent() {
   };
 
   const handleLogout = async () => {
+    Alert.alert( displayName + "\n\nYou have logged out")
     await logout();
     setUser(null);
     setProfileImage(null);
@@ -147,7 +148,7 @@ function ProfileContent() {
     : require("../../assets/images/profile.jpg");
 
   return (
-    
+    <ImageBackground source = {require("../../assets/images/login.avif")} style = {styles.background}>
       <View style={styles.container}>
         <View style={styles.prof}>
           {/* Menu button — absolute top-right of card */}
@@ -245,7 +246,7 @@ function ProfileContent() {
           )}
         </View>
       </View>
-    
+    </ImageBackground>
   );
 }
 
@@ -259,20 +260,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor : "rgb(3, 3, 3)"
+  
   },
 
   prof: {
     width: SCREEN_WIDTH * 0.9,
     maxWidth: 360,
     borderRadius: 25,
-    backgroundColor: "rgba(30, 28, 28, 0.85)",
+    backgroundColor: "rgba(71, 67, 67, 0.24)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(186, 173, 173, 0.06)",
     padding: 20,
     paddingTop: 56,
     alignItems: "center",
     minHeight: 240,
+    marginTop : -450,
   },
 
   imageContainer: {
@@ -299,7 +301,7 @@ const styles = StyleSheet.create({
 
   usernameText: {
     fontSize: 12,
-    color: "#888",
+    color: "#ffffff",
     textAlign: "center",
     marginTop: 2,
   },
@@ -341,7 +343,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 20,
     paddingVertical: 8,
-    marginTop: 4,
+    marginTop: -180,
+    marginLeft : -250,
+    height : 32
   },
 
   logoutText: {
