@@ -58,12 +58,14 @@ export default function Signup() {
       <TextInput
         style={styles.input}
         placeholder="Username"
+        placeholderTextColor = "white"
         onChangeText={setUsername}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor  = "white"
         secureTextEntry
         onChangeText={setPassword}
       />
@@ -109,12 +111,12 @@ const styles = StyleSheet.create({
     fontWeight : "700"
   },
   input: {
-    backgroundColor: "rgba(243, 250, 243, 0.25)",
-    padding: 12,
+    backgroundColor: "rgba(83, 88, 83, 0.25)",
+    padding: 16,
     borderRadius: 10,
-    marginBottom: 10,
+    marginBottom: 14,
     color: "white",
-    borderColor : "rgba(255, 255, 255, 0.3)",
+    borderColor : "rgba(255, 255, 255, 0.26)",
     borderWidth : 1
   },
   button: {
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 10,
     width : 100,
-    marginLeft : 104
+    marginLeft : 94
   },
   buttonText: {
     color: "white",
@@ -131,13 +133,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   formContainer: {
-    backgroundColor: "rgba(40, 37, 37, 0.21)",
-    padding: 20,
+    backgroundColor: "rgba(10, 9, 9, 0.21)",
+    padding: 30,
     borderRadius: 15,
     width : 350,
-    height : 290,
+    height : 320,
     marginLeft : 12,
     borderWidth : 1,
-    borderColor : "rgba(255, 252, 252, 0.58)"
+    borderColor : "rgba(255, 252, 252, 0)"
   },
 });
