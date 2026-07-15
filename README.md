@@ -1,10 +1,10 @@
-# 🤖 AI Chatbots Playground
+#AI Chatbots Playground
 
 A free and open-source AI playground app that lets you experiment with multiple AI chatbots in one place.
 
 ---
 
-## 📲 Download
+Download
 
 Head over to the **Releases** page and download the latest APK.
 
@@ -19,7 +19,7 @@ ETA is in 3 days
 
 ---
 
-## 📸 Screenshots
+Screenshots
 
 <img width="200" height="400" alt="1000001858" src="https://github.com/user-attachments/assets/b4c64764-4546-4a19-9c5d-61198e27b22c" />
 <img width="200" height="400" alt="1000001852" src="https://github.com/user-attachments/assets/a075fe0c-fdaf-4211-943d-433f8ca22e9d" />
@@ -29,20 +29,20 @@ ETA is in 3 days
 
 ---
 
-## ✨ Features
+Features
 
-- 💬 Chat with multiple AI models
-- 🔄 Easily switch between AI assistants
-- 🔐 User authentication
-- 👤 Profile pictures and usernames
-- 🕒 Chat history
-- 🔎 Search functionality
-- ⚡ Fast AI responses
-- 🌎 Completely free and open-source
+- Chat with multiple AI models
+- Easily switch between AI assistants
+- User authentication
+- Profile pictures and usernames
+- Chat history
+- Search functionality
+- Fast AI responses
+- Completely free and open-source
 
 ---
 
-## 🛠️ Built With
+Built With
 
 - React Native
 - Expo
@@ -52,7 +52,7 @@ ETA is in 3 days
 
 ---
 
-## 🚀 About The Project
+About The Project
 
 AI Chatbots Playground is a project focused on exploring AI integrations, mobile development, and backend systems.
 
@@ -60,7 +60,7 @@ The goal is to create a simple and accessible place where users can test differe
 
 ---
 
-## 🐛 Bugs & Feedback
+Bugs & Feedback
 
 Found a bug or have an idea?
 
@@ -68,6 +68,6 @@ Feel free to open a GitHub issue and share your feedback.
 
 ---
 
-## 📜 License
+License
 
 This project is open-source and available for anyone to explore, modify, and contribute to.
