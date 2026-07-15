@@ -29,7 +29,7 @@ function TabContent() {
           height: 55,
           width : 410,
           borderRadius: 50,
-          backgroundColor: "rgba(18, 18, 18, 0.32)",
+          backgroundColor: "rgba(18, 18, 18, 0.18)",
           borderTopWidth: 2,
           borderWidth: 1,
           borderColor: "rgba(255,255,255,0.08)",

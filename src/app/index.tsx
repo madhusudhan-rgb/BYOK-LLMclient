@@ -249,7 +249,7 @@ bgg:{
   },
   iconBtnText: { color: "#fff", fontSize: 20, fontWeight: "700" },
   content: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, gap: 24 },
-  banner: { width: "120%", height: 34, borderRadius: 999, overflow: "hidden", justifyContent: "center", position : "absolute", top: 700},
+  banner: { width: "120%", height: 34, borderRadius: 999, overflow: "hidden", justifyContent: "center", position: "absolute", bottom: 40 },
   bannerTrack: { flexDirection: "row", alignSelf: "flex-start", paddingHorizontal: 8, gap: 8 },
   bannerItem: {
     flexDirection: "row",
