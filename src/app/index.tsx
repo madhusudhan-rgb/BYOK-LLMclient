@@ -89,7 +89,7 @@ export default function HomeScreen() {
             showModal({
               title: "About",
               message:
-                "App is in development.\n\nWe use groq, openrouter and some opensource models to power our app with their provided api keys\n\nWe do not own anything related to the AI except the API codes\n\nFELLOW USERS PLEASE USE THE APP RESPONSIBLY\n\nOpenAI, NVIDIA, Meta, Alibaba, Fluxschnell, Bytedance, Mistral Ai AND THEIR RESPECTIVE LOGOS ARE TRADEMARKS OF THEIR OWNERS. THIS APP IS INDEPENDENT AND IS NOT AFFILIATED NOR ENDORSED BY THE COMPANIES PRESENTED.\n\n",
+                "App is in development.\n\nWe use groq, openrouter and some opensource models to power our app with their provided api keys\n\nWe do not own anything related to the AI except the API codes\n\nFELLOW USERS PLEASE USE THE APP RESPONSIBLY\n\nOpenAI, NVIDIA, Meta, Alibaba, Fluxschnell, Bytedance, Mistral Ai AND THEIR RESPECTIVE LOGOS ARE TRADEMARKS OF THEIR OWNERS. THIS APP IS INDEPENDENT AND IS NOT AFFILIATED NOR ENDORSED BY THE COMPANIES PRESENTED.\n\nMore information about our policies in the moreinfo page in the profile tab!!!",
               buttons: [{ text: "Got it", style: "cancel" }],
             })
           }
@@ -284,7 +284,7 @@ bgg:{
     justifyContent: "center",
     width : 140,
     height :50,
-    marginLeft : 80
+    marginLeft : 85
   },
   primaryBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
 });

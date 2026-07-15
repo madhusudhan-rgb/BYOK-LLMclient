@@ -63,14 +63,14 @@ export function CustomModal({
 const s = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.75)",
+    backgroundColor: "rgba(0, 0, 0, 0.56)",
     justifyContent: "center",
     alignItems: "center",
     padding: 36,
   },
   box: {
     width: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.14)",
+    backgroundColor: "rgba(0, 0, 0, 0.48)",
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",

@@ -139,7 +139,7 @@ export default function Contact() {
               showModal({
                 title: "Information",
                 message:
-                  "I am a 17 yr old ( as of 7/4/26 2:18pm est ) and i wanted to learn something productive during the summer instead of fooling around.\nCoding seemed to be the best option as its becoming more of a generalized thing\nI built this simply to get better at typescript and it might not be the best but hey it works!!!\n\n\n( I did use Ai to debug the config files and check for compiling issues when i made the apk )",
+                  "\nI (the dev) built this simply to get better at typescript\n\n",
                 buttons: [{ text: "Got it", style: "cancel" }],
               }),
           },

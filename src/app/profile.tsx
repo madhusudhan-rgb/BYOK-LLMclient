@@ -14,14 +14,11 @@ import {
   Text,
   TextInput,
   View,
-  
 } from "react-native";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { getCurrentUser, logout, updateProfile, uploadAvatar } from "../utils/auth";
 import DateTimePicker from '@react-native-community/datetimepicker'
-
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
 export default function Profile() {
   return (
     <ErrorBoundary>
@@ -29,7 +26,6 @@ export default function Profile() {
     </ErrorBoundary>
   );
 }
-
 function ProfileContent() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -37,12 +33,9 @@ function ProfileContent() {
   const [displayName, setDisplayName] = useState("");
   const [editingName, setEditingName] = useState(false);
   const [saving, setSaving] = useState(false);
-  
-
   const bannerStart = 220;
   const bannerEnd = -200;
   const bannerX = useRef(new Animated.Value(bannerStart)).current;
-
   // Reload user data every time this screen gets focus
   useFocusEffect(
     useCallback(() => {
@@ -70,7 +63,6 @@ function ProfileContent() {
       };
     }, [])
   );
-
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
@@ -81,13 +73,11 @@ function ProfileContent() {
     animation.start();
     return () => animation.stop();
   }, [bannerEnd, bannerStart]);
-
   const pickImage = async () => {
     if (!user) {
       Alert.alert("Login Required", "Please log in to change your profile picture.");
       return;
     }
-
     const previousAvatar = profileImage;
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -95,25 +85,19 @@ function ProfileContent() {
         Alert.alert("Permission Required", "Permission to access your photos is required.");
         return;
       }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images',
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.7,
       });
-
       if (!result.canceled && result.assets && result.assets[0]) {
         const uri = result.assets[0].uri;
-
         setProfileImage(uri);
-
         try {
           const publicUrl = await uploadAvatar(uri);
           console.log("Uploaded avatar:", publicUrl);
-
           await updateProfile({ avatar_url: publicUrl });
-
           setProfileImage(publicUrl);
           setUser((prev: any) =>
             prev ? { ...prev, avatar_url: publicUrl } : prev
@@ -130,7 +114,6 @@ function ProfileContent() {
       Alert.alert("Error", "Failed to pick image. Please try again.");
     }
   };
-
   const saveDisplayName = async () => {
     const trimmed = displayName.trim();
     if (!trimmed) {
@@ -150,7 +133,6 @@ function ProfileContent() {
       setSaving(false);
     }
   };
-
   const handleLogout = async () => {
     alert(displayName + "You have logged out");
     await logout();
@@ -158,11 +140,9 @@ function ProfileContent() {
     setProfileImage(null);
     router.replace("/login");
   };
-
   const avatarSource = profileImage
     ? { uri: profileImage }
     : require("../../assets/images/profile.jpg");
-
   return (
     <ImageBackground source={require("../../assets/images/login.avif")} style={styles.background}>
       <View style={styles.container}>
@@ -170,11 +150,9 @@ function ProfileContent() {
           <Pressable style={styles.profileButton} onPress={() => setOpen(!open)}>
             <Ionicons name="menu" size={28} color="white" />
           </Pressable>
-
           <Pressable onPress={pickImage} style={styles.imageContainer}>
             <Image key={profileImage ?? "default"} source={avatarSource} style={styles.profimg} />
           </Pressable>
-
           {editingName ? (
             <View style={styles.editNameRow}>
               <TextInput
@@ -201,13 +179,11 @@ function ProfileContent() {
               <Text style={styles.usernameText}>@{user?.username || "guest"}</Text>
             </Pressable>
           )}
-
           {user && (
             <Pressable style={styles.logoutBtn} onPress={handleLogout}>
               <Text style={styles.logoutText}>Logout</Text>
             </Pressable>
           )}
-
           {open && (
             <View style={styles.popup}>
               {!user && (
@@ -218,26 +194,24 @@ function ProfileContent() {
                   <Text style={styles.optionText}>Login / Signup</Text>
                 </Pressable>
               )}
-
               <Pressable style={styles.option} onPress={() => {
                 setOpen(false);
                 router.push("/contact");
               }}>
                 <Text style={styles.optionText}>More info</Text>
               </Pressable>
-
               <Pressable style={styles.option} onPress={() => setOpen(false)}>
                 <Text style={styles.optionText}>Close</Text>
               </Pressable>
             </View>
           )}
         </View>
-
         <View style={styles.content}>
           <View style={styles.banner}>
             <Animated.View style={[styles.bannerTrack, { transform: [{ translateX: bannerX }] }]}>
              <Text style={styles.bannerText}>
-          Welcome back, {displayName} </Text>
+                  New models added!!! Check it out {displayName}
+                   </Text>
             </Animated.View>
           </View>
         </View>
@@ -301,7 +275,7 @@ const styles = StyleSheet.create({
   option: { paddingVertical: 14, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: "#333" },
   optionText: { color: "white", fontSize: 16 },
   content: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, gap: 24 },
-  banner: { width: "120%", height: 34, borderRadius: 999, overflow: "hidden", justifyContent: "center", position: "absolute", bottom: 820 },
+  banner: { width: "120%", height: 34, borderRadius: 999, overflow: "hidden", justifyContent: "center", position: "absolute", bottom: 800 },
   bannerTrack: { flexDirection: "row", alignSelf: "flex-start", paddingHorizontal: 8, gap: 8 },
   bannerItem: { flexDirection: "row", alignItems: "center", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, marginRight: 8 },
   // bannerImage: { width: 25, height: 25, borderRadius: 2, marginRight: 6 },

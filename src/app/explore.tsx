@@ -570,7 +570,7 @@ chatbg2 :{
   flex:1
 },
   api_log : {
-    backgroundColor: "#00cc2c",
+    backgroundColor: "#0fd339",
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -603,7 +603,7 @@ chatbg2 :{
   card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#242222b8",
+    backgroundColor: "#24222250",
     borderRadius: 16,
     padding: 14,
     marginBottom: 10,
