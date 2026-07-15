@@ -182,7 +182,7 @@ export default function Contact() {
 
         <View style={styles.socialmedia}>
           <Text style={styles.supportText}>
-            You can support The dev (me) if you want!!!!
+            You can support or contact The dev (me) if you want!!!!
           </Text>
 
           <View style={styles.socialRow}>

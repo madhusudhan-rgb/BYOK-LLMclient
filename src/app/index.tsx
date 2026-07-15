@@ -260,7 +260,7 @@ bgg:{
     marginRight: 8,
   },
   bannerImage: { width: 25, height: 25, borderRadius: 2, marginRight: 6 },
-  bannerText: { color: "#000000", fontSize: 12, fontWeight: "600", letterSpacing: 0.3 },
+  bannerText: { color: "#fff8f8", fontSize: 12, fontWeight: "600", letterSpacing: 0.3 },
   card: {
     width: "100%",
     backgroundColor: "rgba(42, 40, 40, 0)",
