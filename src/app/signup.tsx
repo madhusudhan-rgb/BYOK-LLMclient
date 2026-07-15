@@ -49,7 +49,7 @@ export default function Signup() {
   return (
     
     <ImageBackground 
-   source={require("../../assets/images/bg4.png")}
+   source={require("../../assets/images/bg4.avif")}
    style = {styles.background}>
     <View style={styles.container}>
       <View style = {styles.formContainer}>
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     fontWeight : "700"
   },
   input: {
-    backgroundColor: "#eaf1ea33",
+    backgroundColor: "rgba(243, 250, 243, 0.25)",
     padding: 12,
     borderRadius: 10,
     marginBottom: 10,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   formContainer: {
-    backgroundColor: "rgba(40, 37, 37, 0.49)",
+    backgroundColor: "rgba(40, 37, 37, 0.21)",
     padding: 20,
     borderRadius: 15,
     width : 350,

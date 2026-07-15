@@ -44,7 +44,7 @@ export default function Login() {
 
   return (
     <ImageBackground
-      source={require("../../assets/images/bg4.png")}
+      source={require("../../assets/images/bg4.avif")}
       style={styles.background}
     >
       <View style={styles.overlay} />
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     width: "88%",
     padding: 25,
     borderRadius: 25,
-    backgroundColor: "rgba(25,25,25,0.75)",
+    backgroundColor: "rgba(25, 25, 25, 0.21)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.08)",
   },
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   input: {
     height: 52,
     borderRadius: 12,
-    backgroundColor: "#222",
+    backgroundColor: "#2222223c",
     color: "white",
     paddingHorizontal: 16,
     marginBottom: 15,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   passwordContainer: {
     height: 52,
     borderRadius: 12,
-    backgroundColor: "#222",
+    backgroundColor: "#22222262",
     borderWidth: 1,
     borderColor: "#444",
     flexDirection: "row",
