@@ -37,10 +37,10 @@ export default function HomeScreen() {
 
   const bounce = (scaleRef: React.RefObject<Animated.Value>, cb?: () => void) => {
     const scale = scaleRef.current;
-    Animated.sequence([
-      Animated.timing(scale, { toValue: 0.93, duration: 200, useNativeDriver: true }),
-      Animated.timing(scale, { toValue: 6, duration:200, useNativeDriver: true }),
-    ]).start(cb);
+  Animated.sequence([
+    Animated.timing(scale, { toValue: 0.93, duration: 200, useNativeDriver: true }),
+    Animated.timing(scale, { toValue: 1, duration: 200, useNativeDriver: true }),
+  ]).start(cb);
   };
 
   const sendFeedback = async (rating: "Good" | "Bad") => {
@@ -161,10 +161,10 @@ export default function HomeScreen() {
 
             <View style={styles.bannerItem}>
               <Image
-                source={require("../../assets/images/qwen.webp")}
+                source={require("../../assets/images/pool.jpg")}
                 style={styles.bannerImage}
               />
-              <Text style={styles.bannerText}>Qwen - Alibaba</Text>
+              <Text style={styles.bannerText}>Poolside laguna - Poolside AI</Text>
             </View>
 
             <View style={styles.bannerItem}>
@@ -177,10 +177,10 @@ export default function HomeScreen() {
 
             <View style={styles.bannerItem}>
               <Image
-                source={require("../../assets/images/mistral.webp")}
+                source={require("../../assets/images/cohere.png")}
                 style={styles.bannerImage}
               />
-              <Text style={styles.bannerText}>Mistral - Mistral AI</Text>
+              <Text style={styles.bannerText}>Cohere ai - Cohere</Text>
             </View>
 
             <View style={styles.bannerItem}>
@@ -263,7 +263,7 @@ bgg:{
   bannerText: { color: "#000000", fontSize: 12, fontWeight: "600", letterSpacing: 0.3 },
   card: {
     width: "100%",
-    backgroundColor: "rgba(42, 40, 40, 0.2)",
+    backgroundColor: "rgba(42, 40, 40, 0)",
     borderWidth: 1,
     borderColor: "rgba(0, 0, 0, 0.14)",
     borderRadius: 24,

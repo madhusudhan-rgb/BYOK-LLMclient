@@ -44,7 +44,7 @@ export default function Login() {
 
   return (
     <ImageBackground
-      source={require("../../assets/images/bg4.png")}
+      source={require("../../assets/images/bg4.avif")}
       style={styles.background}
     >
       <View style={styles.overlay} />
@@ -103,19 +103,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
-  overlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.55)",
-  },
+overlay : {
+  flex:1
+},
+ 
 
   card: {
     width: "88%",
     padding: 25,
-    borderRadius: 25,
-    backgroundColor: "rgba(25,25,25,0.75)",
+    borderRadius: 20,
+    backgroundColor: "rgba(25, 25, 25, 0.31)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.08)",
+    marginBottom :400
   },
 
   title: {
@@ -127,14 +127,14 @@ const styles = StyleSheet.create({
 
   subtitle: {
     fontSize: 15,
-    color: "#bbb",
+    color: "#ffffff",
     marginBottom: 25,
   },
 
   input: {
     height: 52,
     borderRadius: 12,
-    backgroundColor: "#222",
+    backgroundColor: "#2222223b",
     color: "white",
     paddingHorizontal: 16,
     marginBottom: 15,
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   passwordContainer: {
     height: 52,
     borderRadius: 12,
-    backgroundColor: "#222",
+    backgroundColor: "#22222229",
     borderWidth: 1,
     borderColor: "#444",
     flexDirection: "row",
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
 
   loginButton: {
-    backgroundColor: "#00cc2c",
+    backgroundColor: "#1def4a",
     height: 52,
     borderRadius: 12,
     justifyContent: "center",
