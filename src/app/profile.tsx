@@ -16,9 +16,15 @@ import {
   View,
 } from "react-native";
 import { ErrorBoundary } from "../components/ErrorBoundary";
-import { getCurrentUser, logout, updateProfile, uploadAvatar } from "../utils/auth";
-import DateTimePicker from '@react-native-community/datetimepicker'
+import {
+  getCurrentUser,
+  logout,
+  updateProfile,
+  uploadAvatar,
+} from "../utils/auth";
+
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
 export default function Profile() {
   return (
     <ErrorBoundary>
@@ -26,6 +32,7 @@ export default function Profile() {
     </ErrorBoundary>
   );
 }
+
 function ProfileContent() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -33,17 +40,15 @@ function ProfileContent() {
   const [displayName, setDisplayName] = useState("");
   const [editingName, setEditingName] = useState(false);
   const [saving, setSaving] = useState(false);
-  const bannerStart = 220;
-  const bannerEnd = -200;
-  const bannerX = useRef(new Animated.Value(bannerStart)).current;
-  // Reload user data every time this screen gets focus
+
+  const bannerX = useRef(new Animated.Value(SCREEN_WIDTH)).current;
+
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
       (async () => {
         try {
           const current = await getCurrentUser();
-          console.log("PROFILE LOADED:", current);
           if (!cancelled) {
             setUser(current);
             if (current) {
@@ -58,21 +63,30 @@ function ProfileContent() {
           console.error("Failed to load user:", error);
         }
       })();
-      return () => {
-        cancelled = true;
-      };
+      return () => { cancelled = true; };
     }, [])
   );
+
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
-        Animated.timing(bannerX, { toValue: bannerEnd, duration: 10000, easing: Easing.linear, useNativeDriver: true }),
-        Animated.timing(bannerX, { toValue: bannerStart, duration: 0, useNativeDriver: true }),
+        Animated.timing(bannerX, {
+          toValue: -500,
+          duration: 10000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.timing(bannerX, {
+          toValue: SCREEN_WIDTH,
+          duration: 0,
+          useNativeDriver: true,
+        }),
       ])
     );
     animation.start();
     return () => animation.stop();
-  }, [bannerEnd, bannerStart]);
+  }, []);
+
   const pickImage = async () => {
     if (!user) {
       Alert.alert("Login Required", "Please log in to change your profile picture.");
@@ -86,198 +100,290 @@ function ProfileContent() {
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: 'images',
+        mediaTypes: "images",
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.7,
       });
-      if (!result.canceled && result.assets && result.assets[0]) {
+      if (!result.canceled && result.assets?.[0]) {
         const uri = result.assets[0].uri;
         setProfileImage(uri);
         try {
           const publicUrl = await uploadAvatar(uri);
-          console.log("Uploaded avatar:", publicUrl);
           await updateProfile({ avatar_url: publicUrl });
           setProfileImage(publicUrl);
-          setUser((prev: any) =>
-            prev ? { ...prev, avatar_url: publicUrl } : prev
-          );
+          setUser((prev: any) => prev ? { ...prev, avatar_url: publicUrl } : prev);
         } catch (err) {
-          const message = err instanceof Error ? err.message : "Unknown error";
           setProfileImage(previousAvatar);
-          Alert.alert("Upload Issue", message);
-          console.error("Avatar upload failed:", message);
+          Alert.alert("Upload Issue", err instanceof Error ? err.message : "Unknown error");
         }
       }
-    } catch (error) {
-      console.error("Image picker error:", error);
+    } catch {
       Alert.alert("Error", "Failed to pick image. Please try again.");
     }
   };
+
   const saveDisplayName = async () => {
     const trimmed = displayName.trim();
-    if (!trimmed) {
-      Alert.alert("Error", "Display name cannot be empty");
-      return;
-    }
+    if (!trimmed) { Alert.alert("Error", "Display name cannot be empty"); return; }
     setSaving(true);
     try {
       await updateProfile({ display_name: trimmed });
       setEditingName(false);
-      setUser((prev: any) =>
-        prev ? { ...prev, display_name: trimmed } : prev
-      );
-    } catch (err) {
+      setUser((prev: any) => prev ? { ...prev, display_name: trimmed } : prev);
+    } catch {
       Alert.alert("Error", "Failed to save name");
     } finally {
       setSaving(false);
     }
   };
+
   const handleLogout = async () => {
-    alert(displayName + "You have logged out");
-    await logout();
-    setUser(null);
-    setProfileImage(null);
-    router.replace("/login");
+    Alert.alert("Log out", `Log out as ${displayName}?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log out", style: "destructive", onPress: async () => {
+          await logout();
+          setUser(null);
+          setProfileImage(null);
+          router.replace("/login");
+        }
+      },
+    ]);
   };
+
   const avatarSource = profileImage
     ? { uri: profileImage }
     : require("../../assets/images/profile.jpg");
+
   return (
-    <ImageBackground source={require("../../assets/images/login.avif")} style={styles.background}>
-      <View style={styles.container}>
-        <View style={styles.prof}>
-          <Pressable style={styles.profileButton} onPress={() => setOpen(!open)}>
-            <Ionicons name="menu" size={28} color="white" />
-          </Pressable>
-          <Pressable onPress={pickImage} style={styles.imageContainer}>
-            <Image key={profileImage ?? "default"} source={avatarSource} style={styles.profimg} />
-          </Pressable>
-          {editingName ? (
-            <View style={styles.editNameRow}>
-              <TextInput
-                style={styles.nameInput}
-                value={displayName}
-                onChangeText={setDisplayName}
-                placeholder="Display name"
-                placeholderTextColor="#888"
-                autoFocus
-              />
-              <Pressable style={styles.saveNameBtn} onPress={saveDisplayName} disabled={saving}>
-                <Text style={styles.saveNameText}>{saving ? "..." : "Save"}</Text>
-              </Pressable>
-              <Pressable onPress={() => {
-                setEditingName(false);
-                setDisplayName(user?.display_name || user?.username || "");
-              }}>
-                <Ionicons name="close" size={20} color="#fff" />
-              </Pressable>
-            </View>
-          ) : (
-            <Pressable onPress={() => setEditingName(true)} style={styles.nameContainer}>
-              <Text style={styles.Proftext}>{displayName || "Tap to set name"}</Text>
-              <Text style={styles.usernameText}>@{user?.username || "guest"}</Text>
+    <ImageBackground
+      source={require("../../assets/images/login.avif")}
+      style={styles.bg}
+    >
+      {/* Dark overlay */}
+      <View style={styles.overlay} />
+
+      {/* Top bar */}
+      <View style={styles.topBar}>
+        <Text style={styles.screenTitle}>Profile</Text>
+        <Pressable onPress={() => setOpen(!open)} style={styles.menuBtn}>
+          <Ionicons name="menu" size={24} color="#fff" />
+        </Pressable>
+      </View>
+
+      {/* Dropdown menu */}
+      {open && (
+        <View style={styles.popup}>
+          {!user && (
+            <Pressable style={styles.option} onPress={() => { setOpen(false); router.push("/login"); }}>
+              <Text style={styles.optionText}>Login / Signup</Text>
             </Pressable>
           )}
-          {user && (
-            <Pressable style={styles.logoutBtn} onPress={handleLogout}>
-              <Text style={styles.logoutText}>Logout</Text>
-            </Pressable>
-          )}
-          {open && (
-            <View style={styles.popup}>
-              {!user && (
-                <Pressable style={styles.option} onPress={() => {
-                  setOpen(false);
-                  router.push("/login");
-                }}>
-                  <Text style={styles.optionText}>Login / Signup</Text>
-                </Pressable>
-              )}
-              <Pressable style={styles.option} onPress={() => {
-                setOpen(false);
-                router.push("/contact");
-              }}>
-                <Text style={styles.optionText}>More info</Text>
-              </Pressable>
-              <Pressable style={styles.option} onPress={() => setOpen(false)}>
-                <Text style={styles.optionText}>Close</Text>
-              </Pressable>
-            </View>
-          )}
+          <Pressable style={styles.option} onPress={() => { setOpen(false); router.push("/contact"); }}>
+            <Text style={styles.optionText}>More Info</Text>
+          </Pressable>
+          <Pressable style={[styles.option, { borderBottomWidth: 0 }]} onPress={() => setOpen(false)}>
+            <Text style={styles.optionText}>Close</Text>
+          </Pressable>
         </View>
-        <View style={styles.content}>
-          <View style={styles.banner}>
-            <Animated.View style={[styles.bannerTrack, { transform: [{ translateX: bannerX }] }]}>
-             <Text style={styles.bannerText}>
-                  New models added!!! Check it out {displayName}
-                   </Text>
-            </Animated.View>
+      )}
+
+      {/* Avatar + name */}
+      <View style={styles.profileSection}>
+        <Pressable onPress={pickImage} style={styles.avatarWrap}>
+          <Image
+            key={profileImage ?? "default"}
+            source={avatarSource}
+            style={styles.avatar}
+          />
+          <View style={styles.avatarBadge}>
+            <Ionicons name="camera" size={12} color="#fff" />
           </View>
-        </View>
+        </Pressable>
+
+        {editingName ? (
+          <View style={styles.editRow}>
+            <TextInput
+              style={styles.nameInput}
+              value={displayName}
+              onChangeText={setDisplayName}
+              placeholder="Display name"
+              placeholderTextColor="#555"
+              autoFocus
+            />
+            <Pressable style={styles.saveBtn} onPress={saveDisplayName} disabled={saving}>
+              <Text style={styles.saveBtnText}>{saving ? "…" : "Save"}</Text>
+            </Pressable>
+            <Pressable onPress={() => { setEditingName(false); setDisplayName(user?.display_name || user?.username || ""); }}>
+              <Ionicons name="close" size={20} color="#666" />
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable onPress={() => setEditingName(true)} style={styles.nameWrap}>
+            <Text style={styles.displayName}>{displayName || "Tap to set name"}</Text>
+            <Text style={styles.username}>@{user?.username || "guest"}</Text>
+          </Pressable>
+        )}
+      </View>
+
+      {/* Logout */}
+      {user && (
+        <Pressable style={styles.logoutBtn} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={16} color="#ff453a" />
+          <Text style={styles.logoutText}>Log out</Text>
+        </Pressable>
+      )}
+
+      {/* Scrolling banner */}
+      <View style={styles.bannerWrap}>
+        <Animated.View style={{ transform: [{ translateX: bannerX }] }}>
+          <Text style={styles.bannerText}>
+            ✦ New models added! Check it out{displayName ? `, ${displayName}` : ""}
+          </Text>
+        </Animated.View>
       </View>
     </ImageBackground>
   );
 }
+
 const styles = StyleSheet.create({
-  background: { flex: 1 },
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
-  prof: {
-    width: SCREEN_WIDTH * 0.9,
-    maxWidth: 360,
-    borderRadius: 25,
-    backgroundColor: "rgba(71, 67, 67, 0.24)",
-    borderWidth: 1,
-    borderColor: "rgba(186, 173, 173, 0.06)",
-    padding: 20,
-    paddingTop: 56,
+  bg: { flex: 1 },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: "rgba(0,0,0,0.55)",
+  },
+
+  /* Top bar */
+  topBar: {
+    flexDirection: "row",
     alignItems: "center",
-    minHeight: 240,
-    marginTop: 100,
+    justifyContent: "space-between",
+    paddingTop: 60,
+    paddingHorizontal: 24,
+    paddingBottom: 16,
   },
-  imageContainer: { marginBottom: 12 },
-  profimg: { width: 78, height: 78, borderRadius: 39 },
-  nameContainer: { alignItems: "center", marginBottom: 16 },
-  Proftext: { fontSize: 16, fontWeight: "bold", color: "white", textAlign: "center" },
-  usernameText: { fontSize: 12, color: "#ffffff", textAlign: "center", marginTop: 2 },
-  editNameRow: { flexDirection: "row", alignItems: "center", marginBottom: 16, gap: 8 },
-  nameInput: {
-    backgroundColor: "#222",
-    color: "white",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 15,
-    minWidth: 140,
-    borderWidth: 1,
-    borderColor: "#444",
+  screenTitle: { color: "#fff", fontSize: 18, fontWeight: "700" },
+  menuBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  saveNameBtn: { backgroundColor: "#00cc2c", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
-  saveNameText: { color: "white", fontWeight: "700", fontSize: 13 },
-  logoutBtn: { backgroundColor: "#cc2200", borderRadius: 10, paddingHorizontal: 20, paddingVertical: 8, marginTop: -174, height: 32, marginLeft : -230 },
-  logoutText: { color: "white", fontWeight: "700", fontSize: 14 },
-  profileButton: { position: "absolute", top: 16, right: 16 },
+
+  /* Popup */
   popup: {
     position: "absolute",
-    top: 56,
-    right: 16,
-    width: 200,
-    backgroundColor: "#222",
+    top: 108,
+    right: 20,
+    width: 190,
+    backgroundColor: "#1c1c1c",
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
     overflow: "hidden",
+    zIndex: 20,
     elevation: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    zIndex: 10,
   },
-  option: { paddingVertical: 14, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: "#333" },
-  optionText: { color: "white", fontSize: 16 },
-  content: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, gap: 24 },
-  banner: { width: "120%", height: 34, borderRadius: 999, overflow: "hidden", justifyContent: "center", position: "absolute", bottom: 800 },
-  bannerTrack: { flexDirection: "row", alignSelf: "flex-start", paddingHorizontal: 8, gap: 8 },
-  bannerItem: { flexDirection: "row", alignItems: "center", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, marginRight: 8 },
-  // bannerImage: { width: 25, height: 25, borderRadius: 2, marginRight: 6 },
-  bannerText: { color: "#fff8f8", fontSize: 15, fontWeight: "600", letterSpacing: 0.3 },
+  option: {
+    paddingVertical: 13,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#2a2a2a",
+  },
+  optionText: { color: "#fff", fontSize: 15 },
+
+  /* Profile */
+  profileSection: {
+    alignItems: "center",
+    paddingTop: 40,
+    gap: 16,
+  },
+  avatarWrap: { position: "relative" },
+  avatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  avatarBadge: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#333",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "#111",
+  },
+  nameWrap: { alignItems: "center", gap: 4 },
+  displayName: { color: "#fff", fontSize: 20, fontWeight: "700" },
+  username: { color: "rgba(255,255,255,0.4)", fontSize: 13 },
+
+  /* Edit name */
+  editRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 24,
+  },
+  nameInput: {
+    flex: 1,
+    backgroundColor: "#1c1c1c",
+    color: "#fff",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  saveBtn: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  saveBtnText: { color: "#111", fontWeight: "700", fontSize: 13 },
+
+  /* Logout */
+  logoutBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "center",
+    marginTop: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,69,58,0.3)",
+    backgroundColor: "rgba(255,69,58,0.08)",
+  },
+  logoutText: { color: "#ff453a", fontWeight: "600", fontSize: 14 },
+
+  /* Banner */
+  bannerWrap: {
+    position: "absolute",
+    bottom: 60,
+    left: 0,
+    right: 0,
+    overflow: "hidden",
+    paddingVertical: 8,
+    backgroundColor: "rgba(0, 0, 0, 0)",
+  },
+  bannerText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+    letterSpacing: 0.3,
+    paddingHorizontal: 16,
+    width: 500,
+  },
 });

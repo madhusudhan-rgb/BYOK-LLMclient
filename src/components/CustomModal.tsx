@@ -22,25 +22,31 @@ export function CustomModal({
   onClose: () => void;
 }) {
   if (!config) return null;
+
   return (
     <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
       <View style={s.overlay}>
         <View style={s.box}>
-          <Text style={s.title}>{config.title}</Text>
-          <ScrollView style={{ maxHeight: 220 }} showsVerticalScrollIndicator={false}>
-            <Text style={s.message}>{config.message}</Text>
-          </ScrollView>
+          <View style={s.body}>
+            <Text style={s.title}>{config.title}</Text>
+            <ScrollView style={{ maxHeight: 200 }} showsVerticalScrollIndicator={false}>
+              <Text style={s.message}>{config.message}</Text>
+            </ScrollView>
+          </View>
+
           <View style={s.divider} />
-          <View style={s.btnRow}>
+
+          <View style={[s.btnRow, config.buttons.length > 2 && s.btnCol]}>
             {config.buttons.map((btn, i) => (
               <Pressable
                 key={i}
-                style={[
+                style={({ pressed }) => [
                   s.btn,
-                  btn.style === "cancel" && s.btnCancel,
-                  btn.style === "danger" && s.btnDanger,
-                  i < config.buttons.length - 1 && s.btnBorder,
-                  config.buttons.length === 1 && { flex: 1 },
+                  config.buttons.length > 2 && s.btnFull,
+                  i < config.buttons.length - 1 && (
+                    config.buttons.length > 2 ? s.btnBottomBorder : s.btnRightBorder
+                  ),
+                  pressed && s.btnPressed,
                 ]}
                 onPress={() => { onClose(); setTimeout(() => btn.onPress?.(), 300); }}
               >
@@ -63,48 +69,53 @@ export function CustomModal({
 const s = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.56)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "center",
     alignItems: "center",
-    padding: 36,
+    padding: 40,
   },
   box: {
     width: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.48)",
-    borderRadius: 20,
+    backgroundColor: "#1c1c1c",
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "#2a2a2a",
     overflow: "hidden",
   },
-  title: {
-    color: "#fcfbfb",
-    fontSize: 17,
-    fontWeight: "700",
-    textAlign: "center",
-    paddingTop: 22,
+  body: {
+    paddingTop: 20,
     paddingHorizontal: 20,
-    paddingBottom: 8,
+    paddingBottom: 16,
+  },
+  title: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 6,
   },
   message: {
-    color: "rgb(241, 236, 236)",
+    color: "#888",
     fontSize: 14,
-    lineHeight: 21,
-    textAlign: "center",
-    paddingHorizontal: 20,
-    paddingBottom: 18,
+    lineHeight: 20,
   },
-  divider: { height: 1, backgroundColor: "rgba(255,255,255,0.08)" },
+  divider: { height: 1, backgroundColor: "#2a2a2a" },
+
   btnRow: { flexDirection: "row" },
+  btnCol: { flexDirection: "column" },
+
   btn: {
     flex: 1,
-    paddingVertical: 15,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  btnBorder: { borderRightWidth: 1, borderColor: "rgba(255,255,255,0.08)" },
-  btnCancel: { backgroundColor: "rgba(255,255,255,0.03)" },
-  btnDanger: { backgroundColor: "rgba(152, 152, 152, 0)" },
-  btnText: { color: "#36d558", fontWeight: "700", fontSize: 15 },
-  btnTextCancel: { color: "rgb(255, 255, 255)" },
-  btnTextDanger: { color: "rgb(255, 56, 46)" },
+  btnFull: { flex: 0 },
+  btnRightBorder: { borderRightWidth: 1, borderRightColor: "#2a2a2a" },
+  btnBottomBorder: { borderBottomWidth: 1, borderBottomColor: "#2a2a2a" },
+  btnPressed: { backgroundColor: "#252525" },
+
+  btnText: { color: "#fff", fontWeight: "600", fontSize: 15 },
+  btnTextCancel: { color: "#666" },
+  btnTextDanger: { color: "#ff453a" },
 });

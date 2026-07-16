@@ -1,6 +1,6 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   Animated,
   Easing,
@@ -10,37 +10,43 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
 import { useNavbar } from "../context/NavbarContext";
 
+const MODELS = [
+  { image: require("../../assets/images/openai.png"),  label: "GPT-4o · OpenAI" },
+  { image: require("../../assets/images/nvda.webp"),   label: "Nemotron · NVIDIA" },
+  { image: require("../../assets/images/pool.jpg"),    label: "Laguna · Poolside AI" },
+  { image: require("../../assets/images/llama.png"),   label: "LLaMA 3.1 · Meta" },
+  { image: require("../../assets/images/cohere.png"),  label: "Command · Cohere" },
+  { image: require("../../assets/images/byte.png"),    label: "Seed 3.0 · ByteDance" },
+  { image: require("../../assets/images/flux.png"),    label: "Flux · FluxSchnell" },
+];
+
 export default function HomeScreen() {
   const { setShowNavbar } = useNavbar();
-  const scaleFeedback = useRef(new Animated.Value(1));
-  const bannerStart = 220;
-  const bannerEnd = -900;
-  const bannerX = useRef(new Animated.Value(bannerStart));
+  const bannerX = useRef(new Animated.Value(0)).current;
+  const scaleFeedback = useRef(new Animated.Value(1)).current;
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
 
-  useEffect(() => {
-    setShowNavbar(true);
-  }, [setShowNavbar]);
+  useEffect(() => { setShowNavbar(true); }, [setShowNavbar]);
 
   const showModal = (config: ModalConfig) => {
     setModalConfig(config);
     setModalVisible(true);
   };
 
-  const bounce = (scaleRef: React.RefObject<Animated.Value>, cb?: () => void) => {
-    const scale = scaleRef.current;
-  Animated.sequence([
-    Animated.timing(scale, { toValue: 0.93, duration: 200, useNativeDriver: true }),
-    Animated.timing(scale, { toValue: 1, duration: 200, useNativeDriver: true }),
-  ]).start(cb);
+  const bounce = (ref: Animated.Value, cb?: () => void) => {
+    Animated.sequence([
+      Animated.timing(ref, { toValue: 0.92, duration: 100, useNativeDriver: true }),
+      Animated.timing(ref, { toValue: 1,    duration: 80, useNativeDriver: true }),
+    ]).start(cb);
   };
 
   const sendFeedback = async (rating: "Good" | "Bad") => {
@@ -60,231 +66,215 @@ export default function HomeScreen() {
     }
   };
 
-  useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(bannerX.current, { toValue: bannerEnd, duration: 13000, easing: Easing.linear, useNativeDriver: true }),
-        Animated.timing(bannerX.current, { toValue: bannerStart, duration: 0, useNativeDriver: true }),
-      ])
-    );
-    animation.start();
-    return () => animation.stop();
-  }, [bannerEnd, bannerStart]);
+ 
 
-  
-    return (
-      <ImageBackground source = {require("../../assets/images/bg.avif")} style  ={styles.bgg}>
-  <View style={styles.container}>
-    <CustomModal
-      visible={modalVisible}
-      config={modalConfig}
-      onClose={() => setModalVisible(false)}
-    />
+// Ticker animation
+const ITEM_WIDTH = 160; // must match tickerItem width
+const STRIP_WIDTH = MODELS.length * ITEM_WIDTH;
 
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.topBar}>
-        <Pressable
-          style={styles.iconBtn}
-          onPress={() =>
-            showModal({
-              title: "About",
-              message:
-                "App is in development.\n\nWe use groq, openrouter and some opensource models to power our app with their provided api keys\n\nWe do not own anything related to the AI except the API codes\n\nFELLOW USERS PLEASE USE THE APP RESPONSIBLY\n\nOpenAI, NVIDIA, Meta, Alibaba, Fluxschnell, Bytedance, Mistral Ai AND THEIR RESPECTIVE LOGOS ARE TRADEMARKS OF THEIR OWNERS. THIS APP IS INDEPENDENT AND IS NOT AFFILIATED NOR ENDORSED BY THE COMPANIES PRESENTED.\n\nMore information about our policies in the moreinfo page in the profile tab!!!",
-              buttons: [{ text: "Got it", style: "cancel" }],
-            })
-          }
-        >
-          <Text style={styles.iconBtnText}>?</Text>
-        </Pressable>
+useEffect(() => {
+  bannerX.setValue(0);
 
-        <Pressable
-          style={styles.iconBtn}
-          onPress={() => {
-            bounce(scaleFeedback);
-            showModal({
-              title: "Rate Us",
-              message: "How are we doing? Your feedback helps us improve.",
-              buttons: [
-                { text: "Good", onPress: () => sendFeedback("Good") },
-                {
-                  text: "Bad",
-                  onPress: () => sendFeedback("Bad"),
-                  style: "danger",
-                },
-                {
-                  text: "UPDATES",
-                  onPress: () =>
-                    Linking.openURL(
-                      "https://github.com/madhusudhan-rgb/TSX-proj"
-                    ),
-                },
-                { text: "Cancel", style: "cancel" },
-              ],
-            });
-          }}
-        >
-          <Animated.View
-            style={{ transform: [{ scale: scaleFeedback.current }] }}
-          >
-            <MaterialIcons
-              name="feedback"
-              size={22}
-              color="#fffcfc"
-            />
-          </Animated.View>
-        </Pressable>
-      </View>
+  const anim = Animated.loop(
+    Animated.timing(bannerX, {
+      toValue: -STRIP_WIDTH,
+      duration: MODELS.length * 2800,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    })
+  );
 
-      <View style={styles.content}>
-        <View style={styles.banner}>
-          <Animated.View
-            style={[
-              styles.bannerTrack,
-              { transform: [{ translateX: bannerX.current }] },
-            ]}
-          >
-            <View style={styles.bannerItem}>
-              <Image
-                source={require("../../assets/images/openai.png")}
-                style={styles.bannerImage}
-              />
-              <Text style={styles.bannerText}>Gpt-0ss-120b - Open ai</Text>
-            </View>
+  anim.start();
 
-            <View style={styles.bannerItem}>
-              <Image
-                source={require("../../assets/images/nvda.webp")}
-                style={styles.bannerImage}
-              />
-              <Text style={styles.bannerText}>Nemotron - Nvidia</Text>
-            </View>
+  return () => anim.stop();
+}, [bannerX]);
 
-            <View style={styles.bannerItem}>
-              <Image
-                source={require("../../assets/images/pool.jpg")}
-                style={styles.bannerImage}
-              />
-              <Text style={styles.bannerText}>Poolside laguna - Poolside AI</Text>
-            </View>
+const strip = [...MODELS, ...MODELS];
+  return (
+    <ImageBackground source={require("../../assets/images/bg.avif")} style={s.fill}>
+      {/* Dark gradient overlay */}
+      <View style={s.overlay} />
 
-            <View style={styles.bannerItem}>
-              <Image
-                source={require("../../assets/images/llama.png")}
-                style={styles.bannerImage}
-              />
-              <Text style={styles.bannerText}>LLama 3.1 - Meta</Text>
-            </View>
+      <CustomModal visible={modalVisible} config={modalConfig} onClose={() => setModalVisible(false)} />
 
-            <View style={styles.bannerItem}>
-              <Image
-                source={require("../../assets/images/cohere.png")}
-                style={styles.bannerImage}
-              />
-              <Text style={styles.bannerText}>Cohere ai - Cohere</Text>
-            </View>
+      <SafeAreaView style={s.fill}>
+        {/* Top bar */}
+        <View style={s.topBar}>
+          <Text style={s.version}>v1.2.0</Text>
+          <View style={s.topRight}>
+            <Pressable
+              style={s.iconBtn}
+              onPress={() =>
+                showModal({
+                  title: "About",
+                  message:
+                    "This app is in development.\n\nPowered by Groq and OpenRouter. We do not own any AI models — OpenAI, NVIDIA, Meta, Alibaba, FluxSchnell, ByteDance, Mistral AI and their logos are trademarks of their respective owners. This app is independent and not affiliated with or endorsed by any of these companies.\n\nPlease use responsibly.",
+                  buttons: [{ text: "Got it", style: "cancel" }],
+                })
+              }
+            >
+              <Ionicons name="information-outline" size={20} color="rgba(255,255,255,0.7)" />
+            </Pressable>
 
-            <View style={styles.bannerItem}>
-              <Image
-                source={require("../../assets/images/byte.png")}
-                style={styles.bannerImage}
-              />
-              <Text style={styles.bannerText}>
-                Bytedance-seed-3.0 - Bytedance
-              </Text>
-            </View>
-
-            <View style={styles.bannerItem}>
-              <Image
-                source={require("../../assets/images/flux.png")}
-                style={styles.bannerImage}
-              />
-              <Text style={styles.bannerText}>Flux - FluxSchnell</Text>
-            </View>
-
-            <View style={styles.bannerItem}>
-              <Text style={styles.bannerText}></Text>
-            </View>
-          </Animated.View>
+            <Pressable
+              style={s.iconBtn}
+              onPress={() => {
+                bounce(scaleFeedback);
+                showModal({
+                  title: "Feedback",
+                  message: "How are we doing? Your feedback helps us improve.",
+                  buttons: [
+                    { text: "👍 Good", onPress: () => sendFeedback("Good") },
+                    { text: "👎 Bad",  onPress: () => sendFeedback("Bad"), style: "danger" },
+                    { text: "View Updates", onPress: () => Linking.openURL("https://github.com/madhusudhan-rgb/TSX-proj") },
+                    { text: "Cancel", style: "cancel" },
+                  ],
+                });
+              }}
+            >
+              <Animated.View style={{ transform: [{ scale: scaleFeedback }] }}>
+                <MaterialIcons name="feedback" size={20} color="rgba(255,255,255,0.7)" />
+              </Animated.View>
+            </Pressable>
+          </View>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.badge}>v1.2.0</Text>
-          <Text style={styles.title}>Welcome</Text>
-          <Text style={styles.subtitle}>Access the AI Playground</Text>
+        {/* Hero */}
+        <View style={s.hero}>
+          <Text style={s.eyebrow}>AI PLAYGROUND</Text>
+          <Text style={s.title}>Your models,{"\n"}one place.</Text>
+          <Text style={s.subtitle}>
+            Chat, generate images, and explore the latest AI models — all in one app.
+          </Text>
 
           <Link href="/login" asChild>
-            <Pressable style={{ width: "100%" }}>
-              <View style={styles.primaryBtn}>
-                <Text style={styles.primaryBtnText}>Login / Sign Up</Text>
-              </View>
+            <Pressable style={s.cta}>
+              <Text style={s.ctaText}>Get Started</Text>
+              <Ionicons name="arrow-forward" size={16} color="#000" />
             </Pressable>
           </Link>
         </View>
-      </View>
-    </SafeAreaView>
-  </View>
-  </ImageBackground>
-);
+
+        {/* Model ticker */}
+        <View style={s.tickerWrap}>
+          <Text style={s.tickerLabel}>AVAILABLE MODELS</Text>
+          <View style={s.ticker}>
+            <Animated.View style={[s.tickerTrack, { transform: [{ translateX: bannerX }] }]}>
+              {strip.map((model, i) => (
+                <View key={i} style={s.tickerItem}>
+                  <Image source={model.image} style={s.tickerImg} />
+                  <Text style={s.tickerText}>{model.label}</Text>
+                </View>
+              ))}
+            </Animated.View>
+          </View>
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
+  );
 }
 
-
-const styles = StyleSheet.create({
- container: {
- flex:1
-},
-bgg:{
-  flex:1
-},
-  safeArea: { flex: 1 },
-  topBar: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16, paddingTop: 8 },
-  iconBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
-    alignItems: "center",
-    justifyContent: "center",
+const s = StyleSheet.create({
+  fill: { flex: 1 },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: "rgba(0,0,0,0.62)",
   },
-  iconBtnText: { color: "#fff", fontSize: 20, fontWeight: "700" },
-  content: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, gap: 24 },
-  banner: { width: "120%", height: 34, borderRadius: 999, overflow: "hidden", justifyContent: "center", position: "absolute", bottom: 40 },
-  bannerTrack: { flexDirection: "row", alignSelf: "flex-start", paddingHorizontal: 8, gap: 8 },
-  bannerItem: {
+
+  // Top bar
+  topBar: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    marginRight: 8,
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 8,
   },
-  bannerImage: { width: 25, height: 25, borderRadius: 2, marginRight: 6 },
-  bannerText: { color: "#fff8f8", fontSize: 12, fontWeight: "600", letterSpacing: 0.3 },
-  card: {
-    width: "100%",
-    backgroundColor: "rgba(42, 40, 40, 0)",
+  version: {
+    color: "rgba(255,255,255,0.25)",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+  },
+  topRight: { flexDirection: "row", gap: 8 },
+  iconBtn: {
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: "rgba(255,255,255,0.07)",
     borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.14)",
-    borderRadius: 24,
-    padding: 28,
-    alignItems: "center",
-    marginBottom : 100
+    borderColor: "rgba(255,255,255,0.1)",
+    alignItems: "center", justifyContent: "center",
   },
-  badge: { color: "#00cc2c", fontSize: 11, fontWeight: "700", letterSpacing: 1.5, marginBottom: 10 },
-  title: { color: "#fcf8f8", fontSize: 32, fontWeight: "800", letterSpacing: 0.5 },
-  subtitle: { color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 8, textAlign: "center", lineHeight: 20 },
-  primaryBtn: {
-    backgroundColor: "#00cc2c",
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 50,
-    marginTop: 18,
-    alignItems: "center",
+
+  // Hero
+  hero: {
+    flex: 1,
     justifyContent: "center",
-    width : 140,
-    height :50,
-    marginLeft : 85
+    paddingHorizontal: 28,
+    gap: 0,
   },
-  primaryBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+  eyebrow: {
+    color: "rgba(255,255,255,0.3)",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 2,
+    marginBottom: 14,
+  },
+  title: {
+    color: "#fff",
+    fontSize: 44,
+    fontWeight: "800",
+    lineHeight: 50,
+    letterSpacing: -1,
+    marginBottom: 16,
+  },
+  subtitle: {
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 36,
+    maxWidth: 300,
+  },
+  cta: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: "#fff",
+    borderRadius: 50,
+    paddingVertical: 13,
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  ctaText: { color: "#000", fontWeight: "700", fontSize: 15 },
+
+  // Ticker
+  tickerWrap: { paddingBottom: 32 },
+  tickerLabel: {
+    color: "rgba(255,255,255,0.2)",
+    fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 1.5,
+    marginBottom: 10,
+    paddingHorizontal: 20,
+  },
+  ticker: { overflow: "hidden", height: 36 },
+  tickerTrack: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 0,
+  },
+  tickerItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    gap: 8,
+    width: 160,
+  },
+  tickerImg: {
+    width: 22, height: 22, borderRadius: 4,
+    backgroundColor: "rgba(255,255,255,0.05)",
+  },
+  tickerText: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 12,
+    fontWeight: "500",
+  },
 });
