@@ -69,9 +69,7 @@ function TabContent() {
       <Tabs.Screen
         name="settingstab"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "settings" : "settings-outline"} size={22} color={color} />
-          ),
+          href : null
         }}
       />
       <Tabs.Screen

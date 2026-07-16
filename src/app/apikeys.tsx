@@ -13,174 +13,160 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { login } from "../utils/auth";
 
-export default function Login() {
-  const [Apikey, setapikey] = useState("");
-  const [Apiurlendpoint, setapiurl] = useState("");
-  const [hidden, setHidden] = useState(true);
+export default function ApiKeys() {
+  const [apiKey, setApiKey] = useState("");
+  const [apiUrl, setApiUrl] = useState("");
+  const [urlVisible, setUrlVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!Apikey.trim() || !Apiurlendpoint.trim()) {
-      Alert.alert("Error", "Please enter both the api key and Api url endpoint");
+  const handleSave = async () => {
+    if (!apiKey.trim() || !apiUrl.trim()) {
+      Alert.alert("Error", "Please enter both an API key and endpoint URL");
       return;
     }
-
     setLoading(true);
     try {
-      const success = await login(Apikey.trim(), Apiurlendpoint);
-
+      const success = await login(apiKey.trim(), apiUrl.trim());
       if (success) {
-        Alert.alert("Success");
         router.replace("/apikeys");
       } else {
         Alert.alert("Error", "Invalid credentials");
       }
     } catch (err) {
-      Alert.alert("Error", err instanceof Error ? err.message : "failed");
+      Alert.alert("Error", err instanceof Error ? err.message : "Failed to save");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/bg4.avif")}
-      style={styles.background}
-    >
-      <View style={styles.overlay} />
+    <ImageBackground source={require("../../assets/images/bg4.avif")} style={s.bg}>
+      <View style={s.overlay} />
+      <View style={s.inner}>
+        <Text style={s.title}>API configuration</Text>
+        <Text style={s.subtitle}>Connect your own API key and endpoint</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.title}>Personal API key integration</Text>
-
+        <Text style={s.label}>API Key</Text>
         <TextInput
-          style={styles.input}
-          placeholder="Your own api key"
-          placeholderTextColor="#928c8c"
-          value={Apikey}
-          onChangeText={setapikey}
+          style={s.input}
+          placeholder="sk-..."
+          placeholderTextColor="rgba(255,255,255,0.25)"
+          autoCapitalize="none"
+          autoCorrect={false}
+          secureTextEntry
+          value={apiKey}
+          onChangeText={setApiKey}
         />
 
-        <View style={styles.passwordContainer}>
+        <Text style={s.label}>Endpoint URL</Text>
+        <View style={s.passwordRow}>
           <TextInput
-            style={styles.passwordInput}
-            placeholder="url endpoint https://...."
-            placeholderTextColor="#aba6a6"
-            secureTextEntry={hidden}
-            value={Apiurlendpoint}
-            onChangeText={setapiurl}
+            style={s.passwordInput}
+            placeholder="https://api.example.com/v1"
+            placeholderTextColor="rgba(255,255,255,0.25)"
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry={!urlVisible}
+            value={apiUrl}
+            onChangeText={setApiUrl}
           />
-
-          <TouchableOpacity onPress={() => setHidden(!hidden)}>
+          <TouchableOpacity onPress={() => setUrlVisible(!urlVisible)} hitSlop={8}>
             <Ionicons
-              name={hidden ? "eye-off-outline" : "eye-outline"}
-              size={22}
-              color="white"
+              name={urlVisible ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color="rgba(255,255,255,0.4)"
             />
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity
-          style={[styles.loginButton, loading && { opacity: 0.6 }]}
-          onPress={handleLogin}
+          style={[s.button, loading && s.buttonDisabled]}
+          onPress={handleSave}
           disabled={loading}
+          activeOpacity={0.8}
         >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.loginText}>Configure</Text>
-          )}
+          {loading
+            ? <ActivityIndicator color="#000" />
+            : <Text style={s.buttonText}>Save configuration</Text>
+          }
         </TouchableOpacity>
-
-        
       </View>
     </ImageBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  background: {
+const s = StyleSheet.create({
+  bg: { flex: 1 },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.72)" },
+  inner: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-  },
-overlay : {
-  flex:1
-},
- 
-
-  card: {
-    width: "88%",
-    padding: 25,
-    borderRadius: 20,
-    backgroundColor: "rgba(25, 25, 25, 0.31)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    marginBottom :400
+    paddingHorizontal: 28,
   },
 
   title: {
-    fontSize: 30,
-    fontWeight: "700",
-    color: "white",
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: "600",
+    letterSpacing: -0.4,
     marginBottom: 6,
   },
-
   subtitle: {
+    color: "rgba(255,255,255,0.4)",
     fontSize: 15,
-    color: "#ffffff",
-    marginBottom: 25,
+    marginBottom: 32,
+  },
+
+  label: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 12,
+    fontWeight: "500",
+    letterSpacing: 0.4,
+    marginBottom: 7,
+    marginLeft: 2,
   },
 
   input: {
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: "#2222223b",
-    color: "white",
+    height: 50,
+    borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.07)",
+    color: "#fff",
     paddingHorizontal: 16,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#444",
+    fontSize: 15,
+    marginBottom: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.12)",
   },
 
-  passwordContainer: {
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: "#22222229",
-    borderWidth: 1,
-    borderColor: "#444",
+  passwordRow: {
+    height: 50,
+    borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.07)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.12)",
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     marginBottom: 20,
   },
-
   passwordInput: {
     flex: 1,
-    color: "white",
+    color: "#fff",
+    fontSize: 15,
   },
 
-  loginButton: {
-    backgroundColor: "#1def4a",
-    height: 52,
-    borderRadius: 12,
+  button: {
+    height: 50,
+    borderRadius: 11,
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 18,
+    marginTop: 4,
   },
-
-  loginText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-
-  signupText: {
-    color: "#bbb",
-    textAlign: "center",
-  },
-
-  signupLink: {
-    color: "#00cc2c",
-    fontWeight: "700",
+  buttonDisabled: { opacity: 0.5 },
+  buttonText: {
+    color: "#000",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });

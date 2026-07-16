@@ -24,16 +24,13 @@ export default function Login() {
       Alert.alert("Error", "Please enter both username and password");
       return;
     }
-
     setLoading(true);
     try {
       const success = await login(username.trim(), password);
-
       if (success) {
-        Alert.alert("Success", "Logged in!");
         router.replace("/profile");
       } else {
-        Alert.alert("Error", "Invalid credentials");
+        Alert.alert("Error", "Invalid username or password");
       }
     } catch (err) {
       Alert.alert("Error", err instanceof Error ? err.message : "Login failed");
@@ -43,149 +40,135 @@ export default function Login() {
   };
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/bg4.avif")}
-      style={styles.background}
-    >
-      <View style={styles.overlay} />
-
-      <View style={styles.card}>
-        <Text style={styles.title}>Welcome Back</Text>
+    <ImageBackground source={require("../../assets/images/bg4.avif")} style={s.bg}>
+      <View style={s.overlay} />
+      <View style={s.inner}>
+        <Text style={s.title}>Welcome back</Text>
+        <Text style={s.subtitle}>Sign in to continue</Text>
 
         <TextInput
-          style={styles.input}
+          style={s.input}
           placeholder="Username"
-          placeholderTextColor="#888"
+          placeholderTextColor="rgba(255,255,255,0.35)"
+          autoCapitalize="none"
           value={username}
           onChangeText={setUsername}
         />
 
-        <View style={styles.passwordContainer}>
+        <View style={s.passwordRow}>
           <TextInput
-            style={styles.passwordInput}
+            style={s.passwordInput}
             placeholder="Password"
-            placeholderTextColor="#888"
+            placeholderTextColor="rgba(255,255,255,0.35)"
             secureTextEntry={hidden}
             value={password}
             onChangeText={setPassword}
           />
-
-          <TouchableOpacity onPress={() => setHidden(!hidden)}>
+          <TouchableOpacity onPress={() => setHidden(!hidden)} hitSlop={8}>
             <Ionicons
               name={hidden ? "eye-off-outline" : "eye-outline"}
-              size={22}
-              color="white"
+              size={20}
+              color="rgba(255,255,255,0.4)"
             />
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity
-          style={[styles.loginButton, loading && { opacity: 0.6 }]}
+          style={[s.button, loading && s.buttonDisabled]}
           onPress={handleLogin}
           disabled={loading}
+          activeOpacity={0.8}
         >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.loginText}>Login</Text>
-          )}
+          {loading
+            ? <ActivityIndicator color="#000" />
+            : <Text style={s.buttonText}>Log in</Text>
+          }
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("/signup")}>
-          <Text style={styles.signupText}>
-            Don't have an account?{" "}
-            <Text style={styles.signupLink}>Create one</Text>
-          </Text>
-        </TouchableOpacity>
+        <View style={s.footer}>
+          <Text style={s.footerText}>Don't have an account?</Text>
+          <TouchableOpacity onPress={() => router.push("/signup")} hitSlop={8}>
+            <Text style={s.footerLink}>Sign up</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ImageBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  background: {
+const s = StyleSheet.create({
+  bg: { flex: 1 },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.72)" },
+  inner: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-  },
-
-  overlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.55)",
-  },
-
-  card: {
-    width: "88%",
-    padding: 25,
-    borderRadius: 25,
-    backgroundColor: "rgba(25, 25, 25, 0.21)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    paddingHorizontal: 28,
   },
 
   title: {
-    fontSize: 30,
-    fontWeight: "700",
-    color: "white",
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: "600",
+    letterSpacing: -0.4,
     marginBottom: 6,
   },
-
   subtitle: {
+    color: "rgba(255,255,255,0.4)",
     fontSize: 15,
-    color: "#bbb",
-    marginBottom: 25,
+    marginBottom: 32,
   },
 
   input: {
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: "#2222223c",
-    color: "white",
+    height: 50,
+    borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.07)",
+    color: "#fff",
     paddingHorizontal: 16,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#444",
+    fontSize: 15,
+    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.12)",
   },
 
-  passwordContainer: {
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: "#22222262",
-    borderWidth: 1,
-    borderColor: "#444",
+  passwordRow: {
+    height: 50,
+    borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.07)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.12)",
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    marginBottom: 20,
+    marginBottom: 12,
   },
-
   passwordInput: {
     flex: 1,
-    color: "white",
+    color: "#fff",
+    fontSize: 15,
   },
 
-  loginButton: {
-    backgroundColor: "#00cc2c",
-    height: 52,
-    borderRadius: 12,
+  button: {
+    height: 50,
+    borderRadius: 11,
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 18,
+    marginTop: 8,
+  },
+  buttonDisabled: { opacity: 0.5 },
+  buttonText: {
+    color: "#000",
+    fontSize: 15,
+    fontWeight: "600",
   },
 
-  loginText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "700",
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 24,
   },
-
-  signupText: {
-    color: "#bbb",
-    textAlign: "center",
-  },
-
-  signupLink: {
-    color: "#00cc2c",
-    fontWeight: "700",
-  },
+  footerText: { color: "rgba(255,255,255,0.4)", fontSize: 14 },
+  footerLink: { color: "#fff", fontSize: 14, fontWeight: "500" },
 });

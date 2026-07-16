@@ -183,6 +183,18 @@ function ProfileContent() {
           <Pressable style={styles.option} onPress={() => { setOpen(false); router.push("/contact"); }}>
             <Text style={styles.optionText}>More Info</Text>
           </Pressable>
+          {/* <Pressable style={styles.option} onPress={() => {handleLogout}}>
+            <Text style={styles.optionText}>Log out</Text>
+          </Pressable> */}
+           {/* Logout */}
+          {user && (
+        <Pressable style={styles.option} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Log out</Text>
+        </Pressable>
+      )}
+          <Pressable style={styles.option} onPress={() => { setOpen(false); router.push("/settingstab"); }}>
+            <Text style={styles.optionText}>Settings</Text>
+          </Pressable>
           <Pressable style={[styles.option, { borderBottomWidth: 0 }]} onPress={() => setOpen(false)}>
             <Text style={styles.optionText}>Close</Text>
           </Pressable>
@@ -227,13 +239,8 @@ function ProfileContent() {
         )}
       </View>
 
-      {/* Logout */}
-      {user && (
-        <Pressable style={styles.logoutBtn} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={16} color="#ff453a" />
-          <Text style={styles.logoutText}>Log out</Text>
-        </Pressable>
-      )}
+     
+      
 
       {/* Scrolling banner */}
       <View style={styles.bannerWrap}>

@@ -27,7 +27,6 @@ type Message = {
   imageUrl?: string;
 };
 type History = { role: "system" | "user" | "assistant"; content: string };
-
 async function loadSessionFromSupabase(userId: string, botId: string): Promise<{ messages: Message[]; history: History[] } | null> {
   const { data, error } = await supabase
     .from("chat_sessions").select("messages")
@@ -42,7 +41,6 @@ async function loadSessionFromSupabase(userId: string, botId: string): Promise<{
   }));
   return { messages, history: messages.map(m => ({ role: m.role, content: m.text })) };
 }
-
 async function saveSessionToSupabase(userId: string, botId: string, messages: Message[], history: History[]) {
   const stored = messages.map(m => ({ role: m.role, content: m.text, image_url: m.imageUrl || null }));
   const { data: existing } = await supabase.from("chat_sessions").select("id")
@@ -54,11 +52,9 @@ async function saveSessionToSupabase(userId: string, botId: string, messages: Me
     await supabase.from("chat_sessions").insert({ user_id: userId, bot_id: botId, messages: stored });
   }
 }
-
 async function deleteSessionFromSupabase(userId: string, botId: string) {
   await supabase.from("chat_sessions").delete().eq("user_id", userId).eq("bot_id", botId);
 }
-
 const localCache: Record<string, { messages: Message[]; history: History[] }> = {};
 function getChatLocal(bot: Bot) {
   if (!localCache[bot.id]) {
@@ -72,19 +68,16 @@ function getChatLocal(bot: Bot) {
   }
   return localCache[bot.id];
 }
-
 const TYPE_META: Record<BotType, { label: string; color: string; dim: string }> = {
   text:  { label: "Text",  color: "#4ade80", dim: "#4ade8020" },
   image: { label: "Image", color: "#60a5fa", dim: "#60a5fa20" },
   video: { label: "Video", color: "#fb923c", dim: "#fb923c20" },
 };
-
 function isPlaceholderKey(v: string) {
   const n = v.trim().toLowerCase();
   if (!n) return true;
   return ["test","your-","your","placeholder","example","demo","fake","sample","changeme"].some(t => n.includes(t));
 }
-
 function BotAvatar({ bot, size = 40 }: { bot: Bot; size?: number }) {
   if ("image" in bot.icon) {
     return <Image source={bot.icon.image} style={{ width: size, height: size, borderRadius: size / 2 }} />;
@@ -95,7 +88,6 @@ function BotAvatar({ bot, size = 40 }: { bot: Bot; size?: number }) {
     </View>
   );
 }
-
 export default function Explore() {
   const [search,    setSearch]    = useState("");
   const [activeBot, setActiveBot] = useState<Bot | null>(null);
@@ -104,19 +96,16 @@ export default function Explore() {
   const [loading,   setLoading]   = useState(false);
   const [userId,    setUserId]    = useState<string | null>(null);
   const bots = getBots();
-
   const historyRef      = useRef<History[]>([]);
   const messagesRef     = useRef<Message[]>([]);
   const listRef         = useRef<FlatList<Message>>(null);
   const abortRef        = useRef<AbortController | null>(null);
   const currentBotIdRef = useRef<string>("");
   const inputScale      = useRef(new Animated.Value(1)).current;
-
   const filtered = bots.filter(b =>
     b.name.toLowerCase().includes(search.toLowerCase()) ||
     b.subtitle.toLowerCase().includes(search.toLowerCase())
   );
-
   const openBot = async (bot: Bot) => {
     currentBotIdRef.current = bot.id;
     setActiveBot(bot);
@@ -130,16 +119,13 @@ export default function Explore() {
     historyRef.current = cache.history;
     setMessages([...cache.messages]);
   };
-
   useEffect(() => { messagesRef.current = messages; }, [messages]);
-
   const closeBot = async () => {
     abortRef.current?.abort();
     await persistCurrentChat();
     setActiveBot(null);
     setMessages([]);
   };
-
   const persistCurrentChat = async () => {
     if (!currentBotIdRef.current) return;
     const msgs = messagesRef.current;
@@ -149,7 +135,6 @@ export default function Explore() {
       catch (err) { console.error("Failed to save:", err); }
     }
   };
-
   const resetChat = async () => {
     if (!activeBot) return;
     abortRef.current?.abort();
@@ -164,11 +149,9 @@ export default function Explore() {
       catch (err) { console.error("Failed to delete:", err); }
     }
   };
-
   useEffect(() => {
     getCurrentUser().then(u => { if (u) setUserId(u.id); });
   }, []);
-
   const sendText = async (prompt: string, botMsgId: string) => {
     if (!activeBot) throw new Error("No bot selected.");
     if (!activeBot.apiUrl?.trim()) throw new Error("Bot not configured for chat.");
@@ -207,7 +190,7 @@ export default function Explore() {
     if (!fullReply) throw new Error("Empty reply.");
     historyRef.current.push({ role: "assistant", content: fullReply });
   };
-
+  //Image generation ai prompt call since pollination models dont need an actual api key
   const sendImage = async (prompt: string, botMsgId: string) => {
     if (!activeBot) throw new Error("No bot selected.");
     if (activeBot.imageFormat === "pollinations") {
@@ -259,11 +242,10 @@ export default function Explore() {
     }
   };
 
-  // ── BOT LIST ──────────────────────────────────────────────────
+  // BOT LIST 
   if (!activeBot) {
     const featured = bots.slice(0, 5);
     const rest = filtered;
-
     return (
       <ImageBackground source={require("../../assets/images/chatbg2.avif")} style={s.fill}>
         <View style={s.overlay} />
@@ -274,7 +256,7 @@ export default function Explore() {
               <Text style={s.listTitle}>Models</Text>
             </View>
 
-            {/* Featured strip — minimal pill style */}
+            {/* Featured strip with most ai models added lol. It looks mid and i might remove it*/}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.featuredList}>
               {featured.map(bot => (
                 <Pressable key={bot.id} style={s.featuredPill} onPress={() => openBot(bot)}>
@@ -284,7 +266,7 @@ export default function Explore() {
               ))}
             </ScrollView>
 
-            {/* Search */}
+            {/* Search bar below the featured strip*/}
             <View style={s.searchRow}>
               <Ionicons name="search-outline" size={14} color="rgba(255,255,255,0.4)" />
               <TextInput
@@ -301,7 +283,7 @@ export default function Explore() {
               )}
             </View>
 
-            {/* All models — plain list rows */}
+            {/* All Ai models*/}
             <View style={s.listGroup}>
               {rest.length === 0 && (
                 <Text style={s.empty}>No results for "{search}"</Text>
@@ -330,7 +312,7 @@ export default function Explore() {
     );
   }
 
-  // ── CHAT VIEW ─────────────────────────────────────────────────
+  //Chatbox
   const accentColor = TYPE_META[activeBot.type].color;
 
   return (
@@ -342,7 +324,7 @@ export default function Explore() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
         >
-          {/* Header */}
+          {/* Headers */}
           <View style={s.chatHeader}>
             <Pressable onPress={closeBot} hitSlop={8} style={s.backBtn}>
               <Ionicons name="chevron-back" size={20} color="#fff" />
@@ -409,7 +391,7 @@ export default function Explore() {
             }}
           />
 
-          {/* Input */}
+          {/* Input box {sendmessage} */}
           <Animated.View style={[s.inputBar, { transform: [{ scale: inputScale }] }]}>
             <TextInput
               value={input}
@@ -440,9 +422,9 @@ export default function Explore() {
 
 const s = StyleSheet.create({
   fill: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.78)" },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0.4)" },
 
-  // ── Bot list ──
+  // Bot list
   listHeader: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 8 },
   listTitle: { color: "#fff", fontSize: 28, fontWeight: "600", letterSpacing: -0.5 },
 
@@ -475,7 +457,7 @@ const s = StyleSheet.create({
   },
   searchInput: { flex: 1, color: "#fff", fontSize: 15 },
 
-  // Grouped list (iOS-style)
+  // Grouped lists for a better user interface look
   listGroup: {
     marginHorizontal: 16,
     borderRadius: 13,
@@ -505,7 +487,7 @@ const s = StyleSheet.create({
 
   empty: { color: "rgba(255,255,255,0.3)", textAlign: "center", paddingVertical: 32, fontSize: 14 },
 
-  // ── Chat ──
+  // Chat
   chatHeader: {
     flexDirection: "row",
     alignItems: "center",
