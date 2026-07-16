@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
 import { useNavbar } from "../context/NavbarContext";
-
+//List of all models available rn
 const MODELS = [
   { image: require("../../assets/images/openai.png"),  label: "GPT-4o · OpenAI" },
   { image: require("../../assets/images/nvda.webp"),   label: "Nemotron · NVIDIA" },
@@ -26,7 +26,7 @@ const MODELS = [
   { image: require("../../assets/images/byte.png"),    label: "Seed 3.0 · ByteDance" },
   { image: require("../../assets/images/flux.png"),    label: "Flux · FluxSchnell" },
 ];
-
+//Main func
 export default function HomeScreen() {
   const { setShowNavbar } = useNavbar();
   const bannerX = useRef(new Animated.Value(0)).current;
@@ -68,8 +68,8 @@ export default function HomeScreen() {
 
  
 
-// Ticker animation
-const ITEM_WIDTH = 160; // must match tickerItem width
+// Ticker animation. Seems kinda buggy ik imma fix it in a bit
+const ITEM_WIDTH = 160; 
 const STRIP_WIDTH = MODELS.length * ITEM_WIDTH;
 
 useEffect(() => {
@@ -92,7 +92,7 @@ useEffect(() => {
 const strip = [...MODELS, ...MODELS];
   return (
     <ImageBackground source={require("../../assets/images/bg.avif")} style={s.fill}>
-      {/* Dark gradient overlay */}
+      {/* Dark gradient overlay for better visualization of ui */}
       <View style={s.overlay} />
 
       <CustomModal visible={modalVisible} config={modalConfig} onClose={() => setModalVisible(false)} />
@@ -108,7 +108,7 @@ const strip = [...MODELS, ...MODELS];
                 showModal({
                   title: "About",
                   message:
-                    "This app is in development.\n\nPowered by Groq and OpenRouter. We do not own any AI models — OpenAI, NVIDIA, Meta, Alibaba, FluxSchnell, ByteDance, Mistral AI and their logos are trademarks of their respective owners. This app is independent and not affiliated with or endorsed by any of these companies.\n\nPlease use responsibly.",
+                    "This app is in development and in its early stages SO FEATURES ARE LIMITED.\n\nPowered by Groq and OpenRouter. We do not own any AI models — OpenAI, NVIDIA, Meta, Alibaba, FluxSchnell, ByteDance, Mistral AI and their logos are trademarks of their respective owners. This app is independent and not affiliated with or endorsed by any of these companies.\n\nApp will recieve regular updates to its structure, ui, functionality and you can help the dev more by sending feedbacks!!!.\n\nThank you for using my app\n\nPlease use responsibly.",
                   buttons: [{ text: "Got it", style: "cancel" }],
                 })
               }
@@ -138,7 +138,6 @@ const strip = [...MODELS, ...MODELS];
             </Pressable>
           </View>
         </View>
-
         {/* Hero */}
         <View style={s.hero}>
           <Text style={s.eyebrow}>AI PLAYGROUND</Text>
@@ -178,7 +177,7 @@ const s = StyleSheet.create({
   fill: { flex: 1 },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.62)",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
   },
 
   // Top bar
@@ -190,7 +189,7 @@ const s = StyleSheet.create({
     paddingTop: 8,
   },
   version: {
-    color: "rgba(255,255,255,0.25)",
+    color: "rgb(251, 251, 251)",
     fontSize: 11,
     fontWeight: "700",
     letterSpacing: 1.2,
@@ -248,7 +247,7 @@ const s = StyleSheet.create({
   // Ticker
   tickerWrap: { paddingBottom: 32 },
   tickerLabel: {
-    color: "rgba(255,255,255,0.2)",
+    color: "rgb(255, 255, 255)",
     fontSize: 9,
     fontWeight: "700",
     letterSpacing: 1.5,
@@ -273,7 +272,7 @@ const s = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.05)",
   },
   tickerText: {
-    color: "rgba(255,255,255,0.4)",
+    color: "rgba(255, 255, 255, 0.94)",
     fontSize: 12,
     fontWeight: "500",
   },
