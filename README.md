@@ -14,8 +14,8 @@ The ui is kind of bland and dull which i will make better in the next 3 or 4 upd
 The profile part is fully backend.
 make your own profile, Set your own pfp and display name and have fun
 
-THE NEW VERSION IS STILL IN PROGRESS (Preview screenshots are shown below)
-ETA is in 3 days 
+THE NEW VERSION IS STILL IN PROGRESS
+ETA is in 2 days 
 
 ---
 
