@@ -419,15 +419,12 @@ export default function Explore() {
     </ImageBackground>
   );
 }
-
 const s = StyleSheet.create({
   fill: { flex: 1 },
   overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0.4)" },
-
   // Bot list
   listHeader: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 8 },
   listTitle: { color: "#fff", fontSize: 28, fontWeight: "600", letterSpacing: -0.5 },
-
   // Featured pills
   featuredList: { paddingHorizontal: 20, paddingVertical: 16, gap: 8 },
   featuredPill: {
@@ -442,7 +439,6 @@ const s = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.12)",
   },
   featuredPillText: { color: "#fff", fontSize: 13, fontWeight: "500" },
-
   // Search
   searchRow: {
     flexDirection: "row",
@@ -456,8 +452,7 @@ const s = StyleSheet.create({
     paddingVertical: Platform.OS === "ios" ? 9 : 7,
   },
   searchInput: { flex: 1, color: "#fff", fontSize: 15 },
-
-  // Grouped lists for a better user interface look
+  // Grouped lists for a better user interface look ig
   listGroup: {
     marginHorizontal: 16,
     borderRadius: 13,

@@ -98,7 +98,7 @@ export default function Contact() {
       <View style={styles.hr} />
 
       {/* Message box */}
-      <Text style={styles.formLabel}>Send a message</Text>
+      <Text style={styles.formLabel}>Send feedback or contact for inquiries</Text>
       <TextInput
         style={[styles.input, focused && styles.inputFocused]}
         placeholder="What's on your mind?"
