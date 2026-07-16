@@ -7,7 +7,6 @@ import {
   Alert,
   StyleSheet,
   ImageBackground,
-  Pressable,
   ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
@@ -23,16 +22,13 @@ export default function Signup() {
       Alert.alert("Error", "Please enter both username and password");
       return;
     }
-
     if (password.length < 6) {
       Alert.alert("Error", "Password must be at least 6 characters");
       return;
     }
-
     setLoading(true);
     try {
       const success = await register(username.trim(), password);
-
       if (success) {
         Alert.alert("Success", "Account created! You can now log in.");
         router.push("/login");
@@ -47,99 +43,109 @@ export default function Signup() {
   };
 
   return (
-    
-    <ImageBackground 
-   source={require("../../assets/images/bg4.avif")}
-   style = {styles.background}>
-    <View style={styles.container}>
-      <View style = {styles.formContainer}>
-      <Text style={styles.title}>Create an Account</Text>
+    <ImageBackground source={require("../../assets/images/bg4.avif")} style={s.bg}>
+      <View style={s.overlay} />
+      <View style={s.inner}>
+        <Text style={s.title}>Create account</Text>
+        <Text style={s.subtitle}>Sign up to get started</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        placeholderTextColor = "white"
-        onChangeText={setUsername}
-      />
+        <TextInput
+          style={s.input}
+          placeholder="Username"
+          placeholderTextColor="rgba(255,255,255,0.35)"
+          autoCapitalize="none"
+          onChangeText={setUsername}
+          value={username}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor  = "white"
-        secureTextEntry
-        onChangeText={setPassword}
-      />
+        <TextInput
+          style={s.input}
+          placeholder="Password"
+          placeholderTextColor="rgba(255,255,255,0.35)"
+          secureTextEntry
+          onChangeText={setPassword}
+          value={password}
+        />
 
-      <TouchableOpacity
-        style={[styles.button, loading && { opacity: 0.6 }]}
-        onPress={handleSignup}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Sign Up</Text>
-        )}
-      </TouchableOpacity>
-      <Text style = {{color : "white", fontWeight : "200", marginLeft : 60, marginTop : 20}}>Already have an account ? </Text>
-      <Pressable onPress = {() => router.push("/login")}>
-        <Text style = {{fontWeight : "700", color : "lightgreen", marginLeft : 190, marginTop : -17, fontSize : 16}}> Login </Text>
-      </Pressable>
+        <TouchableOpacity
+          style={[s.button, loading && s.buttonDisabled]}
+          onPress={handleSignup}
+          disabled={loading}
+          activeOpacity={0.8}
+        >
+          {loading
+            ? <ActivityIndicator color="#000" />
+            : <Text style={s.buttonText}>Create account</Text>
+          }
+        </TouchableOpacity>
+
+        <View style={s.footer}>
+          <Text style={s.footerText}>Already have an account?</Text>
+          <TouchableOpacity onPress={() => router.push("/login")} hitSlop={8}>
+            <Text style={s.footerLink}>Log in</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
     </ImageBackground>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const s = StyleSheet.create({
+  bg: { flex: 1 },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.72)" },
+  inner: {
     flex: 1,
     justifyContent: "center",
-    padding: 20,
-    
+    paddingHorizontal: 28,
   },
-   background: {
-    flex: 1,
+
+  title: {
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: "600",
+    letterSpacing: -0.4,
+    marginBottom: 6,
+  },
+  subtitle: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 15,
+    marginBottom: 32,
+  },
+
+  input: {
+    height: 50,
+    borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.07)",
+    color: "#fff",
+    paddingHorizontal: 16,
+    fontSize: 15,
+    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.12)",
+  },
+
+  button: {
+    height: 50,
+    borderRadius: 11,
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 8,
   },
-  title: {
-    fontSize: 28,
-    color: "white",
-    marginBottom: 20,
-    marginLeft : 10,
-    fontWeight : "700"
-  },
-  input: {
-    backgroundColor: "rgba(83, 88, 83, 0.25)",
-    padding: 16,
-    borderRadius: 10,
-    marginBottom: 14,
-    color: "white",
-    borderColor : "rgba(255, 255, 255, 0.26)",
-    borderWidth : 1
-  },
-  button: {
-    backgroundColor: "#00cc2c",
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 10,
-    width : 100,
-    marginLeft : 94
-  },
+  buttonDisabled: { opacity: 0.5 },
   buttonText: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "bold",
+    color: "#000",
+    fontSize: 15,
+    fontWeight: "600",
   },
-  formContainer: {
-    backgroundColor: "rgba(10, 9, 9, 0.21)",
-    padding: 30,
-    borderRadius: 15,
-    width : 350,
-    height : 320,
-    marginLeft : 12,
-    borderWidth : 1,
-    borderColor : "rgba(255, 252, 252, 0)"
+
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
+    marginTop: 24,
   },
+  footerText: { color: "rgba(255,255,255,0.4)", fontSize: 14 },
+  footerLink: { color: "#fff", fontSize: 14, fontWeight: "500" },
 });
