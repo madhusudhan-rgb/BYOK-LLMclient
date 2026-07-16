@@ -19,13 +19,6 @@ ETA is in 3 days
 
 ---
 
-Screenshots
-
-<img width="200" height="400" alt="1000001858" src="https://github.com/user-attachments/assets/b4c64764-4546-4a19-9c5d-61198e27b22c" />
-<img width="200" height="400" alt="1000001852" src="https://github.com/user-attachments/assets/a075fe0c-fdaf-4211-943d-433f8ca22e9d" />
-<img width="200" height="400" alt="1000001861" src="https://github.com/user-attachments/assets/c8a20397-6e4e-4e76-b9e9-3eee0db7af47" />
-<img width="200" height="400" alt="1000001855" src="https://github.com/user-attachments/assets/8e11c791-6071-49fd-b71a-ce91c00a9c24" />
-
 
 ---
 
