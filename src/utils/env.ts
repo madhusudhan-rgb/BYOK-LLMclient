@@ -6,6 +6,7 @@ type AppEnv = {
   GROQ_API_KEY: string;
   OPENAI_API_KEY: string;
   QWEN_API_KEY: string;
+  FAL_API_KEY:string;
 };
 
 const extra = (Constants.expoConfig?.extra ?? {}) as Partial<AppEnv>;
@@ -18,6 +19,8 @@ export const env: AppEnv = {
   GROQ_API_KEY: String(extra.GROQ_API_KEY ?? process.env.GROQ_API_KEY ?? ""),
   OPENAI_API_KEY: String(extra.OPENAI_API_KEY ?? process.env.OPENAI_API_KEY ?? ""),
   QWEN_API_KEY: String(extra.QWEN_API_KEY ?? process.env.QWEN_API_KEY ?? ""),
+  FAL_API_KEY: String(extra.FAL_API_KEY ?? process.env.FAL_API_KEY ?? ""),
+
 };
 
 export function getEnv(key: keyof AppEnv): string {

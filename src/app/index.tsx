@@ -25,6 +25,8 @@ const MODELS = [
   { image: require("../../assets/images/cohere.png"),  label: "Command · Cohere" },
   { image: require("../../assets/images/byte.png"),    label: "Seed 3.0 · ByteDance" },
   { image: require("../../assets/images/flux.png"),    label: "Flux · FluxSchnell" },
+  {image : require("../../assets/images/kling.png"), label : "kling 2.1 - Kuaishou tech"},
+  {image : require ("../../assets/images/mx.jpg"), label :"Minimax - MiniMax group inc"}
 ];
 //Main func
 export default function HomeScreen() {
@@ -108,7 +110,7 @@ const strip = [...MODELS, ...MODELS];
                 showModal({
                   title: "About",
                   message:
-                    "This app is in development and in its early stages SO FEATURES ARE LIMITED.\n\nPowered by Groq and OpenRouter. We do not own any AI models — OpenAI, NVIDIA, Meta, Alibaba, FluxSchnell, ByteDance, Mistral AI and their logos are trademarks of their respective owners. This app is independent and not affiliated with or endorsed by any of these companies.\n\nApp will recieve regular updates to its structure, ui, functionality and you can help the dev more by sending feedbacks!!!.\n\nThank you for using my app\n\nPlease use responsibly.",
+                    "This app is in development and in its early stages SO FEATURES ARE LIMITED.\n\n\nApp will recieve regular updates to its structure, ui, functionality and you can help the dev more by sending feedbacks!!!.\n\nThank you for using my app\n\nPlease use responsibly.",
                   buttons: [{ text: "Got it", style: "cancel" }],
                 })
               }
@@ -156,7 +158,7 @@ const strip = [...MODELS, ...MODELS];
 
         {/* Model ticker */}
         <View style={s.tickerWrap}>
-          <Text style={s.tickerLabel}>AVAILABLE MODELS</Text>
+          <Text style={s.tickerLabel}>COMPATIBLE MODELS</Text>
           <View style={s.ticker}>
             <Animated.View style={[s.tickerTrack, { transform: [{ translateX: bannerX }] }]}>
               {strip.map((model, i) => (
