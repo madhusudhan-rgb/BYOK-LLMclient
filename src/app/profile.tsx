@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   bg: { flex: 1 },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.55)",
+    backgroundColor: "rgba(152, 144, 144, 0.62)",
   },
 
   /* Top bar */
