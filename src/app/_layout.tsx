@@ -4,13 +4,6 @@ import { Tabs } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavbarProvider, useNavbar } from "../context/NavbarContext";
 import { ErrorBoundary } from "../components/ErrorBoundary";
-import * as SplashScreen from "expo-splash-screen";
-import { useCallback, useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
-
-// Keep splash screen visible while loading
-SplashScreen.preventAutoHideAsync();
-
 const ACCENT   = "#00cc2c";
 const INACTIVE = "rgba(255,255,255,0.3)";
 
@@ -108,22 +101,6 @@ function TabContent() {
 }
 
 export default function TabLayout() {
-  const [isReady, setReady] = useState(false);
-
-  useEffect(() => {
-    // Hide splash screen when app is ready
-    SplashScreen.hideAsync();
-    setReady(true);
-  }, []);
-
-  if (!isReady) {
-    return (
-      <View style={styles.loading}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
-  }
-
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -136,16 +113,3 @@ export default function TabLayout() {
     </ErrorBoundary>
   );
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    backgroundColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#fff",
-    fontSize: 18,
-  },
-});

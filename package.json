@@ -20,6 +20,7 @@
     "emailjs-com": "^3.2.0",
     "expo": "~57.0.6",
     "expo-constants": "~57.0.2",
+    "expo-dev-client": "~57.0.6",
     "expo-file-system": "~57.0.0",
     "expo-font": "~57.0.0",
     "expo-image": "~57.0.1",
