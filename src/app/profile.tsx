@@ -157,7 +157,8 @@ function ProfileContent() {
     : require("../../assets/images/profile.jpg");
 
   return (
-    <View style={[styles.bg, { backgroundColor: "#0c0c0c" }]}>
+    <ImageBackground source = {require("../../assets/images/bgprof.jpg")} style = {styles.bg}>
+    <View style={[styles.bg]}>
       {/* Dark overlay */}
       <View style={styles.overlay} />
 
@@ -248,6 +249,7 @@ function ProfileContent() {
         </Animated.View>
       </View>
     </View>
+    </ImageBackground>
   );
 }
 

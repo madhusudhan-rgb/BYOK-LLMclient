@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Text,
   View,
+  
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
@@ -93,16 +94,20 @@ useEffect(() => {
 
 const strip = [...MODELS, ...MODELS];
   return (
-    <View style={[s.fill, { backgroundColor: "#0c0c0c" }]}>
+
+  <ImageBackground source = {require("../../assets/images/bgindex.jpg")}
+  style = {s.bg}
+  >
+    <View style={[s.fill]}>
       {/* Dark gradient overlay for better visualization of ui */}
-      <View style={s.overlay} />
+      
 
       <CustomModal visible={modalVisible} config={modalConfig} onClose={() => setModalVisible(false)} />
 
       <SafeAreaView style={s.fill}>
         {/* Top bar */}
         <View style={s.topBar}>
-          <Text style={s.version}>v1.2.0</Text>
+          <Text style={s.version}>v1.4.0</Text>
           <View style={s.topRight}>
             <Pressable
               style={s.iconBtn}
@@ -172,16 +177,16 @@ const strip = [...MODELS, ...MODELS];
         </View>
       </SafeAreaView>
     </View>
+    </ImageBackground>
   );
 }
 
 const s = StyleSheet.create({
-  fill: { flex: 1 },
-  overlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+  fill: { flex: 1 ,
   },
-
+bg:{
+  flex:1
+},
   // Top bar
   topBar: {
     flexDirection: "row",

@@ -945,7 +945,8 @@ export default function Explore() {
   // ── Render ───
 
   return (
-    <View style={[s.fill, { backgroundColor: "#0c0c0c" }]}>
+    <ImageBackground source = {require("../../assets/images/bgexplore.jpg")} style = {s.fill}>
+    <View style={[s.fill]}>
       <View style={s.overlay} />
       <SafeAreaView style={s.fill}>
 
@@ -1148,6 +1149,7 @@ export default function Explore() {
         />
       )}
     </View>
+    </ImageBackground>
   );
 }
 
@@ -1357,7 +1359,7 @@ const s = StyleSheet.create({
 // Sheet styles 
 
 const m = StyleSheet.create({
-  sheet: { flex: 1, backgroundColor: "#0e0e0e" },
+  sheet: { flex: 1, backgroundColor: "rgb(11, 78, 137)" },
 
   handle: {
     width: 36,
@@ -1377,7 +1379,7 @@ const m = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255,255,255,0.07)",
+    borderBottomColor: "rgba(255, 255, 255, 0.54)",
   },
   sheetTitle: { color: "#fff", fontSize: 16, fontWeight: "600", letterSpacing: -0.1 },
   cancelBtn: { color: "rgba(255,255,255,0.45)", fontSize: 15, minWidth: 56 },
@@ -1399,7 +1401,7 @@ const m = StyleSheet.create({
     paddingHorizontal: 13,
     paddingVertical: 7,
     borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(255, 255, 255, 0)",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.09)",
   },
