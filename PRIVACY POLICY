@@ -18,6 +18,8 @@ Depending on how you use the App, we may collect:
 * Messages you send to AI models
 * AI-generated responses
 * Conversation timestamps
+* Api key is also saved in the database as the app requires users to put their own 
+* It is safeguarded from abuse
 
 ### Device Information
 
