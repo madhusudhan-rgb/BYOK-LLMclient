@@ -8,8 +8,6 @@ export type DatabaseConfig = {
   publicKey: string;
 };
 
-// Edit these values with your Supabase Project URL and anon public key.
-// Never put your Supabase service_role key in a mobile app.
 export const DATABASE_CONFIG: DatabaseConfig = {
   enabled: true,
   provider: "supabase",

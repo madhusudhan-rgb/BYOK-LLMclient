@@ -6,6 +6,7 @@ declare global {
       OPENROUTER_API_KEY_3?: string;
       GROQ_API_KEY_1?: string;
       GROQ_API_KEY_2?: string;
+      FAL_API_KEY? :string;
     }
   }
 }
