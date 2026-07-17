@@ -48,9 +48,6 @@ secrets.json
 
 app-example
 
-# large files
-*.zip
-
 # generated native folders
 /ios
 /android
