@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Switch, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Switch,
+  ActivityIndicator,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const KEYS = {
@@ -12,15 +18,16 @@ export default function SettingsTab() {
   const [alerts, setAlerts] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load saved settings on mount
   useEffect(() => {
     (async () => {
       const [n, a] = await Promise.all([
         AsyncStorage.getItem(KEYS.notifications),
         AsyncStorage.getItem(KEYS.alerts),
       ]);
+
       if (n !== null) setNotifications(n === "true");
       if (a !== null) setAlerts(a === "true");
+
       setLoading(false);
     })();
   }, []);
@@ -49,13 +56,18 @@ export default function SettingsTab() {
       <View style={styles.row}>
         <View>
           <Text style={styles.label}>Notifications</Text>
-          <Text style={styles.sub}>{notifications ? "On" : "Off"}</Text>
+          <Text style={styles.sub}>
+            {notifications ? "On" : "Off"}
+          </Text>
         </View>
+
         <Switch
+          value={notifications}
+          onValueChange={(v) =>
+            toggle(KEYS.notifications, v, setNotifications)
+          }
           trackColor={{ false: "#767577", true: "#81b0ff" }}
           thumbColor={notifications ? "#f5dd4b" : "#f4f3f4"}
-          onValueChange={(v) => toggle(KEYS.notifications, v, setNotifications)}
-          value={notifications}
         />
       </View>
 
@@ -64,13 +76,16 @@ export default function SettingsTab() {
       <View style={styles.row}>
         <View>
           <Text style={styles.label}>Alerts</Text>
-          <Text style={styles.sub}>{alerts ? "On" : "Off"}</Text>
+          <Text style={styles.sub}>
+            {alerts ? "On" : "Off"}
+          </Text>
         </View>
+
         <Switch
+          value={alerts}
+          onValueChange={(v) => toggle(KEYS.alerts, v, setAlerts)}
           trackColor={{ false: "#767577", true: "#81b0ff" }}
           thumbColor={alerts ? "#f5dd4b" : "#f4f3f4"}
-          onValueChange={(v) => toggle(KEYS.alerts, v, setAlerts)}
-          value={alerts}
         />
       </View>
     </View>

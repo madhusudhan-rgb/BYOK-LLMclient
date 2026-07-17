@@ -21,7 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../utils/supabase";
 import { getCurrentUser } from "../utils/auth";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Types ───────
 
 type ModelType = "text" | "image" | "video";
 type VideoFormat = "fal" | "direct";
@@ -57,7 +57,7 @@ type History = {
   content: string | any[];
 };
 
-// ─── Provider presets ─────────────────────────────────────────────────────────
+// Provider presets ─────────────────────────────────────────────────────────
 
 const PRESETS: {
   label: string;
@@ -81,7 +81,7 @@ const PRESETS: {
   { label: "fal · MiniMax",apiUrl: "https://queue.fal.run/fal-ai/minimax/video-01",                           model: "minimax-video-01",        type: "video", apiFormat: "openai",   videoFormat: "fal"          },
 ];
 
-// ─── Supabase helpers ─────────────────────────────────────────────────────────
+// Supabase helpers ─────────────────────────────────────────────────────────
 
 async function fetchModels(userId: string): Promise<CustomModel[]> {
   const { data, error } = await supabase
@@ -189,7 +189,7 @@ async function clearSession(userId: string, botId: string): Promise<void> {
     .eq("bot_id", botId);
 }
 
-// ─── Local cache ──────────────────────────────────────────────────────────────
+// Local cache ─
 
 const localCache: Record<string, { messages: Message[]; history: History[] }> = {};
 
@@ -211,7 +211,7 @@ function initCache(model: CustomModel) {
   return localCache[model.id];
 }
 
-// ─── AddModelSheet ────────────────────────────────────────────────────────────
+// AddModelSheet ────────────────────────────────────────────────────────────
 
 function AddModelSheet({
   initialModel,
@@ -509,7 +509,7 @@ function AddModelSheet({
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// Main component ───────────────────────────────────────────────────────────
 
 export default function Explore() {
   const [userId, setUserId]                 = useState<string | null>(null);
@@ -905,7 +905,7 @@ export default function Explore() {
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render ───
 
   return (
     <ImageBackground source={require("../../assets/images/chatbg2.avif")} style={s.fill}>
@@ -1114,7 +1114,7 @@ export default function Explore() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// Styles
 
 const s = StyleSheet.create({
   fill: { flex: 1 },
@@ -1126,7 +1126,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "rgba(255,255,255,0.07)",
-    backgroundColor: "rgba(0,0,0,0.18)",
+    backgroundColor: "rgba(0, 0, 0, 0)",
   },
   tabScroll: {
     paddingHorizontal: 10,
@@ -1144,13 +1144,13 @@ const s = StyleSheet.create({
   },
   tabActive: {},
   tabText: {
-    color: "rgba(255,255,255,0.35)",
+    color: "rgba(235, 224, 224, 0.93)",
     fontSize: 13,
     fontWeight: "500",
     letterSpacing: 0.1,
   },
   tabTextActive: {
-    color: "#fff",
+    color: "#5ee20c",
     fontWeight: "600",
   },
   tabUnderline: {
@@ -1167,7 +1167,7 @@ const s = StyleSheet.create({
     height: 30,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.12)",
+    borderColor: "rgba(255, 255, 255, 0.73)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
@@ -1176,8 +1176,9 @@ const s = StyleSheet.create({
   clearBtn: {
     paddingRight: 16,
     paddingLeft: 6,
-    paddingBottom: 8,
+    paddingBottom: 17,
     alignSelf: "flex-end",
+    borderColor : "rgba(255, 248, 248, 0.72)"
   },
 
   // ── Empty state
@@ -1213,7 +1214,7 @@ const s = StyleSheet.create({
   },
   emptyBtn: {
     marginTop: 10,
-    backgroundColor: "#fff",
+    backgroundColor: "#f6ecec",
     borderRadius: 10,
     paddingHorizontal: 22,
     paddingVertical: 12,
@@ -1229,7 +1230,7 @@ const s = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 9,
-    backgroundColor: "rgba(255,255,255,0.09)",
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.1)",
     alignItems: "center",
@@ -1246,13 +1247,13 @@ const s = StyleSheet.create({
   },
   mediaBubble: { padding: 0, backgroundColor: "transparent" },
   userBubble: {
-    backgroundColor: "rgba(255,255,255,0.14)",
+    backgroundColor: "rgba(43, 39, 39, 0.31)",
     borderBottomRightRadius: 5,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.1)",
   },
   botBubble: {
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(7, 7, 7, 0.31)",
     borderBottomLeftRadius: 5,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.06)",
@@ -1282,8 +1283,9 @@ const s = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: Platform.OS === "ios" ? 16 : 14,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(255,255,255,0.07)",
-    backgroundColor: "rgba(0,0,0,0.15)",
+    borderTopColor: "rgba(255, 255, 255, 0)",
+    backgroundColor: "rgba(0, 0, 0, 0.01)",
+    
     gap: 8,
   },
   chatInput: {
@@ -1293,7 +1295,7 @@ const s = StyleSheet.create({
     borderRadius: 22,
     paddingHorizontal: 16,
     paddingTop: 10,
-    paddingBottom: 10,
+    paddingBottom: 20,
     fontSize: 15,
     maxHeight: 120,
     borderWidth: StyleSheet.hairlineWidth,
@@ -1306,6 +1308,7 @@ const s = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  
   },
   sendBtnStop: {
     backgroundColor: "rgba(255,255,255,0.08)",
@@ -1314,7 +1317,7 @@ const s = StyleSheet.create({
   },
 });
 
-// ─── Sheet styles ─────────────────────────────────────────────────────────────
+// Sheet styles 
 
 const m = StyleSheet.create({
   sheet: { flex: 1, backgroundColor: "#0e0e0e" },
