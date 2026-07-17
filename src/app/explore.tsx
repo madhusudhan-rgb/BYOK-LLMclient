@@ -533,20 +533,57 @@ export default function Explore() {
   // ── Bootstrap ────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    (async () => {
+    let mounted = true;
+
+    const checkUser = async () => {
       const user = await getCurrentUser();
-      if (!user) { setLoadingModels(false); return; }
-      setUserId(user.id);
-      try {
-        const list = await fetchModels(user.id);
-        setModels(list);
-        if (list.length > 0) switchToModel(list[0], user.id);
-      } catch (err) {
-        console.error("Failed to load models:", err);
-      } finally {
-        setLoadingModels(false);
+      if (!mounted) return;
+
+      if (user) {
+        setUserId(user.id);
+        try {
+          const list = await fetchModels(user.id);
+          if (mounted) {
+            setModels(list);
+            if (list.length > 0) switchToModel(list[0], user.id);
+          }
+        } catch (err) {
+          console.error("Failed to load models:", err);
+        } finally {
+          if (mounted) setLoadingModels(false);
+        }
+      } else {
+        if (mounted) {
+          setUserId(null);
+          setModels([]);
+          setLoadingModels(false);
+        }
       }
-    })();
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (mounted) {
+        if (session?.user) {
+          setUserId(session.user.id);
+          const list = await fetchModels(session.user.id);
+          if (mounted) {
+            setModels(list);
+            if (list.length > 0 && !activeId) switchToModel(list[0], session.user.id);
+          }
+        } else {
+          setUserId(null);
+          setModels([]);
+          setActiveId(null);
+        }
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
@@ -908,7 +945,7 @@ export default function Explore() {
   // ── Render ───
 
   return (
-    <ImageBackground source={require("../../assets/images/chatbg2.avif")} style={s.fill}>
+    <View style={[s.fill, { backgroundColor: "#0c0c0c" }]}>
       <View style={s.overlay} />
       <SafeAreaView style={s.fill}>
 
@@ -1110,7 +1147,7 @@ export default function Explore() {
           onClose={() => { setAddOpen(false); setEditingModel(null); }}
         />
       )}
-    </ImageBackground>
+    </View>
   );
 }
 

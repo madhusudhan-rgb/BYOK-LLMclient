@@ -40,7 +40,7 @@ export default function Login() {
   };
 
   return (
-    <ImageBackground source={require("../../assets/images/bg4.avif")} style={s.bg}>
+    <View style={[s.bg, { backgroundColor: "#0c0c0c" }]}>
       <View style={s.overlay} />
       <View style={s.inner}>
         <Text style={s.title}>Welcome back</Text>
@@ -92,7 +92,7 @@ export default function Login() {
           </TouchableOpacity>
         </View>
       </View>
-    </ImageBackground>
+    </View>
   );
 }
 

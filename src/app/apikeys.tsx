@@ -494,18 +494,46 @@ export default function ApiKeyInput() {
   const [editing, setEditing] = useState<CustomModel | null>(null);
 
   useEffect(() => {
-    (async () => {
+    let mounted = true;
+
+    const loadData = async () => {
       const user = await getCurrentUser();
-      if (!user) { setLoading(false); return; }
+      if (!mounted) return;
+      if (!user) {
+        setUserId(null);
+        setLoading(false);
+        return;
+      }
       setUserId(user.id);
       try {
-        setModels(await fetchModels(user.id));
+        const data = await fetchModels(user.id);
+        if (mounted) setModels(data);
       } catch (err) {
         console.error("Failed to load models:", err);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
-    })();
+    };
+
+    loadData();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (mounted) {
+        if (session?.user) {
+          setUserId(session.user.id);
+          const data = await fetchModels(session.user.id);
+          if (mounted) setModels(data);
+        } else {
+          setUserId(null);
+          setModels([]);
+        }
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleSave = async (form: FormState) => {
@@ -566,7 +594,7 @@ export default function ApiKeyInput() {
   );
 
   return (
-    <ImageBackground source={require("../../assets/images/bg4.avif")} style={s.bg}>
+    <View style={[s.bg, { backgroundColor: "#0c0c0c" }]}>
       <View style={s.overlay} />
       <SafeAreaView style={s.fill}>
 
@@ -694,7 +722,7 @@ export default function ApiKeyInput() {
           onClose={() => { setAddOpen(false); setEditing(null); }}
         />
       )}
-    </ImageBackground>
+    </View>
   );
 }
 

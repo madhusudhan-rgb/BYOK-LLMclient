@@ -93,7 +93,7 @@ useEffect(() => {
 
 const strip = [...MODELS, ...MODELS];
   return (
-    <ImageBackground source={require("../../assets/images/bg.avif")} style={s.fill}>
+    <View style={[s.fill, { backgroundColor: "#0c0c0c" }]}>
       {/* Dark gradient overlay for better visualization of ui */}
       <View style={s.overlay} />
 
@@ -171,7 +171,7 @@ const strip = [...MODELS, ...MODELS];
           </View>
         </View>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 }
 
