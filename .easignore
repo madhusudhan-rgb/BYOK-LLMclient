@@ -1,0 +1,10 @@
+node_modules
+.git
+.expo
+.idea
+.vscode
+dist
+commandlinetools.zip
+*.zip
+*.tar
+*.gz
