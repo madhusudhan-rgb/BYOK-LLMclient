@@ -249,16 +249,15 @@ function AddModelSheet({
 
   const handleSave = async () => {
     if (!name.trim()) { Alert.alert("Name required", "Give this model a name."); return; }
-    if (!apiKey.trim()) { Alert.alert("API key required", "Enter your API key."); return; }
-    if (type !== "image" || imageFormat !== "pollinations") {
-      if (!apiUrl.trim()) { Alert.alert("Endpoint required", "Enter the API endpoint URL."); return; }
-    }
+    const isPollinationsImage = type === "image" && imageFormat === "pollinations";
+    if (!isPollinationsImage && !apiKey.trim()) { Alert.alert("API key required", "Enter your API key."); return; }
+    if (!isPollinationsImage && !apiUrl.trim()) { Alert.alert("Endpoint required", "Enter the API endpoint URL."); return; }
     setSaving(true);
     try {
       await onSave({
         name: name.trim(),
-        api_key: apiKey.trim(),
-        api_url: apiUrl.trim(),
+        api_key: isPollinationsImage ? "" : apiKey.trim(),
+        api_url: isPollinationsImage ? "" : apiUrl.trim(),
         model: model.trim(),
         type,
         api_format: apiFormat,
@@ -327,7 +326,8 @@ function AddModelSheet({
             />
           </View>
 
-          {/* API Key */}
+          {/* API Key — hidden for Pollinations (no key needed) */}
+          {!(type === "image" && imageFormat === "pollinations") && (<>
           <Text style={m.sectionLabel}>API KEY</Text>
           <View style={m.group}>
             <View style={m.fieldRow}>
@@ -350,6 +350,7 @@ function AddModelSheet({
               </Pressable>
             </View>
           </View>
+          </>)}
 
           {/* Endpoint + Model */}
           <Text style={m.sectionLabel}>ENDPOINT & MODEL</Text>
@@ -1245,13 +1246,13 @@ const s = StyleSheet.create({
   },
   mediaBubble: { padding: 0, backgroundColor: "transparent" },
   userBubble: {
-    backgroundColor: "rgba(0, 0, 0, 0.36)",
+    backgroundColor: "rgba(255,255,255,0.14)",
     borderBottomRightRadius: 5,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.1)",
   },
   botBubble: {
-    backgroundColor: "rgba(23, 22, 22, 0.74)",
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderBottomLeftRadius: 5,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.06)",

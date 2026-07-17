@@ -51,17 +51,17 @@ const PRESETS: {
   imageFormat?: ImageFormat;
   videoFormat?: VideoFormat;
 }[] = [
-  { label: "OpenAI",      apiUrl: "https://api.openai.com/v1/chat/completions",                                    model: "gpt-4o",                    type: "text",  apiFormat: "openai"    },
-  { label: "Anthropic",   apiUrl: "https://api.anthropic.com/v1/messages",                                        model: "claude-opus-4-5",           type: "text",  apiFormat: "anthropic" },
-  { label: "Groq",        apiUrl: "https://api.groq.com/openai/v1/chat/completions",                              model: "llama-3.3-70b-versatile",   type: "text",  apiFormat: "openai"    },
-  { label: "OpenRouter",  apiUrl: "https://openrouter.ai/api/v1/chat/completions",                               model: "",                          type: "text",  apiFormat: "openai"    },
-  { label: "Gemini",      apiUrl: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",     model: "gemini-2.0-flash",          type: "text",  apiFormat: "openai"    },
-  { label: "Mistral",     apiUrl: "https://api.mistral.ai/v1/chat/completions",                                   model: "mistral-large-latest",      type: "text",  apiFormat: "openai"    },
-  { label: "Ollama",      apiUrl: "http://localhost:11434/v1/chat/completions",                                   model: "llama3",                    type: "text",  apiFormat: "openai"    },
-  { label: "DALL·E",      apiUrl: "https://api.openai.com/v1/images/generations",                                model: "dall-e-3",                  type: "image", apiFormat: "openai",   imageFormat: "url"         },
-  { label: "Pollinations", apiUrl: "",                                                                            model: "flux",                      type: "image", apiFormat: "openai",   imageFormat: "pollinations" },
-  { label: "fal · Kling", apiUrl: "https://queue.fal.run/fal-ai/kling-video/v2.1/standard/text-to-video",       model: "kling-video",               type: "video", apiFormat: "openai",   videoFormat: "fal"         },
-  { label: "fal · MiniMax", apiUrl: "https://queue.fal.run/fal-ai/minimax/video-01",                            model: "minimax-video-01",          type: "video", apiFormat: "openai",   videoFormat: "fal"         },
+  { label: "OpenAI",       apiUrl: "https://api.openai.com/v1/chat/completions",                                 model: "gpt-4o",                  type: "text",  apiFormat: "openai"    },
+  { label: "Anthropic",    apiUrl: "https://api.anthropic.com/v1/messages",                                     model: "claude-opus-4-5",         type: "text",  apiFormat: "anthropic" },
+  { label: "Groq",         apiUrl: "https://api.groq.com/openai/v1/chat/completions",                          model: "llama-3.3-70b-versatile", type: "text",  apiFormat: "openai"    },
+  { label: "OpenRouter",   apiUrl: "https://openrouter.ai/api/v1/chat/completions",                            model: "",                        type: "text",  apiFormat: "openai"    },
+  { label: "Gemini",       apiUrl: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", model: "gemini-2.0-flash",        type: "text",  apiFormat: "openai"    },
+  { label: "Mistral",      apiUrl: "https://api.mistral.ai/v1/chat/completions",                               model: "mistral-large-latest",    type: "text",  apiFormat: "openai"    },
+  { label: "Ollama",       apiUrl: "http://localhost:11434/v1/chat/completions",                               model: "llama3",                  type: "text",  apiFormat: "openai"    },
+  { label: "DALL·E",       apiUrl: "https://api.openai.com/v1/images/generations",                             model: "dall-e-3",                type: "image", apiFormat: "openai",   imageFormat: "url"          },
+  { label: "Pollinations", apiUrl: "",                                                                          model: "flux",                    type: "image", apiFormat: "openai",   imageFormat: "pollinations" },
+  { label: "fal · Kling",  apiUrl: "https://queue.fal.run/fal-ai/kling-video/v2.1/standard/text-to-video",    model: "kling-video",             type: "video", apiFormat: "openai",   videoFormat: "fal"          },
+  { label: "fal · MiniMax",apiUrl: "https://queue.fal.run/fal-ai/minimax/video-01",                           model: "minimax-video-01",        type: "video", apiFormat: "openai",   videoFormat: "fal"          },
 ];
 
 const TYPE_LABEL: Record<ModelType, string> = { text: "Text", image: "Image", video: "Video" };
@@ -106,7 +106,7 @@ async function removeModel(id: string): Promise<void> {
   if (error) throw error;
 }
 
-// ─── ModelForm ─────────────────────────────────────────────────────────────────
+// ─── Form state ────────────────────────────────────────────────────────────────
 
 type FormState = {
   name: string;
@@ -145,6 +145,8 @@ function modelToForm(m: CustomModel): FormState {
   };
 }
 
+// ─── ModelFormModal ────────────────────────────────────────────────────────────
+
 function ModelFormModal({
   initial,
   editingId,
@@ -156,10 +158,10 @@ function ModelFormModal({
   onSave: (form: FormState) => Promise<void>;
   onClose: () => void;
 }) {
-  const [f, setF] = useState<FormState>(initial ?? blankForm());
+  const [f, setF]                 = useState<FormState>(initial ?? blankForm());
   const [keyVisible, setKeyVisible] = useState(false);
   const [showPrompt, setShowPrompt] = useState(!!initial?.systemPrompt);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving]         = useState(false);
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setF(prev => ({ ...prev, [k]: v }));
@@ -179,10 +181,9 @@ function ModelFormModal({
 
   const handleSave = async () => {
     if (!f.name.trim()) { Alert.alert("Name required"); return; }
-    if (!f.apiKey.trim()) { Alert.alert("API key required"); return; }
-    if (f.type !== "image" || f.imageFormat !== "pollinations") {
-      if (!f.apiUrl.trim()) { Alert.alert("Endpoint URL required"); return; }
-    }
+    const isPollinationsImage = f.type === "image" && f.imageFormat === "pollinations";
+    if (!isPollinationsImage && !f.apiKey.trim()) { Alert.alert("API key required"); return; }
+    if (!isPollinationsImage && !f.apiUrl.trim()) { Alert.alert("Endpoint URL required"); return; }
     setSaving(true);
     try {
       await onSave(f);
@@ -197,23 +198,36 @@ function ModelFormModal({
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={sh.sheet}>
+
+        {/* Drag handle */}
+        <View style={sh.handle} />
+
+        {/* Header */}
         <View style={sh.header}>
-          <Pressable onPress={onClose} hitSlop={8}>
+          <Pressable onPress={onClose} hitSlop={12}>
             <Text style={sh.cancel}>Cancel</Text>
           </Pressable>
           <Text style={sh.title}>{editingId ? "Edit model" : "Add model"}</Text>
-          <Pressable onPress={handleSave} disabled={saving} hitSlop={8}>
-            <Text style={[sh.done, saving && { opacity: 0.4 }]}>
+          <Pressable onPress={handleSave} disabled={saving} hitSlop={12}>
+            <Text style={[sh.done, saving && { opacity: 0.35 }]}>
               {saving ? "Saving…" : "Save"}
             </Text>
           </Pressable>
         </View>
 
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={sh.body} keyboardShouldPersistTaps="handled">
-
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={sh.body}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           {/* Presets */}
           <Text style={sh.sectionLabel}>QUICK FILL</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={sh.presetsRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={sh.presetsRow}
+          >
             {PRESETS.map(p => (
               <Pressable key={p.label} style={sh.pill} onPress={() => applyPreset(p)}>
                 <Text style={sh.pillText}>{p.label}</Text>
@@ -227,35 +241,37 @@ function ModelFormModal({
             <TextInput
               style={sh.field}
               placeholder="My GPT-4o"
-              placeholderTextColor="rgba(255,255,255,0.25)"
+              placeholderTextColor="rgba(255,255,255,0.2)"
               value={f.name}
               onChangeText={v => set("name", v)}
             />
           </View>
 
-          {/* API Key */}
+          {/* API Key — hidden for Pollinations (no key needed) */}
+          {!(f.type === "image" && f.imageFormat === "pollinations") && (<>
           <Text style={sh.sectionLabel}>API KEY</Text>
           <View style={sh.group}>
             <View style={sh.fieldRow}>
               <TextInput
                 style={[sh.field, { flex: 1, borderWidth: 0 }]}
                 placeholder="sk-..."
-                placeholderTextColor="rgba(255,255,255,0.25)"
+                placeholderTextColor="rgba(255,255,255,0.2)"
                 value={f.apiKey}
                 onChangeText={v => set("apiKey", v)}
                 secureTextEntry={!keyVisible}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              <Pressable onPress={() => setKeyVisible(v => !v)} hitSlop={8} style={sh.eyeBtn}>
+              <Pressable onPress={() => setKeyVisible(v => !v)} hitSlop={12} style={sh.eyeBtn}>
                 <Ionicons
                   name={keyVisible ? "eye-off-outline" : "eye-outline"}
-                  size={18}
-                  color="rgba(255,255,255,0.35)"
+                  size={17}
+                  color="rgba(255,255,255,0.3)"
                 />
               </Pressable>
             </View>
           </View>
+          </>)}
 
           {/* Endpoint & Model */}
           <Text style={sh.sectionLabel}>ENDPOINT & MODEL ID</Text>
@@ -263,7 +279,7 @@ function ModelFormModal({
             <TextInput
               style={[sh.field, sh.fieldDivider]}
               placeholder="https://api.openai.com/v1/chat/completions"
-              placeholderTextColor="rgba(255,255,255,0.25)"
+              placeholderTextColor="rgba(255,255,255,0.2)"
               value={f.apiUrl}
               onChangeText={v => set("apiUrl", v)}
               autoCapitalize="none"
@@ -273,7 +289,7 @@ function ModelFormModal({
             <TextInput
               style={sh.field}
               placeholder="gpt-4o"
-              placeholderTextColor="rgba(255,255,255,0.25)"
+              placeholderTextColor="rgba(255,255,255,0.2)"
               value={f.model}
               onChangeText={v => set("model", v)}
               autoCapitalize="none"
@@ -326,7 +342,7 @@ function ModelFormModal({
                   <Switch
                     value={f.supportsVision}
                     onValueChange={v => set("supportsVision", v)}
-                    trackColor={{ false: "rgba(255,255,255,0.1)", true: "rgba(255,255,255,0.6)" }}
+                    trackColor={{ false: "rgba(255,255,255,0.1)", true: "rgba(255,255,255,0.75)" }}
                     thumbColor="#000"
                   />
                 </View>
@@ -385,15 +401,15 @@ function ModelFormModal({
                 <Ionicons
                   name={showPrompt ? "chevron-up" : "chevron-down"}
                   size={13}
-                  color="rgba(255,255,255,0.3)"
+                  color="rgba(255,255,255,0.25)"
                 />
               </Pressable>
               {showPrompt && (
                 <View style={sh.group}>
                   <TextInput
-                    style={[sh.field, { minHeight: 90, paddingTop: 12 }]}
+                    style={[sh.field, { minHeight: 90, paddingTop: 14 }]}
                     placeholder="You are a helpful assistant."
-                    placeholderTextColor="rgba(255,255,255,0.25)"
+                    placeholderTextColor="rgba(255,255,255,0.2)"
                     value={f.systemPrompt}
                     onChangeText={v => set("systemPrompt", v)}
                     multiline
@@ -410,14 +426,72 @@ function ModelFormModal({
   );
 }
 
+// ─── Type badge ────────────────────────────────────────────────────────────────
+
+function TypeBadge({ type }: { type: ModelType }) {
+  return (
+    <View style={[badge.root, badge[type]]}>
+      <Text style={badge.text}>{TYPE_LABEL[type]}</Text>
+    </View>
+  );
+}
+
+const badge = StyleSheet.create({
+  root: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
+    alignSelf: "flex-start",
+  },
+  text: { fontSize: 10, fontWeight: "600", letterSpacing: 0.2 },
+  text_color: { color: "rgba(255,255,255,0.55)" },
+  // per-type tints
+  text:  { fontSize: 10, fontWeight: "600", letterSpacing: 0.2, color: "rgba(255,255,255,0.55)" },
+  image: { backgroundColor: "rgba(120,160,255,0.12)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(120,160,255,0.2)" },
+  video: { backgroundColor: "rgba(255,140,80,0.12)",  borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,140,80,0.2)"  },
+} as any);
+
+// Override text per type inline — simpler than fighting TS style inference
+function TypeBadgeLabel({ type }: { type: ModelType }) {
+  const colors: Record<ModelType, string> = {
+    text:  "rgba(255,255,255,0.45)",
+    image: "rgba(130,170,255,0.8)",
+    video: "rgba(255,150,90,0.8)",
+  };
+  const bg: Record<ModelType, string> = {
+    text:  "rgba(255,255,255,0.06)",
+    image: "rgba(100,140,255,0.12)",
+    video: "rgba(255,120,60,0.12)",
+  };
+  const border: Record<ModelType, string> = {
+    text:  "rgba(255,255,255,0.07)",
+    image: "rgba(100,140,255,0.2)",
+    video: "rgba(255,120,60,0.2)",
+  };
+  return (
+    <View style={{
+      paddingHorizontal: 7,
+      paddingVertical: 2,
+      borderRadius: 5,
+      backgroundColor: bg[type],
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: border[type],
+    }}>
+      <Text style={{ fontSize: 10, fontWeight: "600", letterSpacing: 0.2, color: colors[type] }}>
+        {TYPE_LABEL[type]}
+      </Text>
+    </View>
+  );
+}
+
 // ─── Main screen ───────────────────────────────────────────────────────────────
 
 export default function ApiKeyInput() {
-  const [userId, setUserId]     = useState<string | null>(null);
-  const [models, setModels]     = useState<CustomModel[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [addOpen, setAddOpen]   = useState(false);
-  const [editing, setEditing]   = useState<CustomModel | null>(null);
+  const [userId, setUserId]   = useState<string | null>(null);
+  const [models, setModels]   = useState<CustomModel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<CustomModel | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -469,7 +543,6 @@ export default function ApiKeyInput() {
           style: "destructive",
           onPress: async () => {
             await removeModel(model.id);
-            // Also clear chat session
             if (userId) {
               await supabase
                 .from("chat_sessions")
@@ -485,7 +558,7 @@ export default function ApiKeyInput() {
     );
   };
 
-  // Group models by type
+  // Group by type
   const grouped: Record<ModelType, CustomModel[]> = { text: [], image: [], video: [] };
   for (const m of models) grouped[m.type].push(m);
   const sections = (["text", "image", "video"] as ModelType[]).filter(
@@ -497,9 +570,9 @@ export default function ApiKeyInput() {
       <View style={s.overlay} />
       <SafeAreaView style={s.fill}>
 
-        {/* Header */}
+        {/* ── Header ── */}
         <View style={s.header}>
-          <Pressable onPress={() => router.back()} hitSlop={8} style={s.backBtn}>
+          <Pressable onPress={() => router.back()} hitSlop={12} style={s.backBtn}>
             <Ionicons name="chevron-back" size={20} color="#fff" />
             <Text style={s.backLabel}>Back</Text>
           </Pressable>
@@ -507,9 +580,11 @@ export default function ApiKeyInput() {
           <Pressable
             style={s.addBtn}
             onPress={() => { setEditing(null); setAddOpen(true); }}
-            hitSlop={8}
+            hitSlop={12}
           >
-            <Ionicons name="add" size={20} color="#fff" />
+            <View style={s.addBtnInner}>
+              <Ionicons name="add" size={18} color="#fff" />
+            </View>
           </Pressable>
         </View>
 
@@ -521,6 +596,9 @@ export default function ApiKeyInput() {
           {/* Not logged in */}
           {!userId && !loading && (
             <View style={s.emptyState}>
+              <View style={s.emptyIcon}>
+                <Ionicons name="key-outline" size={26} color="rgba(255,255,255,0.3)" />
+              </View>
               <Text style={s.emptyTitle}>Sign in to manage models</Text>
               <Text style={s.emptySubtitle}>
                 Your models are saved to your account so they sync across devices.
@@ -534,6 +612,9 @@ export default function ApiKeyInput() {
           {/* Empty */}
           {userId && !loading && models.length === 0 && (
             <View style={s.emptyState}>
+              <View style={s.emptyIcon}>
+                <Ionicons name="cube-outline" size={26} color="rgba(255,255,255,0.3)" />
+              </View>
               <Text style={s.emptyTitle}>No models yet</Text>
               <Text style={s.emptySubtitle}>
                 Add any AI model using your own API key.{"\n"}
@@ -545,9 +626,9 @@ export default function ApiKeyInput() {
             </View>
           )}
 
-          {/* Grouped model list */}
-          {sections.map(type => (
-            <View key={type} style={s.section}>
+          {/* Model list */}
+          {sections.map((type, si) => (
+            <View key={type} style={[s.section, si === 0 && { marginTop: 4 }]}>
               <Text style={s.sectionLabel}>{TYPE_LABEL[type].toUpperCase()}</Text>
               <View style={s.group}>
                 {grouped[type].map((model, i) => (
@@ -555,7 +636,7 @@ export default function ApiKeyInput() {
                     key={model.id}
                     style={[s.row, i < grouped[type].length - 1 && s.rowDivider]}
                   >
-                    {/* Model initial badge */}
+                    {/* Initial badge */}
                     <View style={s.initial}>
                       <Text style={s.initialText}>
                         {model.name.charAt(0).toUpperCase()}
@@ -564,9 +645,16 @@ export default function ApiKeyInput() {
 
                     {/* Info */}
                     <View style={s.rowBody}>
-                      <Text style={s.rowName}>{model.name}</Text>
+                      <View style={s.rowNameRow}>
+                        <Text style={s.rowName} numberOfLines={1}>{model.name}</Text>
+                        <TypeBadgeLabel type={model.type} />
+                      </View>
                       <Text style={s.rowSub} numberOfLines={1}>
-                        {model.model || model.api_url || "No endpoint"}
+                        {model.model
+                          ? model.model
+                          : model.api_url
+                          ? model.api_url.replace(/^https?:\/\//, "")
+                          : "No endpoint"}
                       </Text>
                     </View>
 
@@ -574,17 +662,17 @@ export default function ApiKeyInput() {
                     <View style={s.rowActions}>
                       <Pressable
                         onPress={() => { setEditing(model); setAddOpen(true); }}
-                        hitSlop={8}
+                        hitSlop={10}
                         style={s.iconBtn}
                       >
-                        <Ionicons name="pencil-outline" size={16} color="rgba(255,255,255,0.4)" />
+                        <Ionicons name="pencil-outline" size={15} color="rgba(255,255,255,0.35)" />
                       </Pressable>
                       <Pressable
                         onPress={() => handleDelete(model)}
-                        hitSlop={8}
+                        hitSlop={10}
                         style={s.iconBtn}
                       >
-                        <Ionicons name="trash-outline" size={16} color="rgba(255,69,58,0.6)" />
+                        <Ionicons name="trash-outline" size={15} color="rgba(255,69,58,0.55)" />
                       </Pressable>
                     </View>
                   </View>
@@ -613,18 +701,21 @@ export default function ApiKeyInput() {
 // ─── Styles ────────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
-  bg: { flex: 1 },
+  bg:   { flex: 1 },
   fill: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.75)" },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.72)" },
 
+  // Header
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingTop: 4,
+    paddingBottom: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "rgba(255,255,255,0.07)",
   },
-  backBtn: { flexDirection: "row", alignItems: "center", gap: 3, minWidth: 70 },
+  backBtn:   { flexDirection: "row", alignItems: "center", gap: 3, minWidth: 72 },
   backLabel: { color: "#fff", fontSize: 16 },
   headerTitle: {
     flex: 1,
@@ -632,48 +723,69 @@ const s = StyleSheet.create({
     fontSize: 17,
     fontWeight: "600",
     textAlign: "center",
+    letterSpacing: -0.2,
   },
-  addBtn: {
-    minWidth: 70,
-    alignItems: "flex-end",
+  addBtn: { minWidth: 72, alignItems: "flex-end" },
+  addBtnInner: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  body: { paddingHorizontal: 16, paddingTop: 8 },
+  body: { paddingHorizontal: 16, paddingTop: 16 },
 
+  // Empty state
   emptyState: {
     alignItems: "center",
-    paddingTop: 80,
-    paddingHorizontal: 24,
-    gap: 12,
+    paddingTop: 72,
+    paddingHorizontal: 32,
+    gap: 10,
   },
-  emptyTitle: { color: "#fff", fontSize: 20, fontWeight: "600" },
+  emptyIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  emptyTitle: { color: "#fff", fontSize: 19, fontWeight: "600", letterSpacing: -0.2 },
   emptySubtitle: {
-    color: "rgba(255,255,255,0.4)",
+    color: "rgba(255,255,255,0.38)",
     fontSize: 14,
     textAlign: "center",
     lineHeight: 21,
   },
   emptyBtn: {
-    marginTop: 8,
+    marginTop: 10,
     backgroundColor: "#fff",
     borderRadius: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 11,
+    paddingHorizontal: 22,
+    paddingVertical: 12,
   },
   emptyBtnText: { color: "#000", fontSize: 14, fontWeight: "600" },
 
-  section: { marginBottom: 24 },
+  // List
+  section:      { marginBottom: 28 },
   sectionLabel: {
-    color: "rgba(255,255,255,0.3)",
+    color: "rgba(255,255,255,0.28)",
     fontSize: 11,
     fontWeight: "600",
-    letterSpacing: 0.6,
+    letterSpacing: 0.7,
     marginBottom: 8,
     marginLeft: 4,
   },
   group: {
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderRadius: 13,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 14,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.08)",
     overflow: "hidden",
@@ -682,69 +794,90 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 13,
     gap: 12,
   },
   rowDivider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255,255,255,0.08)",
+    borderBottomColor: "rgba(255,255,255,0.07)",
   },
+
+  // Initial badge
   initial: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.07)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.09)",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
-  initialText: { color: "#fff", fontSize: 15, fontWeight: "600" },
-  rowBody: { flex: 1 },
-  rowName: { color: "#fff", fontSize: 15, fontWeight: "500" },
-  rowSub: { color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 2 },
-  rowActions: { flexDirection: "row", gap: 4 },
-  iconBtn: { padding: 6 },
+  initialText: { color: "rgba(255,255,255,0.7)", fontSize: 15, fontWeight: "700" },
+
+  rowBody:    { flex: 1, minWidth: 0 },
+  rowNameRow: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 3 },
+  rowName:    { color: "#fff", fontSize: 15, fontWeight: "500", flexShrink: 1 },
+  rowSub:     { color: "rgba(255,255,255,0.3)", fontSize: 12 },
+  rowActions: { flexDirection: "row", gap: 2 },
+  iconBtn:    { padding: 7 },
 });
 
+// ─── Sheet styles ──────────────────────────────────────────────────────────────
+
 const sh = StyleSheet.create({
-  sheet: { flex: 1, backgroundColor: "#111" },
+  sheet: { flex: 1, backgroundColor: "#0e0e0e" },
+
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    alignSelf: "center",
+    marginTop: 10,
+    marginBottom: 6,
+  },
+
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 12,
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255,255,255,0.08)",
+    borderBottomColor: "rgba(255,255,255,0.07)",
   },
-  title: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  cancel: { color: "rgba(255,255,255,0.5)", fontSize: 15 },
-  done: { color: "#fff", fontSize: 15, fontWeight: "600" },
+  title:  { color: "#fff", fontSize: 16, fontWeight: "600", letterSpacing: -0.1 },
+  cancel: { color: "rgba(255,255,255,0.45)", fontSize: 15, minWidth: 56 },
+  done:   { color: "#fff", fontSize: 15, fontWeight: "600", minWidth: 56, textAlign: "right" },
+
   body: { paddingHorizontal: 20, paddingTop: 24 },
 
   sectionLabel: {
-    color: "rgba(255,255,255,0.3)",
+    color: "rgba(255,255,255,0.28)",
     fontSize: 11,
     fontWeight: "600",
-    letterSpacing: 0.6,
+    letterSpacing: 0.7,
     marginBottom: 8,
     marginLeft: 2,
   },
+
   presetsRow: { gap: 6, marginBottom: 24 },
   pill: {
     paddingHorizontal: 13,
     paddingVertical: 7,
     borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(255,255,255,0.09)",
   },
-  pillText: { color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: "500" },
+  pillText: { color: "rgba(255,255,255,0.65)", fontSize: 13, fontWeight: "500" },
 
   group: {
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 13,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.08)",
     overflow: "hidden",
@@ -758,23 +891,23 @@ const sh = StyleSheet.create({
   },
   fieldDivider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255,255,255,0.08)",
+    borderBottomColor: "rgba(255,255,255,0.07)",
   },
   fieldRow: { flexDirection: "row", alignItems: "center" },
-  eyeBtn: { paddingRight: 14 },
+  eyeBtn:   { paddingRight: 14 },
 
-  segRow: { flexDirection: "row", padding: 4, gap: 4 },
-  seg: { flex: 1, paddingVertical: 9, borderRadius: 8, alignItems: "center" },
-  segActive: { backgroundColor: "rgba(255,255,255,0.12)" },
-  segText: { color: "rgba(255,255,255,0.35)", fontSize: 13, fontWeight: "500" },
-  segTextActive: { color: "#fff" },
+  segRow:            { flexDirection: "row", padding: 4, gap: 4 },
+  seg:               { flex: 1, paddingVertical: 9, borderRadius: 9, alignItems: "center" },
+  segActive:         { backgroundColor: "rgba(255,255,255,0.11)" },
+  segText:           { color: "rgba(255,255,255,0.3)",  fontSize: 13, fontWeight: "500" },
+  segTextActive:     { color: "#fff",                    fontSize: 13, fontWeight: "600" },
 
   toggleRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 13,
   },
   toggleLabel: { color: "#fff", fontSize: 15, flex: 1 },
 
@@ -784,5 +917,6 @@ const sh = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 8,
     marginLeft: 2,
+    marginRight: 2,
   },
 });
