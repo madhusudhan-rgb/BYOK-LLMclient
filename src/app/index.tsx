@@ -19,7 +19,7 @@ import { useNavbar } from "../context/NavbarContext";
 //List of all models available rn
 const MODELS = [
   { image: require("../../assets/images/openai.png"),  label: "GPT-4o · OpenAI" },
-  { image: require("../../assets/images/nvda.webp"),   label: "Nemotron · NVIDIA" },
+{ image: require("../../assets/images/nvda.png"),   label: "Nemotron · NVIDIA" },
   { image: require("../../assets/images/pool.jpg"),    label: "Laguna · Poolside AI" },
   { image: require("../../assets/images/llama.png"),   label: "LLaMA 3.1 · Meta" },
   { image: require("../../assets/images/cohere.png"),  label: "Command · Cohere" },
