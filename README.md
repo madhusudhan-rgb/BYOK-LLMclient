@@ -1,6 +1,8 @@
 #AI Chatbots Playground
 
 A free and open-source AI playground app that lets you experiment with multiple AI chatbots in one place.
+Put your own API key and call modelname and test it!!!!
+Make an account and it saves your models settings and chathistory!!!!
 
 ---
 
