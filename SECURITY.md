@@ -53,6 +53,7 @@ The application may store user information such as:
 - Account information
 - User preferences
 - Chat history (if enabled)
+- API KEYS
 
 Reasonable measures are taken to protect stored information. However, no online service can guarantee complete security.
 
