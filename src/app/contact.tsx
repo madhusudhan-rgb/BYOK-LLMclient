@@ -50,7 +50,7 @@ export default function Contact() {
 
       
 # Privacy Policy & Terms of Use
-**Last Updated:** July 16, 2026
+**Last Updated:** July 20, 2026
 By using this App, you agree to this Privacy Policy and Terms of Use.
 
 # 2. Information We Collect
@@ -285,6 +285,12 @@ Questions regarding this Privacy Policy may be directed to the developer using t
 ---
 
 By creating an account or using this App, you acknowledge that you have read, understood, and agreed to this Privacy Policy and Terms of Use.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+AS OF JUNE 17TH 2026 
 
 COPYRIGHT POLICIES
 Creative Commons Legal Code
@@ -489,7 +495,7 @@ express Statement of Purpose.
           {
             ref: scalerndm, label: "Resources", onPress: () => {
               bounce(scalerndm);
-              showModal({ title: "Resources", message: "Really none rn", buttons: [{ text: "OK", style: "cancel" }] });
+              showModal({ title: "Resources", message: "N/A", buttons: [{ text: "OK", style: "cancel" }] });
             }
           },
         ].map(({ ref, label, onPress }) => (

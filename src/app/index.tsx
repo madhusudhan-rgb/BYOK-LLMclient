@@ -147,10 +147,10 @@ const strip = [...MODELS, ...MODELS];
         </View>
         {/* Hero */}
         <View style={s.hero}>
-          <Text style={s.eyebrow}>AI PLAYGROUND</Text>
+          <Text style={s.eyebrow}>LLM CLIENT</Text>
           <Text style={s.title}>Your models,{"\n"}one place.</Text>
           <Text style={s.subtitle}>
-            Chat, generate images, and explore the latest AI models — all in one app.
+            Chat, generate images, and utilize the latest AI models — all in one app.
           </Text>
 
           <Link href="/login" asChild>
@@ -161,7 +161,7 @@ const strip = [...MODELS, ...MODELS];
           </Link>
         </View>
 
-        {/* Model ticker */}
+        {/* Model banner. another buggy syntax but works */}
         <View style={s.tickerWrap}>
           <Text style={s.tickerLabel}>COMPATIBLE MODELS</Text>
           <View style={s.ticker}>

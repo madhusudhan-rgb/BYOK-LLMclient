@@ -17,11 +17,12 @@ function TabContent() {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: "absolute",
-          bottom: 10,
+          bottom: 12,
           left: "5%",
           right: "5%",
           height: 50,
-          borderRadius: 30,
+          
+          borderRadius: 40,
           backgroundColor: "rgba(18, 18, 18, 0.19)",
           borderTopWidth: 0,
           borderWidth: 1,

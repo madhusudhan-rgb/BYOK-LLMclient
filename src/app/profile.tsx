@@ -23,7 +23,7 @@ import {
   uploadAvatar,
 } from "../utils/auth";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+// const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function Profile() {
   return (
@@ -41,7 +41,7 @@ function ProfileContent() {
   const [editingName, setEditingName] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const bannerX = useRef(new Animated.Value(SCREEN_WIDTH)).current;
+  // const bannerX = useRef(new Animated.Value(SCREEN_WIDTH)).current;
 
   useFocusEffect(
     useCallback(() => {
@@ -66,26 +66,26 @@ function ProfileContent() {
       return () => { cancelled = true; };
     }, [])
   );
-
-  useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(bannerX, {
-          toValue: -500,
-          duration: 10000,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-        Animated.timing(bannerX, {
-          toValue: SCREEN_WIDTH,
-          duration: 0,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    animation.start();
-    return () => animation.stop();
-  }, []);
+//BANNER ANIMATION (buggy syntax but it works lol)
+  // useEffect(() => {
+  //   const animation = Animated.loop(
+  //     Animated.sequence([
+  //       Animated.timing(bannerX, {
+  //         toValue: -500,
+  //         duration: 10000,
+  //         easing: Easing.linear,
+  //         useNativeDriver: true,
+  //       }),
+  //       Animated.timing(bannerX, {
+  //         toValue: SCREEN_WIDTH,
+  //         duration: 0,
+  //         useNativeDriver: true,
+  //       }),
+  //     ])
+  //   );
+  //   animation.start();
+  //   return () => animation.stop();
+  // }, []);
 
   const pickImage = async () => {
     if (!user) {
@@ -239,15 +239,15 @@ function ProfileContent() {
 
      
       
-
+    {/* Main banner */}
       {/* Scrolling banner */}
-      <View style={styles.bannerWrap}>
+      {/* <View style={styles.bannerWrap}>
         <Animated.View style={{ transform: [{ translateX: bannerX }] }}>
           <Text style={styles.bannerText}>
             ✦ New models added! Check it out{displayName ? `, ${displayName}` : ""}
           </Text>
         </Animated.View>
-      </View>
+      </View> */}
     </View>
     </ImageBackground>
   );
@@ -376,21 +376,21 @@ const styles = StyleSheet.create({
   logoutText: { color: "#ff453a", fontWeight: "600", fontSize: 14 },
 
   /* Banner */
-  bannerWrap: {
-    position: "absolute",
-    bottom: 60,
-    left: 0,
-    right: 0,
-    overflow: "hidden",
-    paddingVertical: 8,
-    backgroundColor: "rgba(0, 0, 0, 0)",
-  },
-  bannerText: {
-    color: "#000000",
-    fontSize: 14,
-    fontWeight: "600",
-    letterSpacing: 0.3,
-    paddingHorizontal: 16,
-    width: 500,
-  },
+  // bannerWrap: {
+  //   position: "absolute",
+  //   bottom: 60,
+  //   left: 0,
+  //   right: 0,
+  //   overflow: "hidden",
+  //   paddingVertical: 8,
+  //   backgroundColor: "rgba(0, 0, 0, 0)",
+  // },
+  // bannerText: {
+  //   color: "#000000",
+  //   fontSize: 14,
+  //   fontWeight: "600",
+  //   letterSpacing: 0.3,
+  //   paddingHorizontal: 16,
+  //   width: 500,
+  // },
 });
