@@ -115,7 +115,7 @@ const strip = [...MODELS, ...MODELS];
                 showModal({
                   title: "About",
                   message:
-                    "This app is in development and in its early stages SO FEATURES ARE LIMITED.\n\n\nApp will recieve regular updates to its structure, ui, functionality and you can help the dev more by sending feedbacks!!!.\n\nThank you for using my app\n\nPlease use responsibly.",
+                    "This app is in development and in its early stages SO FEATURES ARE LIMITED.\n\nYou basically enter your own api keys and other things realted to use the app\n\nApp will recieve regular updates to its structure, ui, functionality and you can help the dev more by sending feedbacks!!!.\n\nThank you for using my app\n\nPlease use responsibly.",
                   buttons: [{ text: "Got it", style: "cancel" }],
                 })
               }

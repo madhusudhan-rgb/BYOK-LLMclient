@@ -731,7 +731,7 @@ export default function ApiKeyInput() {
 const s = StyleSheet.create({
   bg:   { flex: 1 },
   fill: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0.21)" },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0)" },
 
   // Header
   header: {

@@ -1359,7 +1359,7 @@ const s = StyleSheet.create({
 // Sheet styles 
 
 const m = StyleSheet.create({
-  sheet: { flex: 1, backgroundColor: "rgb(11, 78, 137)" },
+  sheet: { flex: 1, backgroundColor: "rgba(9, 10, 10, 0.99)" },
 
   handle: {
     width: 36,

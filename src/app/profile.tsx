@@ -157,7 +157,7 @@ function ProfileContent() {
     : require("../../assets/images/profile.jpg");
 
   return (
-    <ImageBackground source = {require("../../assets/images/bgprof.jpg")} style = {styles.bg}>
+    <ImageBackground source = {require("../../assets/images/bgprof1.jpg")} style = {styles.bg}>
     <View style={[styles.bg]}>
       {/* Dark overlay */}
       <View style={styles.overlay} />
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
   bg: { flex: 1 },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(152, 144, 144, 0.62)",
+    backgroundColor: "rgba(9, 9, 9, 0.24)",
   },
 
   /* Top bar */
@@ -269,12 +269,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 16,
   },
-  screenTitle: { color: "#fff", fontSize: 18, fontWeight: "700" },
+  screenTitle: { color: "#070707", fontSize: 18, fontWeight: "700" },
   menuBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(1, 1, 1, 0.75)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     top: 108,
     right: 20,
     width: 190,
-    backgroundColor: "#1c1c1c",
+    backgroundColor: "#0b0a0afe",
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#2a2a2a",
@@ -298,8 +298,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#2a2a2a",
+    
   },
-  optionText: { color: "#fff", fontSize: 15 },
+  optionText: { color: "#efeeee", fontSize: 15 },
 
   /* Profile */
   profileSection: {
@@ -329,8 +330,8 @@ const styles = StyleSheet.create({
     borderColor: "#111",
   },
   nameWrap: { alignItems: "center", gap: 4 },
-  displayName: { color: "#fff", fontSize: 20, fontWeight: "700" },
-  username: { color: "rgba(255,255,255,0.4)", fontSize: 13 },
+  displayName: { color: "#060505", fontSize: 20, fontWeight: "700" },
+  username: { color: "rgba(14, 14, 14, 0.4)", fontSize: 13 },
 
   /* Edit name */
   editRow: {
@@ -342,7 +343,7 @@ const styles = StyleSheet.create({
   nameInput: {
     flex: 1,
     backgroundColor: "#1c1c1c",
-    color: "#fff",
+    color: "#f2e2e2",
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 9,
@@ -385,7 +386,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0)",
   },
   bannerText: {
-    color: "#fff",
+    color: "#000000",
     fontSize: 14,
     fontWeight: "600",
     letterSpacing: 0.3,
