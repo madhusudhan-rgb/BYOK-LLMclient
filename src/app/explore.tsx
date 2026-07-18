@@ -1206,7 +1206,7 @@ const s = StyleSheet.create({
     height: 30,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255, 255, 255, 0.73)",
+    borderColor: "rgba(234, 224, 224, 0.15)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,

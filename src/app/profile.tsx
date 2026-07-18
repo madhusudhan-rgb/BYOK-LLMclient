@@ -157,7 +157,7 @@ function ProfileContent() {
     : require("../../assets/images/profile.jpg");
 
   return (
-    <ImageBackground source = {require("../../assets/images/bgprof1.jpg")} style = {styles.bg}>
+    <ImageBackground source = {require("../../assets/images/bgpfp5.jpg")} style = {styles.bg}>
     <View style={[styles.bg]}>
       {/* Dark overlay */}
       <View style={styles.overlay} />
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
   bg: { flex: 1 },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(9, 9, 9, 0.24)",
+    backgroundColor: "rgba(9, 9, 9, 0)",
   },
 
   /* Top bar */
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 16,
   },
-  screenTitle: { color: "#070707", fontSize: 18, fontWeight: "700" },
+  screenTitle: { color: "#fafafa", fontSize: 18, fontWeight: "700" },
   menuBtn: {
     width: 38,
     height: 38,
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     height: 96,
     borderRadius: 48,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: "rgba(0, 236, 16, 0.99)",
   },
   avatarBadge: {
     position: "absolute",
@@ -323,15 +323,15 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#333",
+    backgroundColor: "#030303",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1.5,
     borderColor: "#111",
   },
   nameWrap: { alignItems: "center", gap: 4 },
-  displayName: { color: "#060505", fontSize: 20, fontWeight: "700" },
-  username: { color: "rgba(14, 14, 14, 0.4)", fontSize: 13 },
+  displayName: { color: "#fdf4f4", fontSize: 20, fontWeight: "700" },
+  username: { color: "rgba(254, 243, 243, 0.72)", fontSize: 13 },
 
   /* Edit name */
   editRow: {
