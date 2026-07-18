@@ -20,22 +20,22 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../utils/supabase";
 import { getCurrentUser } from "../utils/auth";
 
-// ─── Storage keys ──────────────────────────
+// ─── Storage keys
 const KEYS = {
   haptics:    "@settings/haptics",
   timestamps: "@settings/timestamps",
 };
 
-// ─── Types ─────────────────────────────────
+// ─── Types 
 type Profile = { id: string; full_name: string | null; email: string | null };
 
-// ─── Helpers ───────────────────────────────
+// ─── Helpers
 function initial(name: string | null | undefined) {
   if (!name) return "?";
   return name.trim().charAt(0).toUpperCase();
 }
 
-// ─── Row components ────────────────────────
+// ─── Row components
 function RowDivider() {
   return <View style={s.rowDivider} />;
 }
@@ -85,7 +85,7 @@ function Group({ children }: { children: React.ReactNode }) {
   return <View style={s.group}>{children}</View>;
 }
 
-// ─── Main screen ───────────────────────────
+// ─── Main screen───
 export default function SettingsScreen() {
   const [profile, setProfile]       = useState<Profile | null>(null);
   const [haptics, setHaptics]       = useState(true);
@@ -226,7 +226,7 @@ export default function SettingsScreen() {
           <Text style={s.pageTitle}>Settings</Text>
 
           {/*Profile card */}
-          <Pressable
+          {/* <Pressable
             style={({ pressed }) => [s.profileCard, pressed && s.rowPressed]}
             onPress={() => router.push("/profile")}
           >
@@ -242,7 +242,7 @@ export default function SettingsScreen() {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={15} color="rgba(255,255,255,0.22)" />
-          </Pressable>
+          </Pressable> */}
 
           {/* ── Notifications */}
           <SectionLabel label="NOTIFICATIONS" />
@@ -367,7 +367,7 @@ export default function SettingsScreen() {
   );
 }
 
-// ─── Styles ────────────────────────────────
+// ─── Styles────────
 const s = StyleSheet.create({
   fill:    { flex: 1 },
   overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0.27)" },
@@ -438,9 +438,9 @@ const s = StyleSheet.create({
 
   // Group container
   group: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(11, 10, 10, 0.35)",
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: "rgba(15, 15, 15, 0.14)",
     borderRadius: 14,
     overflow: "hidden",
   },
@@ -455,7 +455,7 @@ const s = StyleSheet.create({
     minHeight: 50,
   },
   rowPressed: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(255, 255, 255, 0.13)",
   },
   rowLeft: {
     flex: 1,
@@ -469,7 +469,7 @@ const s = StyleSheet.create({
   },
   rowSub: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.35)",
+    color: "rgba(246, 237, 237, 0.82)",
     marginTop: 1,
   },
   rowDestructive: {
@@ -477,12 +477,12 @@ const s = StyleSheet.create({
   },
   rowDivider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(255, 255, 255, 0.33)",
     marginLeft: 16,
   },
 
   // Sign out row
-  signOutRow: {
-    justifyContent: "center",
-  },
+  // signOutRow: {
+  //   justifyContent: "center",
+  // },
 });
