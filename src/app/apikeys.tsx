@@ -446,7 +446,7 @@ const badge = StyleSheet.create({
   text: { fontSize: 10, fontWeight: "600", letterSpacing: 0.2 },
   text_color: { color: "rgba(255,255,255,0.55)" },
   // per-type tints
-  text:  { fontSize: 10, fontWeight: "600", letterSpacing: 0.2, color: "rgba(255,255,255,0.55)" },
+  
   image: { backgroundColor: "rgba(120,160,255,0.12)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(120,160,255,0.2)" },
   video: { backgroundColor: "rgba(255,140,80,0.12)",  borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,140,80,0.2)"  },
 } as any);

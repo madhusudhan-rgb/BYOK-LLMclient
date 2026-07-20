@@ -90,6 +90,7 @@ export default function Login() {
           <TouchableOpacity onPress={() => router.push("/signup")} hitSlop={8}>
             <Text style={s.footerLink}>Sign up</Text>
           </TouchableOpacity>
+          <Text>Have questions?</Text>
         </View>
       </View>
     </View>

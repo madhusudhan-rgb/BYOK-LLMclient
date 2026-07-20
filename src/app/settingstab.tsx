@@ -205,9 +205,10 @@ export default function SettingsScreen() {
   }
 
   // ── Version string ──
-  const version = Constants.expoConfig?.version ?? Constants.manifest?.version ?? "—";
-  const build   = Constants.expoConfig?.ios?.buildNumber
-    ?? Constants.expoConfig?.android?.versionCode?.toString()
+  // Note: In Expo SDK 57, use expoConfig from app.json or manifest.version
+  const version = (Constants.expoConfig as any)?.version ?? "—";
+  const build   = (Constants.expoConfig as any)?.ios?.buildNumber
+    ?? (Constants.expoConfig as any)?.android?.versionCode?.toString()
     ?? null;
   const versionLabel = build ? `${version} (${build})` : version;
 
