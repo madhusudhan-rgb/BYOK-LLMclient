@@ -1164,7 +1164,7 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255,255,255,0.07)",
+    borderBottomColor: "rgba(255, 255, 255, 0)",
     backgroundColor: "rgba(0, 0, 0, 0)",
   },
   tabScroll: {
@@ -1183,13 +1183,13 @@ const s = StyleSheet.create({
   },
   tabActive: {},
   tabText: {
-    color: "rgba(235, 224, 224, 0.93)",
+    color: "rgb(250, 248, 248)",
     fontSize: 13,
     fontWeight: "500",
     letterSpacing: 0.1,
   },
   tabTextActive: {
-    color: "#5ee20c",
+    color: "#ffab02",
     fontWeight: "600",
   },
   tabUnderline: {
@@ -1198,7 +1198,7 @@ const s = StyleSheet.create({
     left: 13,
     right: 13,
     height: 1.5,
-    backgroundColor: "#fff",
+    backgroundColor: "#f0a910",
     borderRadius: 1,
   },
   addTab: {
@@ -1206,7 +1206,7 @@ const s = StyleSheet.create({
     height: 30,
     borderRadius: 8,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(250, 238, 238, 0.67)",
+    borderColor: "rgb(250, 238, 238)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
@@ -1217,10 +1217,10 @@ const s = StyleSheet.create({
     paddingLeft: 6,
     paddingBottom: 17,
     alignSelf: "flex-end",
-    borderColor : "rgba(255, 248, 248, 0.72)"
+    borderColor : "rgb(255, 248, 248)"
   },
 
-  // ── Empty state
+  // ── State when there is no aimodel added or stuff yk
   emptyState: {
     flex: 1,
     alignItems: "center",
@@ -1269,9 +1269,9 @@ const s = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 9,
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    backgroundColor: "rgba(27, 0, 0, 0.04)",
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(255, 255, 255, 0.44)",
     alignItems: "center",
     justifyContent: "center",
   },

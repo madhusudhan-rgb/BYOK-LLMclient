@@ -2,7 +2,6 @@ import * as Haptics from "expo-haptics";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Dimensions,
   Platform,
   Pressable,
   StyleSheet,
@@ -11,15 +10,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavbar } from "../context/NavbarContext";
 
-// ─── Constants 
-const ACTIVE     = "#ffffff";
-const INACTIVE   = "rgba(255,255,255,0.28)";
-const { width: SCREEN_W } = Dimensions.get("window");
-const EXPANDED_W = SCREEN_W * 0.82;
-const PILL_H     = 56;
-const PILL_R     = PILL_H / 2;
-
-// ─── Types ────
+const ACTIVE   = "#ffffff";
+const INACTIVE = "rgba(255,255,255,0.28)";
+const PILL_W   = 56;          
+const SLOT_H   = 56;          
+const PILL_R   = PILL_W / 2;  
 type TabBarProps = {
   state: {
     index: number;
@@ -32,7 +27,7 @@ type TabBarProps = {
   navigation: { navigate: (name: string) => void };
 };
 
-// ─── Single tab item ──────────────────────────
+
 function TabItem({
   isFocused,
   descriptor,
@@ -74,22 +69,24 @@ function TabItem({
   );
 }
 
-// ─── Main tab bar 
+
 export default function AnimatedTabBar(props: TabBarProps) {
   const { showNavbar } = useNavbar();
   const insets = useSafeAreaInsets();
 
-  
   const isOpenRef = useRef(false);
-  const [isOpen, setIsOpen] = useState(false); // drives re-renders for pointerEvents
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Expanded height depends on route count — store in ref so expandBar can read it
+  const expandedHRef = useRef(SLOT_H);
 
   // ── Screen slide in/out ──
   const screenY     = useRef(new Animated.Value(120)).current;
   const screenOp    = useRef(new Animated.Value(0)).current;
   const screenScale = useRef(new Animated.Value(0.92)).current;
 
-  // ── Expand / collapse (pillWidth can't use native driver — layout prop) ──
-  const pillWidth  = useRef(new Animated.Value(PILL_H)).current;
+  // ── Expand / collapse (pillHeight can't use native driver — layout prop) ──
+  const pillHeight = useRef(new Animated.Value(PILL_W)).current; // starts as circle
   const iconsOp    = useRef(new Animated.Value(0)).current;
   const iconsScale = useRef(new Animated.Value(0.7)).current;
   const triggerOp  = useRef(new Animated.Value(1)).current;
@@ -97,13 +94,12 @@ export default function AnimatedTabBar(props: TabBarProps) {
 
   const collapseBar = useCallback(() => {
     Animated.parallel([
-      Animated.spring(pillWidth,  { toValue: PILL_H,    friction: 7, tension: 68,  useNativeDriver: false }),
-      Animated.timing(iconsOp,    { toValue: 0,          duration: 120,            useNativeDriver: true  }),
-      Animated.spring(iconsScale, { toValue: 0.7,        friction: 7, tension: 100, useNativeDriver: true }),
-      Animated.timing(triggerOp,  { toValue: 1,          duration: 200, delay: 80, useNativeDriver: true  }),
-      Animated.spring(triggerScl, { toValue: 1,          friction: 6, tension: 120, useNativeDriver: true }),
+      Animated.spring(pillHeight,  { toValue: PILL_W, friction: 7, tension: 68,   useNativeDriver: false }),
+      Animated.timing(iconsOp,     { toValue: 0,       duration: 100,              useNativeDriver: true  }),
+      Animated.spring(iconsScale,  { toValue: 0.7,     friction: 7, tension: 100,  useNativeDriver: true  }),
+      Animated.timing(triggerOp,   { toValue: 1,       duration: 200, delay: 80,  useNativeDriver: true  }),
+      Animated.spring(triggerScl,  { toValue: 1,       friction: 6, tension: 120,  useNativeDriver: true  }),
     ]).start(() => {
-      
       isOpenRef.current = false;
       setIsOpen(false);
     });
@@ -119,25 +115,24 @@ export default function AnimatedTabBar(props: TabBarProps) {
   }, [showNavbar]);
 
   function expandBar() {
-   
     if (isOpenRef.current) return;
     isOpenRef.current = true;
-    setIsOpen(true); // triggers re-render → pointerEvents flip
+    setIsOpen(true);
 
     if (Platform.OS !== "web") Haptics.selectionAsync();
 
     Animated.parallel([
-      Animated.spring(pillWidth,  { toValue: EXPANDED_W, friction: 7, tension: 52,  useNativeDriver: false }),
-      Animated.timing(triggerOp,  { toValue: 0,           duration: 100,            useNativeDriver: true  }),
-      Animated.spring(triggerScl, { toValue: 0.5,         friction: 6, tension: 150, useNativeDriver: true }),
-      Animated.timing(iconsOp,    { toValue: 1,           duration: 200,            useNativeDriver: true  }),
-      Animated.spring(iconsScale, { toValue: 1,           friction: 7, tension: 80,  useNativeDriver: true }),
+      Animated.spring(pillHeight,  { toValue: expandedHRef.current, friction: 7, tension: 52,  useNativeDriver: false }),
+      Animated.timing(triggerOp,   { toValue: 0,                    duration: 100,             useNativeDriver: true  }),
+      Animated.spring(triggerScl,  { toValue: 0.5,                  friction: 6, tension: 150, useNativeDriver: true  }),
+      Animated.timing(iconsOp,     { toValue: 1,                    duration: 200,             useNativeDriver: true  }),
+      Animated.spring(iconsScale,  { toValue: 1,                    friction: 7, tension: 80,  useNativeDriver: true  }),
     ]).start();
   }
 
   const handleTabPress = useCallback(
     (name: string) => {
-      if (!isOpenRef.current) return; // ignore taps before bar is open
+      if (!isOpenRef.current) return;
       if (Platform.OS !== "web") Haptics.selectionAsync();
       props.navigation.navigate(name);
       collapseBar();
@@ -150,6 +145,9 @@ export default function AnimatedTabBar(props: TabBarProps) {
     (route) => props.descriptors[route.key]?.options?.tabBarIcon != null,
   );
 
+  // Keep expanded height in sync with route count
+  expandedHRef.current = visibleRoutes.length * SLOT_H;
+
   const activeRoute       = props.state.routes[props.state.index];
   const activeDescriptor  = props.descriptors[activeRoute?.key];
   const triggerDescriptor = activeDescriptor?.options?.tabBarIcon
@@ -159,7 +157,6 @@ export default function AnimatedTabBar(props: TabBarProps) {
   const bottomOffset = Math.max(insets.bottom, 8) + 6;
 
   return (
-  
     <Animated.View
       pointerEvents={showNavbar ? "auto" : "none"}
       style={[
@@ -168,11 +165,11 @@ export default function AnimatedTabBar(props: TabBarProps) {
         { transform: [{ translateY: screenY }, { scale: screenScale }], opacity: screenOp },
       ]}
     >
-      <Animated.View style={[s.shadow, { width: pillWidth }]}>
+      {/* Shadow wrapper — separate from overflow:hidden clip */}
+      <Animated.View style={[s.shadow, { height: pillHeight }]}>
         <View style={s.pillClip}>
 
-          {/* ── Collapsed: single icon ── */}
-         
+          {/* ── Collapsed: single icon (centred in the circle) ── */}
           <Animated.View
             pointerEvents={isOpen ? "none" : "auto"}
             style={[s.layer, { opacity: triggerOp, transform: [{ scale: triggerScl }] }]}
@@ -184,11 +181,10 @@ export default function AnimatedTabBar(props: TabBarProps) {
             </Pressable>
           </Animated.View>
 
-          {/* ── Expanded: tab items ── */}
-          
+          {/* ── Expanded: tab items stacked vertically ── */}
           <Animated.View
             pointerEvents={isOpen ? "auto" : "none"}
-            style={[s.layer, s.tabsRow, { opacity: iconsOp, transform: [{ scale: iconsScale }] }]}
+            style={[s.layer, s.tabsColumn, { opacity: iconsOp, transform: [{ scale: iconsScale }] }]}
           >
             {visibleRoutes.map((route) => (
               <TabItem
@@ -208,16 +204,16 @@ export default function AnimatedTabBar(props: TabBarProps) {
 
 
 const s = StyleSheet.create({
+ 
   wrapper: {
     position: "absolute",
-    left: 0,
-    right: 0,
-    top : 830,
-    alignItems: "center",
+    top : 650,
+    right :5,
+    alignSelf: "center",
   },
 
   shadow: {
-    height: PILL_H,
+    width: PILL_W,
     borderRadius: PILL_R,
     backgroundColor: "rgba(10,10,10,0.84)",
     borderWidth: StyleSheet.hairlineWidth,
@@ -241,23 +237,24 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
 
-  tabsRow: {
-    flexDirection: "row",
-    paddingHorizontal: 8,
+  // Column of icons — fills the expanded pill vertically
+  tabsColumn: {
+    flexDirection: "column",
+    paddingVertical: 4,
   },
 
   triggerPressable: {
-    width: PILL_H,
-    height: PILL_H,
+    width: PILL_W,
+    height: PILL_W,
     alignItems: "center",
     justifyContent: "center",
   },
 
   tabItem: {
-    flex: 1,
+    width: PILL_W,
+    height: SLOT_H,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 6,
   },
 
   tabInner: {
