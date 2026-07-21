@@ -11,11 +11,7 @@
 
 ---
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/59cbaf0d-407e-42a5-bf3a-b842aa7048d9" width="260"/>
-  <img src="https://github.com/user-attachments/assets/5a3b108b-20b1-4415-950c-6fe447717698" width="260"/>
-  <img src="https://github.com/user-attachments/assets/c28727ad-2015-4c88-8d3a-8400ba3a5bf2" width="260"/>
-</p>
+
 
 <h3 align="center">
 A customizable AI client for connecting to virtually any AI provider using your own API keys.
