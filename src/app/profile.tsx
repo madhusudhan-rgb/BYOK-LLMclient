@@ -157,7 +157,7 @@ function ProfileContent() {
     : require("../../assets/images/profile.jpg");
 
   return (
-    <ImageBackground source = {require("../../assets/images/bgpfp5.jpg")} style = {styles.bg}>
+    <ImageBackground source = {require("../../assets/images/bgprof23.jpg")} style = {styles.bg}>
     <View style={[styles.bg]}>
       {/* Dark overlay */}
       <View style={styles.overlay} />
@@ -307,6 +307,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 40,
     gap: 16,
+    position : "absolute",
+    right : 63,
+    height  : 400,
+    top : 100,
+    width : "70%",
+    borderRadius : 45,
+    backgroundColor : "rgba(8, 171, 247, 0.45)"
   },
   avatarWrap: { position: "relative" },
   avatar: {
@@ -330,7 +337,7 @@ const styles = StyleSheet.create({
     borderColor: "#111",
   },
   nameWrap: { alignItems: "center", gap: 4 },
-  displayName: { color: "#fdf4f4", fontSize: 20, fontWeight: "700" },
+  displayName: { color: "#fbf4f4", fontSize: 20, fontWeight: "200" },
   username: { color: "rgba(254, 243, 243, 0.72)", fontSize: 13 },
 
   /* Edit name */

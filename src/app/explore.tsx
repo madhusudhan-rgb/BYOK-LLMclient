@@ -20,7 +20,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../utils/supabase";
 import { getCurrentUser } from "../utils/auth";
-
+import { CustomModal, ModalConfig } from "../components/CustomModal";
 // Types ───────
 
 type ModelType = "text" | "image" | "video";
@@ -236,7 +236,12 @@ function AddModelSheet({
   const [showSystemPrompt, setShowSystemPrompt] = useState(!!(initialModel?.system_prompt));
   const [keyVisible, setKeyVisible]         = useState(false);
   const [saving, setSaving]                 = useState(false);
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
+  const showModal = (config: ModalConfig) => {
+    setModalConfig(config);
+    setModalVisible(true);
+  };
   const applyPreset = (p: typeof PRESETS[0]) => {
     setApiUrl(p.apiUrl);
     setModel(p.model);
@@ -275,6 +280,7 @@ function AddModelSheet({
   };
 
   return (
+    
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={m.sheet}>
 
@@ -1002,6 +1008,16 @@ export default function Explore() {
             >
               <Ionicons name="add" size={17} color="rgba(255,255,255,0.5)" />
             </Pressable>
+            <Pressable style = {s.information} 
+            onPress={() =>
+              alert(
+              "To make new tabs click on the + on the top left corner\nTo go to a new tab click on the messageicon or home icon on the right side and the location depends on the devices viewport size\n\nhave fun"
+            )
+
+            }
+            >
+              <Ionicons name = "information" size = {23} color  = "white"/>
+            </Pressable>
           </ScrollView>
 
           {/* Clear chat — only when active */}
@@ -1016,7 +1032,9 @@ export default function Explore() {
         {!loadingModels && models.length === 0 && (
           <View style={s.emptyState}>
             <View style={s.emptyIcon}>
-              <Ionicons name="cube-outline" size={28} color="rgba(255,255,255,0.3)" />
+              
+              <Ionicons name="build" size={28} color="rgba(255,255,255,0.3)" />
+              
             </View>
             <Text style={s.emptyTitle}>No models yet</Text>
             <Text style={s.emptySubtitle}>
@@ -1167,6 +1185,19 @@ const s = StyleSheet.create({
     borderBottomColor: "rgba(255, 255, 255, 0)",
     backgroundColor: "rgba(0, 0, 0, 0)",
   },
+  information : {
+    width: 30,
+    height: 30,
+    borderRadius:23,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(238, 228, 228, 0.48)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+    marginLeft : 12,
+    
+    
+  },
   tabScroll: {
     paddingHorizontal: 10,
     paddingTop: 8,
@@ -1204,9 +1235,9 @@ const s = StyleSheet.create({
   addTab: {
     width: 30,
     height: 30,
-    borderRadius: 8,
+    borderRadius: 23,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgb(250, 238, 238)",
+    borderColor: "rgba(250, 238, 238, 0.4)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
