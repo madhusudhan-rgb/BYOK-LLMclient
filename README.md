@@ -8,5 +8,5 @@ Feel free to reach out incase of any bugs, issues, or problems regarding the pol
 
 Inquiries about the app can be made through the app or my instagram account<br><br>
 Responses will be sent in 1 business day<br><br>
-SOME VERSIONS MIGHT BE BROKEN AND DEPARCATED<br><br>
+SOME VERSIONS MIGHT BE BROKEN AND DEPRECATED<br><br>
 APP STILL IN DEVELOPMENT AND WILL EXPEREINCE TROUBLES<br><br>
