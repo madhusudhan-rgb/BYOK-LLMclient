@@ -8,6 +8,7 @@ import {
   View,
   Alert,
   ActivityIndicator,
+  Pressable
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -41,6 +42,22 @@ export default function Login() {
 
   return (
     <View style={[s.bg, { backgroundColor: "#0c0c0c" }]}>
+      <Pressable
+        onPress={() => router.push("/profile")}
+        style={{
+          position: "absolute",
+          top: 34,
+          left: 16,
+          zIndex: 10,
+        
+        }}
+      >
+        <Ionicons
+          name="arrow-back-outline"
+          size={25}
+          color="white"
+        />
+      </Pressable>
       <View style={s.overlay} />
       <View style={s.inner}>
         <Text style={s.title}>Welcome back</Text>

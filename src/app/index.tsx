@@ -107,7 +107,7 @@ const strip = [...MODELS, ...MODELS];
       <SafeAreaView style={s.fill}>
         {/* Top bar */}
         <View style={s.topBar}>
-          <Text style={s.version}>v1.4.0</Text>
+          <Text style={s.version}>v1.5.0</Text>
           <View style={s.topRight}>
             <Pressable
               style={s.iconBtn}
@@ -155,7 +155,7 @@ const strip = [...MODELS, ...MODELS];
 
           <Link href="/login" asChild>
             <Pressable style={s.cta}>
-              <Text style={s.ctaText}>Get Started</Text>
+              <Text style={s.ctaText}>Get Started if you have not</Text>
               <Ionicons name="arrow-forward" size={16} color="#000" />
             </Pressable>
           </Link>
@@ -252,7 +252,7 @@ bg:{
   ctaText: { color: "#000", fontWeight: "700", fontSize: 15 },
 
   // Ticker
-  tickerWrap: { paddingBottom: 32 },
+  tickerWrap: { paddingBottom: 7 },
   tickerLabel: {
     color: "rgb(255, 255, 255)",
     fontSize: 9,
@@ -266,6 +266,7 @@ bg:{
     flexDirection: "row",
     alignItems: "center",
     gap: 0,
+    
   },
   tickerItem: {
     flexDirection: "row",

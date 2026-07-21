@@ -12,7 +12,8 @@ import {
   View,
 } from "react-native";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
-
+import {Ionicons } from "@expo/vector-icons"
+import {router} from "expo-router"
 const CONTACT_EMAIL = "madhusudhant207@gmail.com";
 
 export default function Contact() {
@@ -285,11 +286,16 @@ Questions regarding this Privacy Policy may be directed to the developer using t
 ---
 
 By creating an account or using this App, you acknowledge that you have read, understood, and agreed to this Privacy Policy and Terms of Use.
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+|--------COPYRIGHT POLICIES INCOMING------------|
+PLEASE READ THE COPYRIGHT POLICIES FOR YOUR OWN BENEFIT AND KNOWLEDGE|
+-AS OF JULY 21ST 2026 AD---|
  
+
+
 AS OF JUNE 17TH 2026 
 
 COPYRIGHT POLICIES
@@ -453,6 +459,23 @@ express Statement of Purpose.
 
       {/* Page title */}
       <Text style={styles.pageTitle}>Contact</Text>
+      
+     <Pressable
+  onPress={() => router.push("/profile")}
+  style={{
+    position: "absolute",
+    top: 34,
+    left: 16,
+    zIndex: 10,
+  
+  }}
+>
+  <Ionicons
+    name="arrow-back-outline"
+    size={25}
+    color="white"
+  />
+</Pressable>
 
       {/* Email tap row */}
       <Pressable onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)}>
@@ -511,52 +534,113 @@ express Statement of Purpose.
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#111" },
-  content: { padding: 24, paddingTop: 64 },
+  
+  container: {
+    flex: 1,
+    backgroundColor: "#0D0D0D",
+  },
+
+  content: {
+    paddingHorizontal: 24,
+    paddingTop: 70,
+    paddingBottom: 30,
+  },
 
   pageTitle: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "800",
-    marginBottom: 32,
-    letterSpacing: -0.5,
+    color: "#FFF",
+    fontSize: 34,
+    fontWeight: "700",
+    marginBottom: 36,
+    letterSpacing: -1,
   },
 
   emailRow: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 4,
-  },
-  emailLabel: { color: "#555", fontSize: 12, marginBottom: 4, fontWeight: "600" },
-  emailValue: { color: "#fff", fontSize: 16, fontWeight: "500" },
-  emailArrow: { color: "#555", fontSize: 20 },
-
-  hr: { height: 1, backgroundColor: "#222", marginVertical: 28 },
-
-  formLabel: { color: "#555", fontSize: 12, fontWeight: "600", marginBottom: 12 },
-  input: {
-    backgroundColor: "#181818",
-    borderRadius: 10,
+    alignItems: "center",
+    backgroundColor: "#171717",
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
     borderWidth: 1,
     borderColor: "#222",
-    padding: 14,
-    color: "#fff",
-    fontSize: 15,
-    minHeight: 140,
-    lineHeight: 22,
-    marginBottom: 12,
   },
-  inputFocused: { borderColor: "#333" },
+
+  emailLabel: {
+    color: "#7A7A7A",
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  emailValue: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  emailArrow: {
+    color: "#777",
+    fontSize: 20,
+  },
+
+  hr: {
+    height: 1,
+    backgroundColor: "#232323",
+    marginVertical: 32,
+  },
+
+  formLabel: {
+    color: "#7A7A7A",
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  input: {
+    backgroundColor: "#171717",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#232323",
+    padding: 18,
+    color: "#FFF",
+    fontSize: 16,
+    minHeight: 160,
+    lineHeight: 24,
+    textAlignVertical: "top",
+    marginBottom: 18,
+  },
+
+  inputFocused: {
+    borderColor: "#3B82F6",
+  },
 
   sendBtn: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    paddingVertical: 14,
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    paddingVertical: 16,
     alignItems: "center",
+    justifyContent: "center",
   },
-  sendBtnText: { color: "#111", fontWeight: "700", fontSize: 15 },
 
-  links: { gap: 20 },
-  linkText: { color: "#555", fontSize: 14, fontWeight: "500" },
+  sendBtnText: {
+    color: "#111",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+
+  links: {
+    marginTop: 32,
+    gap: 18,
+  },
+
+  linkText: {
+    color: "#9A9A9A",
+    fontSize: 15,
+    fontWeight: "500",
+  },
 });

@@ -38,7 +38,9 @@ function ProfileContent() {
   const [user, setUser] = useState<any>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("");
+  // const [displayDate, setDisplayDate] = useState("");
   const [editingName, setEditingName] = useState(false);
+  // const [editingDatejoined, setEditingDate] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // const bannerX = useRef(new Animated.Value(SCREEN_WIDTH)).current;
@@ -137,7 +139,23 @@ function ProfileContent() {
       setSaving(false);
     }
   };
+// const saveDisplayDate = async() => {
+//   const trimmed  = displayDate.trim();
+//   if (!trimmed ) {Alert.alert("error", "displaydate cannot be empty") ; return;}
+//   setSaving(true);
+//   try {
+//     await updateProfile({ display_Date : trimmed});
+//     setEditingDate(false);
+//     setUser((prev : any) => prev ? {...prev, display_Date : trimmed}: prev);}
+//     catch {
+//       Alert.alert("error", "Failed to save date");
+//     }
+//     finally {
+//       setSaving(false);
+//     }
+//   };
 
+// }
   const handleLogout = async () => {
     Alert.alert("Log out", `Log out as ${displayName}?`, [
       { text: "Cancel", style: "cancel" },
@@ -200,6 +218,7 @@ function ProfileContent() {
       )}
 
       {/* Avatar + name */}
+      
       <View style={styles.profileSection}>
         <Pressable onPress={pickImage} style={styles.avatarWrap}>
           <Image
@@ -211,7 +230,32 @@ function ProfileContent() {
             <Ionicons name="camera" size={12} color="#fff" />
           </View>
         </Pressable>
-
+        {/* {editingDatejoined ? (
+          <View style={styles.editRow}>
+            <TextInput
+              style={styles.nameInput}
+              value={displayDate}
+              onChangeText={setDisplayName}
+              placeholder="Display name"
+              placeholderTextColor="#555"
+              autoFocus
+            />
+            <Pressable style={styles.saveBtn} onPress={saveDisplayDate} disabled={saving}>
+              <Text style={styles.saveBtnText}>{saving ? "…" : "Save"}</Text>
+            </Pressable>
+            <Pressable onPress={() => { setEditingDate(false); setDisplayDate(user?.display_date || user?.date || ""); }}>
+              <Ionicons name="close" size={20} color="#666" />
+            </Pressable>
+          </View>
+        ) : (
+              <Pressable onPress={() => setEditingDate(true)} style={styles.nameWrap}>
+            <Text style={styles.displayName}>{displayName || "Tap to set a date"}</Text>
+            <Text style={styles.username}>@{user?.username || "Date joined : N/A"}</Text>
+          </Pressable>
+        )} */}
+        <Pressable onPress = {()=>alert("Date you joined feature is coming soon!!!")} style= {{position : "absolute", bottom  : 176}}>
+          <Text style=  {{color : "white", fontWeight : "200"}}>Joined date : N/A</Text>
+          </Pressable>
         {editingName ? (
           <View style={styles.editRow}>
             <TextInput
@@ -236,9 +280,6 @@ function ProfileContent() {
           </Pressable>
         )}
       </View>
-
-     
-      
     {/* Main banner */}
       {/* Scrolling banner */}
       {/* <View style={styles.bannerWrap}>
@@ -252,7 +293,6 @@ function ProfileContent() {
     </ImageBackground>
   );
 }
-
 const styles = StyleSheet.create({
   bg: { flex: 1 },
   overlay: {

@@ -8,10 +8,12 @@ import {
   StyleSheet,
   ImageBackground,
   ActivityIndicator,
+  Pressable,
+
 } from "react-native";
 import { router } from "expo-router";
 import { register } from "../utils/auth";
-
+import {Ionicons} from  "@expo/vector-icons"
 export default function Signup() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -44,6 +46,22 @@ export default function Signup() {
 
   return (
     <View style={[s.bg, { backgroundColor: "#0c0c0c" }]}>
+      <Pressable
+  onPress={() => router.push("/profile")}
+  style={{
+    position: "absolute",
+    top: 34,
+    left: 16,
+    zIndex: 10,
+  
+  }}
+>
+  <Ionicons
+    name="arrow-back-outline"
+    size={25}
+    color="white"
+  />
+</Pressable>
       <View style={s.overlay} />
       <View style={s.inner}>
         <Text style={s.title}>Create account</Text>
