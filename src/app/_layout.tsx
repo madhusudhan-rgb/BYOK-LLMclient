@@ -66,7 +66,7 @@ function TabContent() {
             <Ionicons
               name={focused 
                 ?   "bar-chart" 
-                : "newspaper"}
+                : "bar-chart"}
               size={17}
               color={color}
             />

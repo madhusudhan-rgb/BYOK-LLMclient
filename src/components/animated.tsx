@@ -5,7 +5,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavbar } from "../context/NavbarContext";
@@ -65,8 +64,11 @@ export default function AnimatedTabBar(props: TabBarProps) {
   const { showNavbar } = useNavbar();
   const insets = useSafeAreaInsets();
 
-  const isOpenRef = useRef(false);
+  // Single source of truth for open/closed — updated at the START of each
+  // transition so pointerEvents switch immediately and can never get stuck.
   const [isOpen, setIsOpen] = useState(false);
+  const isOpenRef = useRef(false);   // ref mirrors state for use inside callbacks
+  const animating = useRef(false);   // blocks double-triggers mid-animation
 
   const visibleRoutes = props.state.routes.filter(
     r => props.descriptors[r.key]?.options?.tabBarIcon != null,
@@ -83,41 +85,65 @@ export default function AnimatedTabBar(props: TabBarProps) {
   const triggerOp   = useRef(new Animated.Value(1)).current;
   const triggerScl  = useRef(new Animated.Value(1)).current;
 
+  // Stop all pill animations so their callbacks don't fire after we've moved on
+  function stopPillAnims() {
+    pillHeight.stopAnimation();
+    iconsOp.stopAnimation();
+    iconsScale.stopAnimation();
+    triggerOp.stopAnimation();
+    triggerScl.stopAnimation();
+  }
+
   const collapseBar = useCallback(() => {
+    // Flip state immediately — pointerEvents switch right away
+    isOpenRef.current = false;
+    setIsOpen(false);
+    animating.current = true;
+
+    stopPillAnims();
+
     Animated.parallel([
-      Animated.spring(pillHeight, { toValue: PILL_W,  friction: 7, tension: 70,  useNativeDriver: false }),
-      Animated.timing(iconsOp,    { toValue: 0,        duration: 90,              useNativeDriver: true  }),
-      Animated.spring(iconsScale, { toValue: 0.7,      friction: 7, tension: 110, useNativeDriver: true  }),
-      Animated.timing(triggerOp,  { toValue: 1,        duration: 180, delay: 70, useNativeDriver: true  }),
-      Animated.spring(triggerScl, { toValue: 1,        friction: 6, tension: 120, useNativeDriver: true  }),
+      Animated.spring(pillHeight, { toValue: PILL_W, friction: 7, tension: 70,  useNativeDriver: false }),
+      Animated.timing(iconsOp,    { toValue: 0,       duration: 90,              useNativeDriver: true  }),
+      Animated.spring(iconsScale, { toValue: 0.7,     friction: 7, tension: 110, useNativeDriver: true  }),
+      Animated.timing(triggerOp,  { toValue: 1,       duration: 180, delay: 70,  useNativeDriver: true  }),
+      Animated.spring(triggerScl, { toValue: 1,       friction: 6, tension: 120, useNativeDriver: true  }),
     ]).start(() => {
-      isOpenRef.current = false;
-      setIsOpen(false);
+      animating.current = false;
     });
-  }, [pillHeight, iconsOp, iconsScale, triggerOp, triggerScl]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     Animated.parallel([
-      Animated.spring(screenY,     { toValue: showNavbar ? 0 : 120,    friction: 9, tension: 65, useNativeDriver: true }),
-      Animated.timing(screenOp,    { toValue: showNavbar ? 1 : 0,      duration: 180,            useNativeDriver: true }),
-      Animated.spring(screenScale, { toValue: showNavbar ? 1 : 0.92,   friction: 9, tension: 80, useNativeDriver: true }),
+      Animated.spring(screenY,     { toValue: showNavbar ? 0 : 120,   friction: 9, tension: 65, useNativeDriver: true }),
+      Animated.timing(screenOp,    { toValue: showNavbar ? 1 : 0,     duration: 180,            useNativeDriver: true }),
+      Animated.spring(screenScale, { toValue: showNavbar ? 1 : 0.92,  friction: 9, tension: 80, useNativeDriver: true }),
     ]).start();
     if (!showNavbar) collapseBar();
   }, [showNavbar, collapseBar]);
 
   function expandBar() {
-    if (isOpenRef.current) return;
+    if (isOpenRef.current || animating.current) return;
+
+    // Flip state immediately
     isOpenRef.current = true;
     setIsOpen(true);
+    animating.current = true;
+
     if (Platform.OS !== "web") Haptics.selectionAsync();
+
+    stopPillAnims();
 
     Animated.parallel([
       Animated.spring(pillHeight, { toValue: expandedH, friction: 7, tension: 52,  useNativeDriver: false }),
-      Animated.timing(triggerOp,  { toValue: 0,          duration: 90,             useNativeDriver: true  }),
+      Animated.timing(triggerOp,  { toValue: 0,          duration: 90,              useNativeDriver: true  }),
       Animated.spring(triggerScl, { toValue: 0.5,        friction: 6, tension: 160, useNativeDriver: true  }),
-      Animated.timing(iconsOp,    { toValue: 1,          duration: 200,            useNativeDriver: true  }),
+      Animated.timing(iconsOp,    { toValue: 1,          duration: 200,             useNativeDriver: true  }),
       Animated.spring(iconsScale, { toValue: 1,          friction: 7, tension: 80,  useNativeDriver: true  }),
-    ]).start();
+    ]).start(() => {
+      animating.current = false;
+    });
   }
 
   const handleTabPress = useCallback(
@@ -148,10 +174,8 @@ export default function AnimatedTabBar(props: TabBarProps) {
         { transform: [{ translateY: screenY }, { scale: screenScale }], opacity: screenOp },
       ]}
     >
-      {/* Shadow lives outside the overflow:hidden clip so it renders fully */}
       <Animated.View style={[s.shadow, { height: pillHeight }]}>
 
-        {/* Collapsed trigger — rendered below tabs so tabs sit on top when open */}
         <Animated.View
           pointerEvents={isOpen ? "none" : "auto"}
           style={[s.layer, { opacity: triggerOp, transform: [{ scale: triggerScl }] }]}
@@ -163,7 +187,6 @@ export default function AnimatedTabBar(props: TabBarProps) {
           </Pressable>
         </Animated.View>
 
-        {/* Expanded tabs — rendered on top; clip overflow here only, not on the shadow wrapper */}
         <Animated.View
           pointerEvents={isOpen ? "auto" : "none"}
           style={[s.layer, s.tabsColumn, { opacity: iconsOp, transform: [{ scale: iconsScale }] }]}
@@ -187,7 +210,7 @@ const s = StyleSheet.create({
   wrapper: {
     position: "absolute",
     right: 12,
-    top : 500
+    top: 500,
   },
 
   shadow: {
