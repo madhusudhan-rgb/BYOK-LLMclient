@@ -17,7 +17,7 @@ function TabContent() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarItemStyle: {
-          paddingVertical: 8,
+          paddingVertical: 12,
           borderRadius: 30,
           
         },
@@ -59,6 +59,21 @@ function TabContent() {
           href: null,
         }}
       />
+     <Tabs.Screen
+        name="Dash"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused 
+                ?   "bar-chart" 
+                : "newspaper"}
+              size={17}
+              color={color}
+            />
+          ),
+        }}
+      />
+      
 
       <Tabs.Screen
         name="profile"
