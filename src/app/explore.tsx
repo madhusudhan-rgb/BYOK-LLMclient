@@ -1175,7 +1175,7 @@ export default function Explore() {
 
 const s = StyleSheet.create({
   fill: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.58)" },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0.17)" },
 
   // ── Tab bar
   tabBar: {
@@ -1220,7 +1220,7 @@ const s = StyleSheet.create({
     letterSpacing: 0.1,
   },
   tabTextActive: {
-    color: "#ffab02",
+    color: "#f5f2ec",
     fontWeight: "600",
   },
   tabUnderline: {
@@ -1229,7 +1229,7 @@ const s = StyleSheet.create({
     left: 13,
     right: 13,
     height: 1.5,
-    backgroundColor: "#f0a910",
+    backgroundColor: "#f2f0ea",
     borderRadius: 1,
   },
   addTab: {
@@ -1258,12 +1258,13 @@ const s = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 44,
     gap: 10,
+    backgroundColor : "rgba(17, 17, 17, 0.49)"
   },
   emptyIcon: {
     width: 56,
     height: 56,
     borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(36, 33, 33, 0.56)",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.08)",
     alignItems: "center",
@@ -1271,7 +1272,7 @@ const s = StyleSheet.create({
     marginBottom: 4,
   },
   emptyTitle: {
-    color: "#fff",
+    color: "#efe7e7",
     fontSize: 19,
     fontWeight: "600",
     letterSpacing: -0.2,
@@ -1300,7 +1301,7 @@ const s = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 9,
-    backgroundColor: "rgba(27, 0, 0, 0.04)",
+    backgroundColor: "rgba(5, 5, 5, 0)",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255, 255, 255, 0.44)",
     alignItems: "center",
@@ -1317,13 +1318,13 @@ const s = StyleSheet.create({
   },
   mediaBubble: { padding: 0, backgroundColor: "transparent" },
   userBubble: {
-    backgroundColor: "rgba(43, 39, 39, 0.31)",
+    backgroundColor: "rgba(10, 10, 10, 0.53)",
     borderBottomRightRadius: 5,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(30, 200, 212, 0.1)",
   },
   botBubble: {
-    backgroundColor: "rgba(7, 7, 7, 0.31)",
+    backgroundColor: "rgba(0, 0, 0, 0.42)",
     borderBottomLeftRadius: 5,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.06)",
@@ -1354,13 +1355,13 @@ const s = StyleSheet.create({
     paddingBottom: Platform.OS === "ios" ? 16 : 14,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "rgba(255, 255, 255, 0)",
-    backgroundColor: "rgba(0, 0, 0, 0.01)",
+    backgroundColor: "rgba(0, 0, 0, 0)",
     
     gap: 8,
   },
   chatInput: {
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(2, 2, 2, 0)",
     color: "#fff",
     borderRadius: 22,
     paddingHorizontal: 16,
@@ -1369,7 +1370,7 @@ const s = StyleSheet.create({
     fontSize: 15,
     maxHeight: 120,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(255, 255, 255, 0.32)",
   },
   sendBtn: {
     width: 38,

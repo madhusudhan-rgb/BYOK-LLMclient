@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     top : 100,
     width : "70%",
     borderRadius : 45,
-    backgroundColor : "rgba(8, 171, 247, 0.45)"
+    backgroundColor : "rgba(9, 9, 9, 0.2)"
   },
   avatarWrap: { position: "relative" },
   avatar: {
