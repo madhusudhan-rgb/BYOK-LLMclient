@@ -1,3 +1,5 @@
+//you thought id hardcode my own api key here. lol
+
 import { useRef, useState } from "react";
 import {
     FlatList,
