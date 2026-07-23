@@ -1,7 +1,7 @@
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-
+//Aint finding keys here either buddy lol
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type BotIcon =
