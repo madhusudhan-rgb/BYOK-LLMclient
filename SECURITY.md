@@ -1,5 +1,5 @@
 # Security Policy
-
+AS OF JULT 23RD 2026
 ## Supported Versions
 
 This project is actively developed, and security updates will generally be provided for the latest version.
@@ -7,8 +7,8 @@ This project is actively developed, and security updates will generally be provi
 | Version | Supported |
 | ------- | --------- |
 | Latest release | ✅ |
-| Older releases | ⚠️ Limited support |
-| Unreleased versions | ❌ |
+| Older releases | ⚠️ Limited support but will work|
+| deprecated versions | ❌ zero support |
 
 ---
 
