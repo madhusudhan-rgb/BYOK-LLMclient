@@ -1045,7 +1045,7 @@ export default function Explore() {
               style={s.emptyBtn}
               onPress={() => {
                 if (!userId) {
-                  Alert.alert("Sign in required", "Log in to save and manage your models.");
+                  Alert.alert("Login required", "Log in to save and manage your models.");
                   return;
                 }
                 setAddOpen(true);
@@ -1248,7 +1248,8 @@ const s = StyleSheet.create({
     paddingLeft: 6,
     paddingBottom: 17,
     alignSelf: "flex-end",
-    borderColor : "rgb(255, 248, 248)"
+    
+    borderColor : "rgb(11, 10, 10)"
   },
 
   // ── State when there is no aimodel added or stuff yk

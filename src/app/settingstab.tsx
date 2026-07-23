@@ -19,6 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../utils/supabase";
 import { getCurrentUser } from "../utils/auth";
+import { isNativePlatformSupported } from "react-native-screens/lib/typescript/core";
 
 // ─── Storage keys
 const KEYS = {
@@ -133,12 +134,17 @@ export default function SettingsScreen() {
 
   // ── Toggle helpers ──
   async function toggleHaptics(v: boolean) {
+     alert("Haptics : "  + haptics)
+   
     setHaptics(v);
+    
     await AsyncStorage.setItem(KEYS.haptics, String(v));
+    
     if (v) Haptics.selectionAsync();
   }
 
   async function toggleTimestamps(v: boolean) {
+    alert("Timestamps : " + timestamps)
     setTimestamps(v);
     await AsyncStorage.setItem(KEYS.timestamps, String(v));
     if (haptics) Haptics.selectionAsync();

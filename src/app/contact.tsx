@@ -458,7 +458,7 @@ express Statement of Purpose.
       <CustomModal visible={modalVisible} config={modalConfig} onClose={() => setModalVisible(false)} />
 
       {/* Page title */}
-      <Text style={styles.pageTitle}>Contact</Text>
+      <Text style={styles.pageTitle}>Contact Us</Text>
       
      <Pressable
   onPress={() => router.push("/profile")}
