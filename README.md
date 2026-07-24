@@ -89,7 +89,7 @@ The application currently supports the following AI workloads:
 |-------|--------|
 | Text Models | Supported |
 | Image Generation | Supported |
-| Video Generation | Supported |
+| Video Generation | Limited-Supported |
 
 Additional model categories will be introduced in future releases.
 
