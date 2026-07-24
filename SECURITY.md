@@ -6,7 +6,7 @@ This project is actively developed, and security updates will generally be provi
 
 | Version | Supported |
 | ------- | --------- |
-| Latest release | ✅ |
+| Latest release | ✅ Full support|
 | Older releases | ⚠️ Limited support but will work|
 | deprecated versions | ❌ zero support |
 
