@@ -61,7 +61,7 @@ export default function Dash() {
 
   return (
     <ImageBackground
-      source={require("../../assets/images/bgpfp5.jpg")}
+      source={require("../../assets/images/dash.bg.jpg")}
       style={styles.bg}
     >
       <StatusBar barStyle="light-content" />
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: "rgba(255,255,255,0.25)",
+    color: "rgba(252, 245, 245, 0.89)",
     fontSize: 10,
     letterSpacing: 2,
     fontWeight: "600",
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
 
   card: {
     width: CARD,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(21, 20, 20, 0.24)",
     borderRadius: 18,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.1)",
@@ -228,14 +228,14 @@ const styles = StyleSheet.create({
   },
 
   cardName: {
-    color: "#fff",
+    color: "#eff0ee",
     fontSize: 15,
     fontWeight: "400",
     marginBottom: 3,
   },
 
   cardSub: {
-    color: "rgba(255,255,255,0.3)",
+    color: "rgb(243, 245, 240)",
     fontSize: 11,
     letterSpacing: 0.2,
   },

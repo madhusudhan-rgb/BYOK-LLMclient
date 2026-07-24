@@ -101,7 +101,7 @@ useEffect(() => {
 const strip = [...MODELS, ...MODELS];
   return (
 
-  <ImageBackground source = {require("../../assets/images/bgindex.jpg")}
+  <ImageBackground source = {require("../../assets/images/bgind.jpg")}
   style = {s.bg}
   >
     <View style={[s.fill]}>
@@ -143,8 +143,8 @@ const strip = [...MODELS, ...MODELS];
                   title: "Feedback",
                   message: "How are we doing? Your feedback helps us improve.",
                   buttons: [
-                    { text: "👍 Good", onPress: () => sendFeedback("Good") },
-                    { text: "👎 Bad",  onPress: () => sendFeedback("Bad"), style: "danger" },
+                    { text: "Good", onPress: () => sendFeedback("Good") },
+                    { text: "Bad",  onPress: () => sendFeedback("Bad"), style: "danger" },
                     { text: "View Updates", onPress: () => Linking.openURL("https://github.com/madhusudhan-rgb/TSX-proj") },
                     { text: "Cancel", style: "cancel" },
                   ],
@@ -197,7 +197,9 @@ const s = StyleSheet.create({
   fill: { flex: 1 ,
   },
 bg:{
-  flex:1
+  flex:1,
+  justifyContent : "center",
+  
 },
   // Top bar
   topBar: {
