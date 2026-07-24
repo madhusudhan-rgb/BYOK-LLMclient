@@ -1,5 +1,5 @@
 
-
+--row creation in supabase to store data 
 -- 1. Profiles table
 CREATE TABLE IF NOT EXISTS profiles (
   id        UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
