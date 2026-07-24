@@ -1,39 +1,75 @@
 # AI Playground
 
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)
-![VS Code](https://img.shields.io/badge/VS_Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-![Android](https://img.shields.io/badge/Android-34A853?style=for-the-badge&logo=android&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+<p align="center">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB">
+  <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+  <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white">
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white">
+  <img src="https://img.shields.io/badge/Android-34A853?style=for-the-badge&logo=android&logoColor=white">
+  <img src="https://img.shields.io/badge/VS_Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white">
+  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white">
+</p>
+
+<h3 align="center">
+AI Playground
+</h3>
+
+<p align="center">
+A customizable AI client that allows users to connect to virtually any compatible AI provider using their own API keys.
+</p>
 
 ---
 
+## Overview
 
+AI Playground is a React Native application designed to provide a flexible interface for interacting with modern AI services. Rather than being limited to a single provider, users can configure their own API endpoint, model, and authentication credentials to access text, image, and video generation models from a wide range of providers.
 
-<h3 align="center">
-A customizable AI client for connecting to virtually any AI provider using your own API keys.
-</h3>
+The application is provider-agnostic and is intended to work with any service exposing a compatible API.
 
 ---
 
 ## Features
 
-- Bring your own API keys
-- Configure custom AI models
-- Configure custom API endpoint URLs
-- Text AI support
-- Image generation support
-- Video generation support
-- Multiple AI providers
-- User accounts
-- Chat history synchronization
-- Profile management
-- Modern React Native interface
-- Secure authentication
-- Customizable AI playground
+### AI Providers
+
+- Bring Your Own API Keys
+- Custom API Endpoint URLs
+- Custom Model Configuration
+- Multiple Provider Support
+- OpenAI-Compatible APIs
+- OpenRouter
+- Groq
+- Ollama
+- LM Studio
+- Local AI Servers
+- Custom REST APIs
+
+### AI Capabilities
+
+- Text Generation
+- Image Generation
+- Video Generation
+- Multi-Provider Switching
+- Conversation History
+- Provider Configuration
+
+### User Features
+
+- Secure Authentication
+- User Profiles
+- Profile Customization
+- Cloud Chat Synchronization
+- Saved Preferences
+- Settings Management
+
+### Application
+
+- Modern React Native Interface
+- Built with Expo
+- Cross-Device Synchronization
+- Responsive UI
+- Ongoing Feature Updates
 
 ---
 
@@ -45,96 +81,110 @@ A customizable AI client for connecting to virtually any AI provider using your 
 
 ---
 
-## Supported Models
+## Supported Model Types
 
-Currently supported:
+The application currently supports the following AI workloads:
 
-- ✅ Text Models
-- ✅ Image Generation Models
-- ✅ Video Generation Models
+| Type | Status |
+|-------|--------|
+| Text Models | Supported |
+| Image Generation | Supported |
+| Video Generation | Supported |
 
-More model types will be added in future releases.
+Additional model categories will be introduced in future releases.
 
 ---
 
 ## Getting Started
 
-1. Download the latest release.
-2. Create an account or sign in.
+### Installation
+
+Download the latest application release from the repository.
+
+### Setup
+
+1. Create an account.
+2. Sign in.
 3. Add your API key.
 4. Enter the model name.
-5. Enter the endpoint URL.
-6. Start chatting.
+5. Enter the provider endpoint URL.
+6. Save the configuration.
+7. Begin interacting with your selected model.
 
-> AI Playground does **not** provide API keys. Users must obtain their own credentials from the AI provider they wish to use.
+> AI Playground does not supply API keys. Users are responsible for obtaining credentials from their chosen AI provider.
 
 ---
 
-## Account Storage
+## Account Data
 
-The following information is stored with your account:
+Depending on enabled features, the following information may be stored securely within your account:
 
-- API Keys
-- Chat History
 - Profile Information
+- API Configuration
+- API Keys
+- Conversation History
 - User Preferences
 
-Please review the Privacy Policy before using the application.
+Refer to the Privacy Policy for additional information.
 
 ---
 
 ## Supported Providers
 
-AI Playground is provider-agnostic and works with any compatible API.
+AI Playground is designed to work with providers offering compatible APIs, including but not limited to:
 
-Examples include:
-
-- OpenAI Compatible APIs
+- OpenAI-Compatible APIs
 - OpenRouter
 - Groq
-- Local LLM Servers
 - Ollama
 - LM Studio
+- Local AI Servers
+- Self-Hosted Models
 - Custom REST APIs
 
 ---
 
 ## Development Status
 
-AI Playground is currently under active development.
+AI Playground is under active development.
 
-You may encounter:
+The project is continually evolving and may contain:
 
-- Bugs
-- Performance issues
-- Missing features
-- UI changes
-- Deprecated releases
+- Experimental features
+- Performance improvements
+- User interface updates
+- Bug fixes
+- Breaking changes between releases
 
-Some versions may become unsupported as development continues.
+Older versions may eventually become unsupported.
 
 ---
 
-## Bug Reports
+## Reporting Issues
 
-When reporting an issue, please include:
+When submitting a bug report, please include the following information whenever possible:
 
 - Device Model
 - Android Version
-- App Version
+- Application Version
 - Steps to Reproduce
-- Screenshots (if applicable)
+- Expected Behavior
+- Actual Behavior
+- Screenshots or Screen Recordings
+
+Providing complete information helps reproduce and resolve issues more efficiently.
 
 ---
 
 ## Support
 
-Questions, feedback, and bug reports can be submitted through:
+For questions, feedback, or bug reports, contact through:
 
-- The application
+- GitHub Issues
+- The Application
 - Instagram
 
-Responses are typically provided within **1 business day**.
+Support requests are typically reviewed within one business day.
 
 ---
 
@@ -142,26 +192,27 @@ Responses are typically provided within **1 business day**.
 
 AI Playground is an independent client application.
 
-The app does **not** host, own, or provide any AI models.
+The application does not own, host, or provide AI models or APIs.
 
-Users are responsible for:
+Users are solely responsible for:
 
-- Their API keys
-- Provider usage costs
-- Generated content
-- Compliance with each provider's Terms of Service
+- API Keys
+- Provider Costs
+- Generated Content
+- Compliance with Provider Terms of Service
+- Usage of Third-Party APIs
 
 ---
 
 ## Privacy
 
-Please read the Privacy Policy before using the application.
+Please review the Privacy Policy before using the application.
 
 ---
 
 ## Copyright
 
-Please read the Copyright Policy before using generated content.
+Generated content may be subject to the policies and licensing terms of the selected AI provider. Users are responsible for complying with applicable copyright laws and provider policies.
 
 ---
 
@@ -178,4 +229,4 @@ Please read the Copyright Policy before using generated content.
 
 ## License
 
-See the LICENSE file for more information.
+This project is distributed under the terms of the LICENSE file included in this repository.
