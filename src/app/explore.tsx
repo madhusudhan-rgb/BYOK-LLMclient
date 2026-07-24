@@ -1328,7 +1328,7 @@ const s = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.42)",
     borderBottomLeftRadius: 5,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255, 255, 255, 0.53)",
   },
   bubbleText: { color: "rgba(255,255,255,0.82)", fontSize: 15, lineHeight: 22 },
   userBubbleText: { color: "#fff" },
