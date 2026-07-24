@@ -20,7 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../utils/supabase";
 import { getCurrentUser } from "../utils/auth";
 import { isNativePlatformSupported } from "react-native-screens/lib/typescript/core";
-
+// import { CustomModal, ModalConfig } from "../components/CustomModal";
 // ─── Storage keys
 const KEYS = {
   haptics:    "@settings/haptics",
@@ -94,7 +94,8 @@ export default function SettingsScreen() {
   const [chatCount, setChatCount]   = useState<number | null>(null);
   const [modelCount, setModelCount] = useState<number | null>(null);
   const [loading, setLoading]       = useState(true);
-
+  // const [modalVisible, setModalVisible] = useState(false);
+  // const [modalConfig, setModalConfig]   = useState<ModalConfig | null>(null);
   // ── Load everything on mount ──
   useEffect(() => {
     (async () => {
@@ -217,7 +218,10 @@ export default function SettingsScreen() {
     ?? (Constants.expoConfig as any)?.android?.versionCode?.toString()
     ?? null;
   const versionLabel = build ? `${version} (${build})` : version;
-
+// const showModal = (config: ModalConfig) => {
+//     setModalConfig(config);
+//     setModalVisible(true);
+//   };
   // ── Render ──
   return (
     <ImageBackground source={require("../../assets/images/bgexplore.jpg")} style={s.fill}>
@@ -328,11 +332,18 @@ export default function SettingsScreen() {
           {/* ── About */}
           <SectionLabel label="ABOUT" />
           <Group>
+            {/* <Pressable onPress = {()=>showModal({
+            title : "Version Number",
+            message :  "the version number of the app as of 7/24/26 is\t" + versionLabel ,
+            buttons : [{text : "Ok", style : "cancel" }]
+          })}
+          > */}
             <Row
               label="Version"
               subtitle={versionLabel}
               last={false}
             />
+            {/* </Pressable> */}
             {/* <Row
               label="Rate the app"
               onPress={() =>

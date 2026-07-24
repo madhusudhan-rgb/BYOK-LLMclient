@@ -17,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
 import { useNavbar } from "../context/NavbarContext";
+import Constants from "expo-constants";
 //List of all models available rn
 const MODELS = [
   { image: require("../../assets/images/openai.png"),  label: "GPT-4o · OpenAI" },
@@ -69,7 +70,12 @@ export default function HomeScreen() {
     }
   };
 
- 
+ const version = (Constants.expoConfig as any)?.version ?? "—";
+  const build   = (Constants.expoConfig as any)?.ios?.buildNumber
+    ?? (Constants.expoConfig as any)?.android?.versionCode?.toString()
+    ?? null;
+  const versionLabel = build ? `${version} (${build})` : version;
+
 
 // Ticker animation. Seems kinda buggy ik imma fix it in a bit
 const ITEM_WIDTH = 160; 
@@ -107,7 +113,13 @@ const strip = [...MODELS, ...MODELS];
       <SafeAreaView style={s.fill}>
         {/* Top bar */}
         <View style={s.topBar}>
-          <Text style={s.version}>v1.5.0</Text>
+          <Pressable onPress = {()=>showModal({
+            title : "Version Number",
+            message :  "the version number of the app as of 7/24/26 is\t" + versionLabel ,
+            buttons : [{text : "Ok", style : "cancel" }]
+          })}
+          >
+          <Text style={s.version}>{versionLabel}</Text></Pressable>
           <View style={s.topRight}>
             <Pressable
               style={s.iconBtn}
