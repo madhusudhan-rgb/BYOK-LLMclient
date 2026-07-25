@@ -113,7 +113,6 @@ export default function Dash() {
           ))}
         </ScrollView>
       </SafeAreaView>
-
       {/* WebView Modal */}
       <Modal
         visible={!!activeUrl}
@@ -164,7 +163,6 @@ export default function Dash() {
     </ImageBackground>
   );
 }
-
 const styles = StyleSheet.create({
   bg:   { flex: 1 },
   safe: { flex: 1 },

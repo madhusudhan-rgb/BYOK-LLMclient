@@ -11,7 +11,6 @@ import {
   StyleSheet,
   Text,
   View,
-  
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
@@ -35,24 +34,19 @@ export default function HomeScreen() {
   const { setShowNavbar } = useNavbar();
   const bannerX = useRef(new Animated.Value(0)).current;
   const scaleFeedback = useRef(new Animated.Value(1)).current;
-
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
-
   useEffect(() => { setShowNavbar(true); }, [setShowNavbar]);
-
   const showModal = (config: ModalConfig) => {
     setModalConfig(config);
     setModalVisible(true);
   };
-
   const bounce = (ref: Animated.Value, cb?: () => void) => {
     Animated.sequence([
       Animated.timing(ref, { toValue: 0.92, duration: 100, useNativeDriver: true }),
       Animated.timing(ref, { toValue: 1,    duration: 80, useNativeDriver: true }),
     ]).start(cb);
   };
-
   const sendFeedback = async (rating: "Good" | "Bad") => {
     try {
       const res = await fetch("https://formspree.io/f/mojowgkw", {
@@ -69,21 +63,15 @@ export default function HomeScreen() {
       showModal({ title: "Error", message: "Network error. Try again.", buttons: [{ text: "OK", style: "cancel" }] });
     }
   };
-
  const version = (Constants.expoConfig as any)?.version ?? "—";
   const build   = (Constants.expoConfig as any)?.ios?.buildNumber
     ?? (Constants.expoConfig as any)?.android?.versionCode?.toString()
     ?? null;
   const versionLabel = build ? `${version} (${build})` : version;
-
-
-// Ticker animation. Seems kinda buggy ik imma fix it in a bit
 const ITEM_WIDTH = 160; 
 const STRIP_WIDTH = MODELS.length * ITEM_WIDTH;
-
 useEffect(() => {
   bannerX.setValue(0);
-
   const anim = Animated.loop(
     Animated.timing(bannerX, {
       toValue: -STRIP_WIDTH,
@@ -92,26 +80,17 @@ useEffect(() => {
       useNativeDriver: true,
     })
   );
-
   anim.start();
-
   return () => anim.stop();
 }, [bannerX]);
-
 const strip = [...MODELS, ...MODELS];
   return (
-
   <ImageBackground source = {require("../../assets/images/bgind.jpg")}
   style = {s.bg}
   >
     <View style={[s.fill]}>
-      {/* Dark gradient overlay for better visualization of ui */}
-      
-
       <CustomModal visible={modalVisible} config={modalConfig} onClose={() => setModalVisible(false)} />
-
       <SafeAreaView style={s.fill}>
-        {/* Top bar */}
         <View style={s.topBar}>
           <Pressable onPress = {()=>showModal({
             title : "Version Number",
@@ -134,7 +113,6 @@ const strip = [...MODELS, ...MODELS];
             >
               <Ionicons name="information-outline" size={20} color="rgba(255,255,255,0.7)" />
             </Pressable>
-
             <Pressable
               style={s.iconBtn}
               onPress={() => {
@@ -157,14 +135,12 @@ const strip = [...MODELS, ...MODELS];
             </Pressable>
           </View>
         </View>
-        {/* Hero */}
         <View style={s.hero}>
           <Text style={s.eyebrow}>LLM CLIENT</Text>
           <Text style={s.title}>Your models,{"\n"}one place.</Text>
           <Text style={s.subtitle}>
             Chat, generate images, and utilize the latest AI models — all in one app.
           </Text>
-
           <Link href="/login" asChild>
             <Pressable style={s.cta}>
               <Text style={s.ctaText}>Get Started if you have not</Text>
@@ -172,8 +148,6 @@ const strip = [...MODELS, ...MODELS];
             </Pressable>
           </Link>
         </View>
-
-        {/* Model banner. another buggy syntax but works */}
         <View style={s.tickerWrap}>
           <Text style={s.tickerLabel}>COMPATIBLE MODELS</Text>
           <View style={s.ticker}>
@@ -192,7 +166,6 @@ const strip = [...MODELS, ...MODELS];
     </ImageBackground>
   );
 }
-
 const s = StyleSheet.create({
   fill: { flex: 1 ,
   },
