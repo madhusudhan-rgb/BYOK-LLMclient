@@ -450,6 +450,7 @@ express Statement of Purpose.
   };
 
   return (
+    
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
@@ -542,15 +543,15 @@ const styles = StyleSheet.create({
 
   content: {
     paddingHorizontal: 24,
-    paddingTop: 70,
-    paddingBottom: 30,
+    paddingTop: 90,
+    paddingBottom: 60,
   },
 
   pageTitle: {
     color: "#FFF",
     fontSize: 34,
     fontWeight: "700",
-    marginBottom: 36,
+    marginBottom: 40,
     letterSpacing: -1,
   },
 

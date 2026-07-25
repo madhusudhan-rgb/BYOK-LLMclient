@@ -94,7 +94,7 @@ const strip = [...MODELS, ...MODELS];
         <View style={s.topBar}>
           <Pressable onPress = {()=>showModal({
             title : "Version Number",
-            message :  "the version number of the app as of 7/24/26 is\t" + versionLabel ,
+            message :  "version:\t" + versionLabel ,
             buttons : [{text : "Ok", style : "cancel" }]
           })}
           >
@@ -143,7 +143,7 @@ const strip = [...MODELS, ...MODELS];
           </Text>
           <Link href="/login" asChild>
             <Pressable style={s.cta}>
-              <Text style={s.ctaText}>Get Started if you have not</Text>
+              <Text style={s.ctaText}>Get Started</Text>
               <Ionicons name="arrow-forward" size={16} color="#000" />
             </Pressable>
           </Link>
@@ -230,7 +230,7 @@ bg:{
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "flex-start",
-    backgroundColor: "#fff",
+    backgroundColor: "#f2e4e4f6",
     borderRadius: 50,
     paddingVertical: 13,
     paddingHorizontal: 24,

@@ -1259,7 +1259,7 @@ const s = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 44,
     gap: 10,
-    backgroundColor : "rgba(17, 17, 17, 0.49)"
+    backgroundColor : "rgba(17, 17, 17, 0.01)"
   },
   emptyIcon: {
     width: 56,
