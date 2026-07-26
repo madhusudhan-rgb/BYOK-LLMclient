@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   Alert,
   StyleSheet,
   ImageBackground,
@@ -50,12 +49,15 @@ export default function Signup() {
       <View style={s.inner}>
         <Pressable
           onPress={() => router.push("/profile")}
-          style={{
-            position: "absolute",
-            top: 50,
-            left: 20,
-            zIndex: 10,
-          }}
+          style={({ pressed }) => [
+            {
+              position: "absolute",
+              top: 50,
+              left: 20,
+              zIndex: 10,
+              opacity: pressed ? 0.5 : 1,
+            }
+          ]}
         >
           <Ionicons name="arrow-back" size={24} color="white" />
         </Pressable>
@@ -70,6 +72,7 @@ export default function Signup() {
           autoCapitalize="none"
           onChangeText={setUsername}
           value={username}
+          selectionColor="#fff"
         />
 
         <TextInput
@@ -79,25 +82,25 @@ export default function Signup() {
           secureTextEntry
           onChangeText={setPassword}
           value={password}
+          selectionColor="#fff"
         />
 
-        <TouchableOpacity
-          style={[s.button, loading && s.buttonDisabled]}
+        <Pressable
+          style={({ pressed }) => [s.button, (loading || pressed) && s.buttonDisabled]}
           onPress={handleSignup}
           disabled={loading}
-          activeOpacity={0.8}
         >
           {loading
             ? <ActivityIndicator color="#000" />
             : <Text style={s.buttonText}>Create account</Text>
           }
-        </TouchableOpacity>
+        </Pressable>
 
         <View style={s.footer}>
           <Text style={s.footerText}>Already have an account?</Text>
-          <TouchableOpacity onPress={() => router.push("/login")} hitSlop={8}>
+          <Pressable onPress={() => router.push("/login")} hitSlop={8} style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}>
             <Text style={s.footerLink}>Log in</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </ImageBackground>

@@ -6,12 +6,15 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { View } from "react-native";
 
 import { NavbarProvider } from "../context/NavbarContext";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import AnimatedTabBar from "../components/animated";
 
-// Auto-hide handled by Expo
+// Keep splash screen visible until JS is ready
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
 function TabContent() {
   return (
     <Tabs
@@ -83,12 +86,19 @@ function TabContent() {
 }
 
 export default function TabLayout() {
+  useEffect(() => {
+    // Hide splash screen as soon as the component mounts
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
+
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <NavbarProvider>
-            <TabContent />
+            <View style={{ flex: 1, backgroundColor: "#0c0c0c" }}>
+              <TabContent />
+            </View>
           </NavbarProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

@@ -503,16 +503,6 @@ export default function Explore() {
     if (!editingModel) return;
     const updated = await updateModel(editingModel.id, fields);
     setModels(prev => prev.map(m => m.id === updated.id ? updated : m));
-    if (localCache[updated.id]) {
-      localCache[updated.id].messages[0] = {
-        ...localCache[updated.id].messages[0],
-        text: updated.type === "image"
-          ? `Hi! I'm ${updated.name}. Describe what you'd like me to draw.`
-          : updated.type === "video"
-          ? `Hi! I'm ${updated.name}. Describe the video you want me to create.`
-          : `Hi! I'm ${updated.name}. How can I help?`,
-      };
-    }
     setEditingModel(null);
   };
 
@@ -575,7 +565,6 @@ export default function Explore() {
     const decoder = new TextDecoder();
     let fullReply = "";
     if (reader) { while (true) { const { done, value } = await reader.read(); if (done) break; for (const line of decoder.decode(value, { stream: true }).split("\n")) { if (!line.startsWith("data: ")) continue; const payload = line.slice(6).trim(); if (payload === "[DONE]") break; try { const delta = JSON.parse(payload)?.choices?.[0]?.delta?.content; if (delta) { fullReply += delta; setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: fullReply } : m)); } } catch { } } } }
-    else { const data = await res.json(); fullReply = data?.choices?.[0]?.message?.content ?? ""; setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: fullReply } : m)); }
     if (!fullReply) throw new Error("Empty reply.");
     historyRef.current.push({ role: "assistant", content: fullReply });
   };
@@ -678,7 +667,7 @@ export default function Explore() {
             <View style={s.emptyIcon}><Ionicons name="build" size={28} color="rgba(255,255,255,0.3)" /></View>
             <Text style={s.emptyTitle}>No models yet</Text>
             <Text style={s.emptySubtitle}>Tap + to add any AI model using your own API key.{"\n"}Works with OpenAI, Anthropic, Groq, Ollama, fal.ai, and more.</Text>
-            <Pressable style={s.emptyBtn} onPress={() => { if (!userId) { Alert.alert("Login required", "Log in to save and manage your models."); return; } setAddOpen(true); }}><Text style={s.emptyBtnText}>Add your first model</Text></Pressable>
+            <Pressable style={({ pressed }) => [s.emptyBtn, pressed && { opacity: 0.8 }]} onPress={() => { if (!userId) { Alert.alert("Login required", "Log in to save and manage your models."); return; } setAddOpen(true); }}><Text style={s.emptyBtnText}>Add your first model</Text></Pressable>
           </View>
         )}
 
@@ -692,15 +681,15 @@ export default function Explore() {
                   <View style={[s.msgRow, isUser && s.msgRowUser]}>
                     {!isUser && <View style={s.avatarCol}>{showAvatar ? <View style={s.botAvatar}><Text style={s.botAvatarText}>{activeModel.name.charAt(0).toUpperCase()}</Text></View> : <View style={{ width: 28 }} />}</View>}
                     <View style={[s.bubble, isUser ? s.userBubble : s.botBubble, (item.imageUrl || item.videoUrl) && s.mediaBubble]}>
-                      {item.imageUrl ? <Image source={{ uri: item.imageUrl }} style={s.generatedImage} resizeMode="cover" /> : item.videoUrl ? <View style={s.videoPlaceholder}><Ionicons name="play-circle-outline" size={34} color="rgba(255,255,255,0.5)" /><Text style={s.videoReadyText}>Video ready</Text></View> : <Text style={[s.bubbleText, isUser && s.userBubbleText]}>{item.text || (item.role === "assistant" && loading ? "▍" : "")}</Text>}
+                      {item.imageUrl ? <Image source={{ uri: item.imageUrl }} style={s.generatedImage} /> : item.videoUrl ? <View style={s.videoPlaceholder}><Ionicons name="play-circle-outline" size={34} color="rgba(255,255,255,0.5)" /><Text style={s.videoReadyText}>Video ready</Text></View> : <Text style={[s.bubbleText, isUser && s.userBubbleText]}>{item.text || (item.role === "assistant" && loading ? "▍" : "")}</Text>}
                     </View>
                   </View>
                 );
               }}
             />
             <Animated.View style={[s.inputBar, { transform: [{ scale: inputScale }] }]}>
-              <TextInput value={input} onChangeText={setInput} placeholder={activeModel.type === "video" ? "Describe a video…" : activeModel.type === "image" ? "Describe an image…" : "Message"} placeholderTextColor="rgba(255,255,255,0.25)" style={s.chatInput} onSubmitEditing={sendMessage} returnKeyType="send" multiline />
-              <Pressable style={[s.sendBtn, loading && s.sendBtnStop]} onPress={loading ? () => abortRef.current?.abort() : sendMessage}>
+              <TextInput value={input} onChangeText={setInput} placeholder={activeModel.type === "video" ? "Describe a video…" : activeModel.type === "image" ? "Describe an image…" : "Message"} placeholderTextColor="rgba(255,255,255,0.25)" style={s.chatInput} onSubmitEditing={sendMessage} returnKeyType="send" multiline selectionColor="#fff" />
+              <Pressable style={({ pressed }) => [s.sendBtn, loading && s.sendBtnStop, pressed && { opacity: 0.7 }]} onPress={loading ? () => abortRef.current?.abort() : sendMessage}>
                 <Ionicons name={loading ? "stop" : activeModel.type === "video" ? "videocam" : activeModel.type === "image" ? "image-outline" : "arrow-up"} size={15} color={loading ? "rgba(255,255,255,0.45)" : "#000"} />
               </Pressable>
             </Animated.View>
@@ -746,8 +735,8 @@ const s = StyleSheet.create({
   generatedImage: { width: 252, height: 252, borderRadius: 15 },
   videoPlaceholder: { width: 224, height: 126, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.05)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", gap: 8 },
   videoReadyText: { color: "rgba(255,255,255,0.45)", fontSize: 13 },
-  inputBar: { flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 12, paddingTop: 10, paddingBottom: Platform.OS === "ios" ? 16 : 14, backgroundColor: "transparent", gap: 8 },
-  chatInput: { flex: 1, backgroundColor: "rgba(2, 2, 2, 0.4)", color: "#fff", borderRadius: 22, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 20, fontSize: 15, maxHeight: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.32)" },
+  inputBar: { flexDirection: "row", alignItems: "flex-end", paddingLeft: 12, paddingRight: 68, paddingTop: 10, paddingBottom: Platform.OS === "ios" ? 16 : 14, backgroundColor: "transparent", gap: 8 },
+  chatInput: { flex: 1, backgroundColor: "rgba(2, 2, 2, 0.4)", color: "#fff", borderRadius: 22, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, fontSize: 15, maxHeight: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.32)" },
   sendBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
   sendBtnStop: { backgroundColor: "rgba(255,255,255,0.08)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.1)" },
 });
@@ -776,5 +765,5 @@ const m = StyleSheet.create({
   segmentTextActive: { color: "#fff",                    fontSize: 13, fontWeight: "600" },
   toggleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 13 },
   toggleLabel: { color: "#fff", fontSize: 15, flex: 1 },
-  collapsibleHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8, marginLeft: 2, marginRight: 2 },
+  collapsibleHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12, paddingRight: 4 },
 });

@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import Constants from "expo-constants";
 import * as Haptics from "expo-haptics";
-import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -19,23 +18,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../utils/supabase";
 import { getCurrentUser } from "../utils/auth";
-// import { CustomModal, ModalConfig } from "../components/CustomModal";
-// ─── Storage keys
+
 const KEYS = {
   haptics:    "@settings/haptics",
   timestamps: "@settings/timestamps",
 };
 
-// ─── Types 
 type Profile = { id: string; full_name: string | null; email: string | null };
 
-// ─── Helpers
-function initial(name: string | null | undefined) {
-  if (!name) return "?";
-  return name.trim().charAt(0).toUpperCase();
-}
-
-// ─── Row components
 function RowDivider() {
   return <View style={s.rowDivider} />;
 }
@@ -85,7 +75,6 @@ function Group({ children }: { children: React.ReactNode }) {
   return <View style={s.group}>{children}</View>;
 }
 
-// ─── Main screen───
 export default function SettingsScreen() {
   const [profile, setProfile]       = useState<Profile | null>(null);
   const [haptics, setHaptics]       = useState(true);
@@ -93,9 +82,7 @@ export default function SettingsScreen() {
   const [chatCount, setChatCount]   = useState<number | null>(null);
   const [modelCount, setModelCount] = useState<number | null>(null);
   const [loading, setLoading]       = useState(true);
-  // const [modalVisible, setModalVisible] = useState(false);
-  // const [modalConfig, setModalConfig]   = useState<ModalConfig | null>(null);
-  // ── Load everything on mount ──
+
   useEffect(() => {
     (async () => {
       const [h, ts, user] = await Promise.all([
@@ -132,7 +119,6 @@ export default function SettingsScreen() {
     })();
   }, []);
 
-  // ── Toggle helpers ──
   async function toggleHaptics(v: boolean) {
     setHaptics(v);
     await AsyncStorage.setItem(KEYS.haptics, String(v));
@@ -145,7 +131,6 @@ export default function SettingsScreen() {
     if (haptics) Haptics.selectionAsync();
   }
 
-  // ── Destructive actions ──
   function confirmClearChats() {
     if (haptics) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
@@ -190,33 +175,11 @@ export default function SettingsScreen() {
     );
   }
 
-  function confirmSignOut() {
-    if (haptics) Haptics.selectionAsync();
-    Alert.alert("Sign out?", "You'll be returned to the login screen.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Sign out",
-        style: "destructive",
-        onPress: async () => {
-          await supabase.auth.signOut();
-          router.replace("/login");
-        },
-      },
-    ]);
-  }
+  // Fixed deprecated constants
+  const version = Constants?.expoConfig?.version ?? "1.5.0";
+  const build   = (Constants?.expoConfig as any)?.android?.versionCode?.toString() ?? "1";
+  const versionLabel = `${version} (${build})`;
 
-  // ── Version string ──
-  const version = Constants?.expoConfig?.version ?? Constants?.manifest2?.extra?.expoClient?.version ?? "—";
-  const build   = (Constants?.expoConfig as any)?.ios?.buildNumber
-    ?? (Constants?.expoConfig as any)?.android?.versionCode?.toString()
-    ?? (Constants?.manifest2?.extra?.expoClient as any)?.android?.versionCode?.toString()
-    ?? null;
-  const versionLabel = build ? `${version} (${build})` : version;
-// const showModal = (config: ModalConfig) => {
-//     setModalConfig(config);
-//     setModalVisible(true);
-//   };
-  // ── Render ──
   return (
     <ImageBackground source={require("../../assets/images/bgexplore.jpg")} style={s.fill}>
       <View style={s.overlay} />
@@ -227,10 +190,8 @@ export default function SettingsScreen() {
           contentContainerStyle={s.content}
           showsVerticalScrollIndicator={false}
         >
-          
           <Text style={s.pageTitle}>Settings</Text>
 
-          {/* ── Chat behavior */}
           <SectionLabel label="CHAT" />
           <Group>
             <Row
@@ -272,7 +233,6 @@ export default function SettingsScreen() {
             />
           </Group>
 
-          {/* ── Models & keys  */}
           <SectionLabel label="MODELS & API KEYS" />
           <Group>
             <Row
@@ -293,54 +253,14 @@ export default function SettingsScreen() {
             />
           </Group>
 
-          {/* ── About */}
           <SectionLabel label="ABOUT" />
           <Group>
-            {/* <Pressable onPress = {()=>showModal({
-            title : "Version Number",
-            message :  "the version number of the app as of 7/24/26 is\t" + versionLabel ,
-            buttons : [{text : "Ok", style : "cancel" }]
-          })}
-          > */}
             <Row
               label="Version"
               subtitle={versionLabel}
-              last={false}
+              last={true}
             />
-            {/* </Pressable> */}
-            {/* <Row
-              label="Rate the app"
-              onPress={() =>
-                Linking.openURL(
-                  Platform.OS === "ios"
-                    ? "https://apps.apple.com/app/idYOUR_APP_ID"
-                    : "https://play.google.com/store/apps/details?id=YOUR_PACKAGE_NAME"
-                )
-              }
-            />
-            <Row
-              label="Privacy policy"
-              onPress={() => Linking.openURL("https://go")}
-            />
-            <Row
-              label="Terms of service"
-              onPress={() => Linking.openURL("https://your-domain.com/terms")}
-              last
-            /> */}
           </Group>
-
-          {/* ── Sign out ────*/}
-          <SectionLabel label="" />
-          {/* <Group>
-            <Pressable
-              style={({ pressed }) => [s.row, s.signOutRow, pressed && s.rowPressed]}
-              onPress={confirmSignOut}
-            >
-              <Text style={[s.rowLabel, s.rowDestructive, { textAlign: "center", flex: 1 }]}>
-                Sign out
-              </Text>
-            </Pressable>
-          </Group> */}
 
           <View style={{ height: 48 }} />
         </ScrollView>
@@ -349,14 +269,12 @@ export default function SettingsScreen() {
   );
 }
 
-// ─── Styles────────
 const s = StyleSheet.create({
   fill:    { flex: 1 },
   overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0.27)" },
   scroll:  { flex: 1 },
   content: { paddingHorizontal: 16, paddingTop: 12 },
 
-  // Page header
   pageTitle: {
     fontSize: 30,
     fontWeight: "300",
@@ -366,48 +284,6 @@ const s = StyleSheet.create({
     marginLeft: 4,
   },
 
-  // Profile card
-  profileCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(19, 19, 19, 0.69)",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.08)",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 14,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(5, 4, 4, 0)",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.15)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "500",
-  },
-  profileInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  profileName: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  profileEmail: {
-    color: "rgba(255,255,255,0.38)",
-    fontSize: 13,
-  },
-
-  // Section label
   sectionLabel: {
     fontSize: 11,
     fontWeight: "600",
@@ -418,7 +294,6 @@ const s = StyleSheet.create({
     marginLeft: 4,
   },
 
-  // Group container
   group: {
     backgroundColor: "rgba(11, 10, 10, 0.35)",
     borderWidth: StyleSheet.hairlineWidth,
@@ -427,7 +302,6 @@ const s = StyleSheet.create({
     overflow: "hidden",
   },
 
-  // Row
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -462,9 +336,4 @@ const s = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.33)",
     marginLeft: 16,
   },
-
-  // Sign out row
-  // signOutRow: {
-  //   justifyContent: "center",
-  // },
 });

@@ -198,11 +198,7 @@ function ModelFormModal({
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={sh.sheet}>
-
-        {/* Drag handle */}
         <View style={sh.handle} />
-
-        {/* Header */}
         <View style={sh.header}>
           <Pressable onPress={onClose} hitSlop={12}>
             <Text style={sh.cancel}>Cancel</Text>
@@ -221,7 +217,6 @@ function ModelFormModal({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Presets */}
           <Text style={sh.sectionLabel}>QUICK FILL</Text>
           <ScrollView
             horizontal
@@ -229,13 +224,12 @@ function ModelFormModal({
             contentContainerStyle={sh.presetsRow}
           >
             {PRESETS.map(p => (
-              <Pressable key={p.label} style={sh.pill} onPress={() => applyPreset(p)}>
+              <Pressable key={p.label} style={({ pressed }) => [sh.pill, pressed && { opacity: 0.6 }]} onPress={() => applyPreset(p)}>
                 <Text style={sh.pillText}>{p.label}</Text>
               </Pressable>
             ))}
           </ScrollView>
 
-          {/* Name */}
           <Text style={sh.sectionLabel}>NAME</Text>
           <View style={sh.group}>
             <TextInput
@@ -244,10 +238,10 @@ function ModelFormModal({
               placeholderTextColor="rgba(255,255,255,0.2)"
               value={f.name}
               onChangeText={v => set("name", v)}
+              selectionColor="#fff"
             />
           </View>
 
-          {/* API Key — hidden for Pollinations (no key needed) */}
           {!(f.type === "image" && f.imageFormat === "pollinations") && (<>
           <Text style={sh.sectionLabel}>API KEY</Text>
           <View style={sh.group}>
@@ -261,6 +255,7 @@ function ModelFormModal({
                 secureTextEntry={!keyVisible}
                 autoCapitalize="none"
                 autoCorrect={false}
+                selectionColor="#fff"
               />
               <Pressable onPress={() => setKeyVisible(v => !v)} hitSlop={12} style={sh.eyeBtn}>
                 <Ionicons
@@ -273,7 +268,6 @@ function ModelFormModal({
           </View>
           </>)}
 
-          {/* Endpoint & Model */}
           <Text style={sh.sectionLabel}>ENDPOINT & MODEL ID</Text>
           <View style={sh.group}>
             <TextInput
@@ -285,6 +279,7 @@ function ModelFormModal({
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="url"
+              selectionColor="#fff"
             />
             <TextInput
               style={sh.field}
@@ -294,10 +289,10 @@ function ModelFormModal({
               onChangeText={v => set("model", v)}
               autoCapitalize="none"
               autoCorrect={false}
+              selectionColor="#fff"
             />
           </View>
 
-          {/* Type */}
           <Text style={sh.sectionLabel}>TYPE</Text>
           <View style={sh.group}>
             <View style={sh.segRow}>
@@ -315,7 +310,6 @@ function ModelFormModal({
             </View>
           </View>
 
-          {/* Text-specific */}
           {f.type === "text" && (
             <>
               <Text style={sh.sectionLabel}>API FORMAT</Text>
@@ -350,7 +344,6 @@ function ModelFormModal({
             </>
           )}
 
-          {/* Image-specific */}
           {f.type === "image" && (
             <>
               <Text style={sh.sectionLabel}>IMAGE FORMAT</Text>
@@ -370,7 +363,6 @@ function ModelFormModal({
             </>
           )}
 
-          {/* Video-specific */}
           {f.type === "video" && (
             <>
               <Text style={sh.sectionLabel}>VIDEO FORMAT</Text>
@@ -390,7 +382,6 @@ function ModelFormModal({
             </>
           )}
 
-          {/* System prompt */}
           {f.type === "text" && (
             <>
               <Pressable
@@ -413,6 +404,7 @@ function ModelFormModal({
                     value={f.systemPrompt}
                     onChangeText={v => set("systemPrompt", v)}
                     multiline
+                    selectionColor="#fff"
                   />
                 </View>
               )}
@@ -426,32 +418,6 @@ function ModelFormModal({
   );
 }
 
-// ─── Type badge ────────────────────────────────────────────────────────────────
-
-function TypeBadge({ type }: { type: ModelType }) {
-  return (
-    <View style={[badge.root, badge[type]]}>
-      <Text style={badge.text}>{TYPE_LABEL[type]}</Text>
-    </View>
-  );
-}
-
-const badge = StyleSheet.create({
-  root: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 5,
-    alignSelf: "flex-start",
-  },
-  text: { fontSize: 10, fontWeight: "600", letterSpacing: 0.2 },
-  text_color: { color: "rgba(255,255,255,0.55)" },
-  // per-type tints
-  
-  image: { backgroundColor: "rgba(120,160,255,0.12)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(120,160,255,0.2)" },
-  video: { backgroundColor: "rgba(255,140,80,0.12)",  borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,140,80,0.2)"  },
-} as any);
-
-// Override text per type inline — simpler than fighting TS style inference
 function TypeBadgeLabel({ type }: { type: ModelType }) {
   const colors: Record<ModelType, string> = {
     text:  "rgba(255,255,255,0.45)",
@@ -484,8 +450,6 @@ function TypeBadgeLabel({ type }: { type: ModelType }) {
   );
 }
 
-// ─── Main screen ───────────────────────────────────────────────────────────────
-
 export default function ApiKeyInput() {
   const [userId, setUserId]   = useState<string | null>(null);
   const [models, setModels]   = useState<CustomModel[]>([]);
@@ -495,7 +459,6 @@ export default function ApiKeyInput() {
 
   useEffect(() => {
     let mounted = true;
-
     const loadData = async () => {
       const user = await getCurrentUser();
       if (!mounted) return;
@@ -514,9 +477,7 @@ export default function ApiKeyInput() {
         if (mounted) setLoading(false);
       }
     };
-
     loadData();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (mounted) {
         if (session?.user) {
@@ -529,7 +490,6 @@ export default function ApiKeyInput() {
         }
       }
     });
-
     return () => {
       mounted = false;
       subscription.unsubscribe();
@@ -585,7 +545,6 @@ export default function ApiKeyInput() {
     );
   };
 
-  // Group by type
   const grouped: Record<ModelType, CustomModel[]> = { text: [], image: [], video: [] };
   for (const m of models) grouped[m.type].push(m);
   const sections = (["text", "image", "video"] as ModelType[]).filter(
@@ -596,10 +555,8 @@ export default function ApiKeyInput() {
     <View style={[s.bg, { backgroundColor: "#0c0c0c" }]}>
       <View style={s.overlay} />
       <SafeAreaView style={s.fill}>
-
-        {/* ── Header ── */}
         <View style={s.header}>
-          <Pressable onPress={() => router.back()} hitSlop={12} style={s.backBtn}>
+          <Pressable onPress={() => router.back()} hitSlop={12} style={({ pressed }) => [s.backBtn, pressed && { opacity: 0.6 }]}>
             <Ionicons name="chevron-back" size={20} color="#fff" />
             <Text style={s.backLabel}>Back</Text>
           </Pressable>
@@ -620,7 +577,6 @@ export default function ApiKeyInput() {
           contentContainerStyle={s.body}
           showsVerticalScrollIndicator={false}
         >
-          {/* Not logged in */}
           {!userId && !loading && (
             <View style={s.emptyState}>
               <View style={s.emptyIcon}>
@@ -630,13 +586,12 @@ export default function ApiKeyInput() {
               <Text style={s.emptySubtitle}>
                 Your models are saved to your account so they sync across devices.
               </Text>
-              <Pressable style={s.emptyBtn} onPress={() => router.push("/login")}>
+              <Pressable style={({ pressed }) => [s.emptyBtn, pressed && { opacity: 0.8 }]} onPress={() => router.push("/login")}>
                 <Text style={s.emptyBtnText}>Sign in</Text>
               </Pressable>
             </View>
           )}
 
-          {/* Empty */}
           {userId && !loading && models.length === 0 && (
             <View style={s.emptyState}>
               <View style={s.emptyIcon}>
@@ -647,13 +602,12 @@ export default function ApiKeyInput() {
                 Add any AI model using your own API key.{"\n"}
                 Works with OpenAI, Anthropic, Groq, Ollama, fal.ai, and more.
               </Text>
-              <Pressable style={s.emptyBtn} onPress={() => setAddOpen(true)}>
+              <Pressable style={({ pressed }) => [s.emptyBtn, pressed && { opacity: 0.8 }]} onPress={() => setAddOpen(true)}>
                 <Text style={s.emptyBtnText}>Add your first model</Text>
               </Pressable>
             </View>
           )}
 
-          {/* Model list */}
           {sections.map((type, si) => (
             <View key={type} style={[s.section, si === 0 && { marginTop: 4 }]}>
               <Text style={s.sectionLabel}>{TYPE_LABEL[type].toUpperCase()}</Text>
@@ -663,14 +617,11 @@ export default function ApiKeyInput() {
                     key={model.id}
                     style={[s.row, i < grouped[type].length - 1 && s.rowDivider]}
                   >
-                    {/* Initial badge */}
                     <View style={s.initial}>
                       <Text style={s.initialText}>
                         {model.name.charAt(0).toUpperCase()}
                       </Text>
                     </View>
-
-                    {/* Info */}
                     <View style={s.rowBody}>
                       <View style={s.rowNameRow}>
                         <Text style={s.rowName} numberOfLines={1}>{model.name}</Text>
@@ -684,20 +635,18 @@ export default function ApiKeyInput() {
                           : "No endpoint"}
                       </Text>
                     </View>
-
-                    {/* Actions */}
                     <View style={s.rowActions}>
                       <Pressable
                         onPress={() => { setEditing(model); setAddOpen(true); }}
                         hitSlop={10}
-                        style={s.iconBtn}
+                        style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.5 }]}
                       >
                         <Ionicons name="pencil-outline" size={15} color="rgba(255,255,255,0.35)" />
                       </Pressable>
                       <Pressable
                         onPress={() => handleDelete(model)}
                         hitSlop={10}
-                        style={s.iconBtn}
+                        style={({ pressed }) => [s.iconBtn, pressed && { opacity: 0.5 }]}
                       >
                         <Ionicons name="trash-outline" size={15} color="rgba(255,69,58,0.55)" />
                       </Pressable>
@@ -707,12 +656,10 @@ export default function ApiKeyInput() {
               </View>
             </View>
           ))}
-
-          <View style={{ height: 48 }} />
+          <View style={{ height: 100 }} />
         </ScrollView>
       </SafeAreaView>
 
-      {/* Add / Edit modal */}
       {addOpen && (
         <ModelFormModal
           initial={editing ? modelToForm(editing) : undefined}
@@ -725,14 +672,10 @@ export default function ApiKeyInput() {
   );
 }
 
-// ─── Styles ────────────────────────────────────────────────────────────────────
-
 const s = StyleSheet.create({
   bg:   { flex: 1 },
   fill: { flex: 1 },
   overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0)" },
-
-  // Header
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -763,10 +706,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   body: { paddingHorizontal: 16, paddingTop: 16 },
-
-  // Empty state
   emptyState: {
     alignItems: "center",
     paddingTop: 72,
@@ -799,8 +739,6 @@ const s = StyleSheet.create({
     paddingVertical: 12,
   },
   emptyBtnText: { color: "#000", fontSize: 14, fontWeight: "600" },
-
-  // List
   section:      { marginBottom: 28 },
   sectionLabel: {
     color: "rgba(255,255,255,0.28)",
@@ -828,8 +766,6 @@ const s = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "rgba(255,255,255,0.07)",
   },
-
-  // Initial badge
   initial: {
     width: 38,
     height: 38,
@@ -842,7 +778,6 @@ const s = StyleSheet.create({
     flexShrink: 0,
   },
   initialText: { color: "rgba(255,255,255,0.7)", fontSize: 15, fontWeight: "700" },
-
   rowBody:    { flex: 1, minWidth: 0 },
   rowNameRow: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 3 },
   rowName:    { color: "#fff", fontSize: 15, fontWeight: "500", flexShrink: 1 },
@@ -851,11 +786,8 @@ const s = StyleSheet.create({
   iconBtn:    { padding: 7 },
 });
 
-// ─── Sheet styles ──────────────────────────────────────────────────────────────
-
 const sh = StyleSheet.create({
   sheet: { flex: 1, backgroundColor: "#0e0e0e" },
-
   handle: {
     width: 36,
     height: 4,
@@ -865,7 +797,6 @@ const sh = StyleSheet.create({
     marginTop: 10,
     marginBottom: 6,
   },
-
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -879,9 +810,7 @@ const sh = StyleSheet.create({
   title:  { color: "#fff", fontSize: 16, fontWeight: "600", letterSpacing: -0.1 },
   cancel: { color: "rgba(255,255,255,0.45)", fontSize: 15, minWidth: 56 },
   done:   { color: "#fff", fontSize: 15, fontWeight: "600", minWidth: 56, textAlign: "right" },
-
   body: { paddingHorizontal: 20, paddingTop: 24 },
-
   sectionLabel: {
     color: "rgba(255,255,255,0.28)",
     fontSize: 11,
@@ -890,7 +819,6 @@ const sh = StyleSheet.create({
     marginBottom: 8,
     marginLeft: 2,
   },
-
   presetsRow: { gap: 6, marginBottom: 24 },
   pill: {
     paddingHorizontal: 13,
@@ -901,7 +829,6 @@ const sh = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.09)",
   },
   pillText: { color: "rgba(255,255,255,0.65)", fontSize: 13, fontWeight: "500" },
-
   group: {
     backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 13,
@@ -922,13 +849,11 @@ const sh = StyleSheet.create({
   },
   fieldRow: { flexDirection: "row", alignItems: "center" },
   eyeBtn:   { paddingRight: 14 },
-
   segRow:            { flexDirection: "row", padding: 4, gap: 4 },
   seg:               { flex: 1, paddingVertical: 9, borderRadius: 9, alignItems: "center" },
   segActive:         { backgroundColor: "rgba(255,255,255,0.11)" },
   segText:           { color: "rgba(255,255,255,0.3)",  fontSize: 13, fontWeight: "500" },
   segTextActive:     { color: "#fff",                    fontSize: 13, fontWeight: "600" },
-
   toggleRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -937,7 +862,6 @@ const sh = StyleSheet.create({
     paddingVertical: 13,
   },
   toggleLabel: { color: "#fff", fontSize: 15, flex: 1 },
-
   collapseHeader: {
     flexDirection: "row",
     alignItems: "center",

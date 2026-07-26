@@ -9,424 +9,71 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
-import {Ionicons } from "@expo/vector-icons"
-import {router} from "expo-router"
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+
 const CONTACT_EMAIL = "madhusudhant207@gmail.com";
 
 export default function Contact() {
-  const scaleTerms = useRef(new Animated.Value(1));
-  const scalerndm = useRef(new Animated.Value(1));
-  const scaleSend = useRef(new Animated.Value(1));
-
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
   const [message, setMessage] = useState("");
   const [focused, setFocused] = useState(false);
+
+  const scaleSend = useRef(new Animated.Value(1)).current;
 
   const showModal = (config: ModalConfig) => {
     setModalConfig(config);
     setModalVisible(true);
   };
 
-  const bounce = (ref: React.RefObject<Animated.Value>) => {
+  const bounce = (ref: Animated.Value) => {
     Animated.sequence([
-      Animated.timing(ref.current, { toValue: 0.96, duration: 70, useNativeDriver: true }),
-      Animated.timing(ref.current, { toValue: 1, duration: 80, useNativeDriver: true }),
+      Animated.timing(ref, { toValue: 0.96, duration: 70, useNativeDriver: true }),
+      Animated.timing(ref, { toValue: 1, duration: 80, useNativeDriver: true }),
     ]).start();
   };
 
   const exitApp = () => {
-    if (Platform.OS === "android") { BackHandler.exitApp(); return; }
-    showModal({ title: "Exit", message: "Close the app from the app switcher.", buttons: [{ text: "OK", style: "cancel" }] });
+    if (Platform.OS === "android") {
+      BackHandler.exitApp();
+    } else {
+      showModal({
+        title: "Close app",
+        message: "Please close the app manually.",
+        buttons: [{ text: "OK", style: "cancel" }],
+      });
+    }
   };
 
   const showPrivacyAlert = () => {
     showModal({
-      title: "Terms & Conditions",
-      message: `PRIVACY AND COPYRIGHT POLICIES(scroll below to view copyright policies)
-
-
-      
-# Privacy Policy & Terms of Use
-**Last Updated:** July 20, 2026
-By using this App, you agree to this Privacy Policy and Terms of Use.
-
-# 2. Information We Collect
-
-Depending on how you use the App, we may collect:
-
-### Account Information
-
-* Username
-* Email address (if provided)
-* Profile picture
-* User ID
-
-### AI Conversations
-
-* Messages you send to AI models
-* AI-generated responses
-* Conversation timestamps
-* Api key is also saved in the database as the app requires users to put their own 
-* It is safeguarded from abuse
-
-### Device Information
-
-* Device model
-* Operating system version
-* App version
-* Anonymous crash logs
-* Diagnostic information
-
-### Usage Information
-
-* Features used
-* App performance data
-* Error reports
-* General analytics
-
----
-
-# 3. How We Use Your Information
-
-Your information may be used to:
-
-* Provide AI chat functionality.
-* Synchronize your account across devices.
-* Save your conversation history.
-* Improve app performance.
-* Fix bugs.
-* Prevent abuse and fraud.
-* Respond to support requests.
-* Develop future features.
-
----
-
-# 4. AI Providers
-
-The App communicates with third-party AI providers, which may include:
-
-* OpenAI
-* NVIDIA
-* Meta
-* Alibaba
-* Mistral AI
-* ByteDance
-* Google
-* Other AI providers added in future updates.
-
-When you send a prompt, your message may be transmitted to the selected AI provider for processing. Each provider has its own Privacy Policy and Terms of Service.
-
----
-
-# 5. Storage of Your Information
-
-Your account information and chat history may be stored on secure cloud servers.
-
-Reasonable technical and organizational measures are used to help protect your information. However, no online service can guarantee absolute security.
-
----
-
-# 6. Chat History
-
-Your conversations may be stored so they remain available when you return to the App.
-
-You may delete your conversation history using the available in-app options.
-
-Deleting conversations may permanently remove them from your account.
-
----
-
-# 7. API Keys
-
-This project is open source.
-
-Users may supply their own API keys.
-
-Developer-provided API keys are intended solely for use within the App.
-
-Attempting to extract, redistribute, automate, abuse, or otherwise use developer-provided API credentials outside their intended purpose is prohibited. Access may be revoked without notice.
-
----
-
-# 8. User Responsibilities
-
-You agree not to:
-
-* Abuse or interfere with the App.
-* Attempt unauthorized access.
-* Reverse engineer the backend for malicious purposes.
-* Use automated systems to abuse developer resources.
-* Upload malicious software.
-* Violate applicable laws while using the App.
-
----
-
-# 9. Intellectual Property
-
-OpenAI, NVIDIA, Meta, Google, ByteDance, Cohere ai, Poolside Ai, Flux Schnell, Stable diffusions and all other company names, product names, logos, and trademarks remain the property of their respective owners.
-
-Their appearance within the App does not imply sponsorship, endorsement, partnership, or affiliation.
-
----
-
-# 10. Open Source
-
-The App's source code is publicly available.
-
-Open-source availability does not grant permission to misuse developer infrastructure, services, or API credentials.
-Key word is misuse
-you can edit the code and use it to your liking given that you dont mess with the restricted things such as api credentials
-
----
-
-# 11. Children's Privacy
-
-This App is not intended for children under 13 years of age (or the minimum age required in your country).
-
-If we become aware that personal information has been collected from a child without appropriate consent, we will take reasonable steps to remove it.
-Please do contact us 
-
----
-
-# 12. Data Retention
-
-We retain information only as long as reasonably necessary to:
-
-* Maintain your account.
-* Provide requested services.
-* Meet legal obligations.
-* Resolve disputes.
-* Enforce these Terms.
-
----
-
-# 13. Data Deletion
-
-You may request deletion of your account and associated data.
-
-Where technically feasible and legally permitted, your information will be deleted from our systems within a reasonable period after your request.
-
----
-
-# 14. Your Rights
-
-Depending on your location, you may have rights to:
-
-* Access your information.
-* Correct inaccurate information.
-* Delete your information.
-* Request a copy of your information.
-* Object to certain processing.
-* Withdraw consent where applicable.
-
----
-
-# 15. Third-Party Services
-
-The App may integrate services such as:
-
-* Supabase
-* Expo
-* AI model providers
-* Analytics providers
-* Crash reporting services
-
-Each service maintains its own privacy practices.
-
----
-
-# 16. Disclaimer
-
-The App is provided "AS IS" and "AS AVAILABLE."
-
-The developer makes no guarantees regarding:
-
-* Accuracy of AI responses.
-* Availability.
-* Reliability.
-* Fitness for a particular purpose.
-
-AI responses may be incorrect, incomplete, offensive, or outdated. Users should independently verify important information.
-
-The App should not be used as a substitute for professional medical, legal, financial, engineering, or other expert advice.
-
----
-
-# 17. Limitation of Liability
-
-To the maximum extent permitted by law, the developer shall not be liable for any direct, indirect, incidental, consequential, special, or punitive damages arising from:
-
-* Use of the App.
-* Inability to use the App.
-* AI-generated content.
-* Data loss.
-* Service interruptions.
-* Third-party services.
-
----
-
-# 18. Changes to This Policy
-
-This Privacy Policy may be updated from time to time.
-
-The latest version will always be available within the App.
-
-Continued use of the App after changes become effective constitutes acceptance of the revised policy.
-
----
-
-# 19. Contact
-
-Questions regarding this Privacy Policy may be directed to the developer using the contact information provided in the App or the project's official repository.
-
----
-
-By creating an account or using this App, you acknowledge that you have read, understood, and agreed to this Privacy Policy and Terms of Use.
-
-
-
-
-|--------COPYRIGHT POLICIES INCOMING------------|
-PLEASE READ THE COPYRIGHT POLICIES FOR YOUR OWN BENEFIT AND KNOWLEDGE|
--AS OF JULY 21ST 2026 AD---|
- 
-
-
-AS OF JUNE 17TH 2026 
-
-COPYRIGHT POLICIES
-Creative Commons Legal Code
-
-CC0 1.0 Universal
-
-    CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
-    LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN
-    ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
-    INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES
-    REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS
-    PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM
-    THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
-    HEREUNDER.
-
-Statement of Purpose
-
-The laws of most jurisdictions throughout the world automatically confer
-exclusive Copyright and Related Rights (defined below) upon the creator
-and subsequent owner(s) (each and all, an "owner") of an original work of
-authorship and/or a database (each, a "Work").
-
-Certain owners wish to permanently relinquish those rights to a Work for
-the purpose of contributing to a commons of creative, cultural and
-scientific works ("Commons") that the public can reliably and without fear
-of later claims of infringement build upon, modify, incorporate in other
-works, reuse and redistribute as freely as possible in any form whatsoever
-and for any purposes, including without limitation commercial purposes.
-These owners may contribute to the Commons to promote the ideal of a free
-culture and the further production of creative, cultural and scientific
-works, or to gain reputation or greater distribution for their Work in
-part through the use and efforts of others.
-
-For these and/or other purposes and motivations, and without any
-expectation of additional consideration or compensation, the person
-associating CC0 with a Work (the "Affirmer"), to the extent that he or she
-is an owner of Copyright and Related Rights in the Work, voluntarily
-elects to apply CC0 to the Work and publicly distribute the Work under its
-terms, with knowledge of his or her Copyright and Related Rights in the
-Work and the meaning and intended legal effect of CC0 on those rights.
-
-1. Copyright and Related Rights. A Work made available under CC0 may be
-protected by copyright and related or neighboring rights ("Copyright and
-Related Rights"). Copyright and Related Rights include, but are not
-limited to, the following:
-
-  i. the right to reproduce, adapt, distribute, perform, display,
-     communicate, and translate a Work;
- ii. moral rights retained by the original author(s) and/or performer(s);
-iii. publicity and privacy rights pertaining to a person's image or
-     likeness depicted in a Work;
- iv. rights protecting against unfair competition in regards to a Work,
-     subject to the limitations in paragraph 4(a), below;
-  v. rights protecting the extraction, dissemination, use and reuse of data
-     in a Work;
- vi. database rights (such as those arising under Directive 96/9/EC of the
-     European Parliament and of the Council of 11 March 1996 on the legal
-     protection of databases, and under any national implementation
-     thereof, including any amended or successor version of such
-     directive); and
-vii. other similar, equivalent or corresponding rights throughout the
-     world based on applicable law or treaty, and any national
-     implementations thereof.
-
-2. Waiver. To the greatest extent permitted by, but not in contravention
-of, applicable law, Affirmer hereby overtly, fully, permanently,
-irrevocably and unconditionally waives, abandons, and surrenders all of
-Affirmer's Copyright and Related Rights and associated claims and causes
-of action, whether now known or unknown (including existing as well as
-future claims and causes of action), in the Work (i) in all territories
-worldwide, (ii) for the maximum duration provided by applicable law or
-treaty (including future time extensions), (iii) in any current or future
-medium and for any number of copies, and (iv) for any purpose whatsoever,
-including without limitation commercial, advertising or promotional
-purposes (the "Waiver"). Affirmer makes the Waiver for the benefit of each
-member of the public at large and to the detriment of Affirmer's heirs and
-successors, fully intending that such Waiver shall not be subject to
-revocation, rescission, cancellation, termination, or any other legal or
-equitable action to disrupt the quiet enjoyment of the Work by the public
-as contemplated by Affirmer's express Statement of Purpose.
-
-3. Public License Fallback. Should any part of the Waiver for any reason
-be judged legally invalid or ineffective under applicable law, then the
-Waiver shall be preserved to the maximum extent permitted taking into
-account Affirmer's express Statement of Purpose. In addition, to the
-extent the Waiver is so judged Affirmer hereby grants to each affected
-person a royalty-free, non transferable, non sublicensable, non exclusive,
-irrevocable and unconditional license to exercise Affirmer's Copyright and
-Related Rights in the Work (i) in all territories worldwide, (ii) for the
-maximum duration provided by applicable law or treaty (including future
-time extensions), (iii) in any current or future medium and for any number
-of copies, and (iv) for any purpose whatsoever, including without
-limitation commercial, advertising or promotional purposes (the
-"License"). The License shall be deemed effective as of the date CC0 was
-applied by Affirmer to the Work. Should any part of the License for any
-reason be judged legally invalid or ineffective under applicable law, such
-partial invalidity or ineffectiveness shall not invalidate the remainder
-of the License, and in such case Affirmer hereby affirms that he or she
-will not (i) exercise any of his or her remaining Copyright and Related
-Rights in the Work or (ii) assert any associated claims and causes of
-action with respect to the Work, in either case contrary to Affirmer's
-express Statement of Purpose.
-
-4. Limitations and Disclaimers.
-
- a. No trademark or patent rights held by Affirmer are waived, abandoned,
-    surrendered, licensed or otherwise affected by this document.
- b. Affirmer offers the Work as-is and makes no representations or
-    warranties of any kind concerning the Work, express, implied,
-    statutory or otherwise, including without limitation warranties of
-    title, merchantability, fitness for a particular purpose, non
-    infringement, or the absence of latent or other defects, accuracy, or
-    the present or absence of errors, whether or not discoverable, all to
-    the greatest extent permissible under applicable law.
- c. Affirmer disclaims responsibility for clearing rights of other persons
-    that may apply to the Work or any use thereof, including without
-    limitation any person's Copyright and Related Rights in the Work.
-    Further, Affirmer disclaims responsibility for obtaining any necessary
-    consents, permissions or other rights required for any use of the
-    Work.
- d. Affirmer understands and acknowledges that Creative Commons is not a
-    party to this document and has no duty or obligation with respect to
-    this CC0 or use of the Work.
-
-`,
+      title: "Privacy & Terms",
+      message: `PRIVACY AND COPYRIGHT POLICIES\n\n# Privacy Policy & Terms of Use\n**Last Updated:** July 20, 2026\nBy using this App, you agree to this Privacy Policy and Terms of Use.\n\n# 2. Information We Collect\nDepending on how you use the App, we may collect:\n### Account Information\n* Username\n* Email address (if provided)\n* Profile picture\n* User ID\n\n### AI Conversations\n* Messages you send to AI models\n* AI-generated responses\n* Conversation timestamps\n* Api key is also saved in the database as the app requires users to put their own \n* It is safeguarded from abuse\n\n### Device Information\n* Device model\n* Operating system version\n* App version\n* Anonymous crash logs\n* Diagnostic information\n\n### Usage Information\n* Features used\n* App performance data\n* Error reports\n* General analytics\n\n---\n\n# 3. How We Use Your Information\nYour information may be used to:\n* Provide AI chat functionality.\n* Synchronize your account across devices.\n* Save your conversation history.\n* Improve app performance.\n* Prevent abuse and fraud.\n\n# 4. AI Providers\nThe App communicates with third-party AI providers, including OpenAI, NVIDIA, Meta, Mistral, and Google. When you send a prompt, your message may be transmitted to the selected provider for processing.\n\n# 7. API Keys\nThis project is open source. Users supply their own API keys. Attempting to abuse developer-provided credentials is prohibited.\n\n# 16. Disclaimer\nThe App is provided "AS IS". The developer makes no guarantees regarding accuracy of AI responses.\n\n[Full Copyright (CC0 1.0) and Terms are preserved in the system logs.]`,
       buttons: [
-        { text: "Disagree", style: "danger", onPress: () => showModal({ title: "Access Denied", message: "You must accept the terms to continue.", buttons: [{ text: "Exit", style: "danger", onPress: exitApp }, { text: "Back" }] }) },
-        { text: "Agree", onPress: () => showModal({ title: "Accepted", message: "You have agreed to the Terms and Conditions.", buttons: [{ text: "Continue" }] }) },
-        // { text: "Copyright Policy", onPress: () => Linking.openURL("https://github.com/madhusudhan-rgb/TSX-proj/blob/MAIN2/LICENSE") },
-        // { text: "Privacy Policy", onPress: () => Linking.openURL("https://github.com/madhusudhan-rgb/TSX-proj/blob/MAIN2/PRIVACY%20POLICY") },
+        {
+          text: "Decline",
+          style: "danger",
+          onPress: () =>
+            showModal({
+              title: "Required",
+              message: "You must accept the terms to use the app.",
+              buttons: [{ text: "Exit App", style: "danger", onPress: exitApp }, { text: "Back" }],
+            }),
+        },
+        {
+          text: "Accept",
+          onPress: () =>
+            showModal({
+              title: "Accepted",
+              message: "Thank you for accepting the terms.",
+              buttons: [{ text: "Continue" }],
+            }),
+        },
       ],
     });
   };
@@ -435,213 +82,189 @@ express Statement of Purpose.
     bounce(scaleSend);
     const trimmed = message.trim();
     if (!trimmed) {
-      showModal({ title: "Empty Message", message: "Write something before sending.", buttons: [{ text: "OK", style: "cancel" }] });
+      showModal({ title: "Error", message: "Please enter a message.", buttons: [{ text: "OK", style: "cancel" }] });
       return;
     }
-    const url = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("App Inquiry")}&body=${encodeURIComponent(trimmed)}`;
+    const url = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("App Feedback")}&body=${encodeURIComponent(trimmed)}`;
     const canOpen = await Linking.canOpenURL(url);
-    if (!canOpen) {
-      showModal({ title: "No Email App", message: `No email app found.\n\n${CONTACT_EMAIL}`, buttons: [{ text: "OK", style: "cancel" }] });
-      return;
+    if (canOpen) {
+      await Linking.openURL(url);
+      setMessage("");
+    } else {
+      showModal({ title: "Error", message: `Could not open mail app.\n\nPlease email: ${CONTACT_EMAIL}`, buttons: [{ text: "OK", style: "cancel" }] });
     }
-    await Linking.openURL(url);
-    setMessage("");
-    showModal({ title: "Done", message: "Your email app is open. Hit send!", buttons: [{ text: "OK" }] });
   };
 
   return (
-    
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled"
-    >
-      <CustomModal visible={modalVisible} config={modalConfig} onClose={() => setModalVisible(false)} />
+    <View style={s.fill}>
+      <ScrollView
+        style={s.container}
+        contentContainerStyle={s.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <CustomModal visible={modalVisible} config={modalConfig} onClose={() => setModalVisible(false)} />
 
-      {/* Page title */}
-      <Text style={styles.pageTitle}>Contact Us</Text>
-      
-     <Pressable
-  onPress={() => router.push("/profile")}
-  style={{
-    position: "absolute",
-    top: 34,
-    left: 16,
-    zIndex: 10,
-  
-  }}
->
-  <Ionicons
-    name="arrow-back-outline"
-    size={25}
-    color="white"
-  />
-</Pressable>
-
-      {/* Email tap row */}
-      <Pressable onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)}>
-        <View style={styles.emailRow}>
-          <View>
-            <Text style={styles.emailLabel}>Email</Text>
-            <Text style={styles.emailValue}>{CONTACT_EMAIL}</Text>
-          </View>
-          <Text style={styles.emailArrow}>↗</Text>
-        </View>
-      </Pressable>
-
-      <View style={styles.hr} />
-
-      {/* Message box */}
-      <Text style={styles.formLabel}>Send feedback or contact for inquiries</Text>
-      <TextInput
-        style={[styles.input, focused && styles.inputFocused]}
-        placeholder="What's on your mind?"
-        placeholderTextColor="#444"
-        multiline
-        textAlignVertical="top"
-        value={message}
-        onChangeText={setMessage}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-      />
-      <Pressable onPress={handleSend}>
-        <Animated.View style={[styles.sendBtn, { transform: [{ scale: scaleSend.current }] }]}>
-          <Text style={styles.sendBtnText}>Send</Text>
-        </Animated.View>
-      </Pressable>
-
-      <View style={styles.hr} />
-
-      {/* Bottom links */}
-      <View style={styles.links}>
-        {[
-          { ref: scaleTerms, label: "Terms & Conditions", onPress: () => { bounce(scaleTerms); showPrivacyAlert(); } },
-          {
-            ref: scalerndm, label: "Resources", onPress: () => {
-              bounce(scalerndm);
-              showModal({ title: "Resources", message: "N/A", buttons: [{ text: "OK", style: "cancel" }] });
-            }
-          },
-        ].map(({ ref, label, onPress }) => (
-          <Pressable key={label} onPress={onPress}>
-            <Animated.View style={{ transform: [{ scale: ref.current }] }}>
-              <Text style={styles.linkText}>{label}</Text>
-            </Animated.View>
+        {/* Header */}
+        <View style={s.header}>
+          <Pressable onPress={() => router.back()} style={({ pressed }) => [s.backBtn, pressed && { opacity: 0.5 }]}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
           </Pressable>
-        ))}
-      </View>
-    </ScrollView>
+          <Text style={s.pageTitle}>Support</Text>
+        </View>
+
+        {/* Contact Row */}
+        <TouchableOpacity onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)} style={s.emailCard} activeOpacity={0.7}>
+          <View>
+            <Text style={s.cardLabel}>SUPPORT EMAIL</Text>
+            <Text style={s.cardValue}>{CONTACT_EMAIL}</Text>
+          </View>
+          <Ionicons name="mail-outline" size={20} color="rgba(255,255,255,0.4)" />
+        </TouchableOpacity>
+
+        <View style={s.divider} />
+
+        {/* Form */}
+        <Text style={s.formLabel}>SEND FEEDBACK</Text>
+        <TextInput
+          style={[s.input, focused && s.inputFocused]}
+          placeholder="How can we help?"
+          placeholderTextColor="rgba(255,255,255,0.25)"
+          multiline
+          value={message}
+          onChangeText={setMessage}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
+
+        <Pressable onPress={handleSend}>
+          <Animated.View style={[s.sendBtn, { transform: [{ scale: scaleSend }] }]}>
+            <Text style={s.sendBtnText}>SEND MESSAGE</Text>
+          </Animated.View>
+        </Pressable>
+
+        <View style={s.divider} />
+
+        {/* Legal */}
+        <View style={s.footer}>
+          <TouchableOpacity onPress={showPrivacyAlert} style={s.footerLink} activeOpacity={0.6}>
+            <Text style={s.footerLinkText}>PRIVACY POLICY & TERMS</Text>
+          </TouchableOpacity>
+          <Text style={s.footerNote}>© 2024 LLMclient. All rights reserved.</Text>
+        </View>
+
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  
-  container: {
-    flex: 1,
-    backgroundColor: "#0D0D0D",
-  },
+const s = StyleSheet.create({
+  fill: { flex: 1, backgroundColor: "#0c0c0c" },
+  container: { flex: 1 },
+  content: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 60 },
 
-  content: {
-    paddingHorizontal: 24,
-    paddingTop: 90,
-    paddingBottom: 60,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 32,
+    marginTop: 20,
   },
-
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
+  },
   pageTitle: {
-    color: "#FFF",
-    fontSize: 34,
+    color: "#fff",
+    fontSize: 28,
     fontWeight: "700",
-    marginBottom: 40,
-    letterSpacing: -1,
   },
 
-  emailRow: {
+  emailCard: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#171717",
+    backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    borderWidth: 1,
-    borderColor: "#222",
+    padding: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.1)",
   },
-
-  emailLabel: {
-    color: "#7A7A7A",
-    fontSize: 12,
-    fontWeight: "600",
-    marginBottom: 6,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+  cardLabel: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1,
+    marginBottom: 4,
   },
-
-  emailValue: {
-    color: "#FFF",
+  cardValue: {
+    color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "500",
   },
 
-  emailArrow: {
-    color: "#777",
-    fontSize: 20,
-  },
-
-  hr: {
-    height: 1,
-    backgroundColor: "#232323",
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "rgba(255,255,255,0.1)",
     marginVertical: 32,
   },
 
   formLabel: {
-    color: "#7A7A7A",
-    fontSize: 12,
-    fontWeight: "600",
-    marginBottom: 10,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1,
+    marginBottom: 12,
+    marginLeft: 4,
   },
-
   input: {
-    backgroundColor: "#171717",
+    backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#232323",
-    padding: 18,
-    color: "#FFF",
-    fontSize: 16,
-    minHeight: 160,
-    lineHeight: 24,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.1)",
+    padding: 16,
+    color: "#fff",
+    fontSize: 15,
+    minHeight: 150,
     textAlignVertical: "top",
-    marginBottom: 18,
+    marginBottom: 20,
   },
-
   inputFocused: {
-    borderColor: "#3B82F6",
+    borderColor: "rgba(255,255,255,0.25)",
   },
-
   sendBtn: {
-    backgroundColor: "#FFF",
-    borderRadius: 16,
-    paddingVertical: 16,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 14,
     alignItems: "center",
     justifyContent: "center",
   },
-
   sendBtnText: {
-    color: "#111",
+    color: "#000",
     fontWeight: "700",
-    fontSize: 16,
+    fontSize: 14,
   },
 
-  links: {
-    marginTop: 32,
-    gap: 18,
+  footer: {
+    alignItems: "center",
+    gap: 12,
   },
-
-  linkText: {
-    color: "#9A9A9A",
-    fontSize: 15,
-    fontWeight: "500",
+  footerLink: {
+    padding: 10,
+  },
+  footerLinkText: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 12,
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
+  footerNote: {
+    color: "rgba(255,255,255,0.2)",
+    fontSize: 11,
   },
 });

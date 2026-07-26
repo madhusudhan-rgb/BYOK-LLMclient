@@ -67,6 +67,7 @@ export default function HomeScreen() {
     }
   };
 
+  // Fixed deprecated Constants usage
   const version = Constants?.expoConfig?.version ?? "1.5.0";
   const build   = (Constants?.expoConfig as any)?.android?.versionCode?.toString() ?? "1";
   const versionLabel = `${version} (${build})`;

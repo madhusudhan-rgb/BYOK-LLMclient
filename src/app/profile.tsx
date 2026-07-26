@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -6,29 +7,39 @@ import {
   Alert,
   Image,
   ImageBackground,
+  Modal,
   Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavbar } from "../context/NavbarContext";
-import { getCurrentUser, logout } from "../utils/auth";
+import { getCurrentUser, logout, updateProfile, uploadAvatar } from "../utils/auth";
 import { supabase } from "../utils/supabase";
 
 export default function Profile() {
   const { setShowNavbar } = useNavbar();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [newDisplayName, setNewDisplayName] = useState("");
+  const [updating, setUpdating] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     setShowNavbar(true);
     checkUser();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
+      if (session?.user) {
+        checkUser();
+      } else {
+        setUser(null);
+        setLoading(false);
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -37,6 +48,7 @@ export default function Profile() {
     try {
       const u = await getCurrentUser();
       setUser(u);
+      if (u) setNewDisplayName(u.display_name || "");
     } catch (err) {
       console.error(err);
     } finally {
@@ -56,6 +68,52 @@ export default function Profile() {
         },
       },
     ]);
+  }
+
+  async function handlePickImage() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert("Permission required", "Allow access to your photo library to change your profile picture.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'], // Modern non-deprecated way
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+      setUploading(true);
+      try {
+        const publicUrl = await uploadAvatar(uri);
+        await updateProfile({ avatar_url: publicUrl });
+        await checkUser();
+        Alert.alert("Success", "Profile picture updated.");
+      } catch (err) {
+        console.error(err);
+        Alert.alert("Error", "Failed to upload avatar.");
+      } finally {
+        setUploading(false);
+      }
+    }
+  }
+
+  async function handleUpdateDisplayName() {
+    if (!newDisplayName.trim()) return;
+    setUpdating(true);
+    try {
+      await updateProfile({ display_name: newDisplayName.trim() });
+      await checkUser();
+      setEditModalVisible(false);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to update display name.");
+    } finally {
+      setUpdating(false);
+    }
   }
 
   if (loading) {
@@ -103,32 +161,27 @@ export default function Profile() {
           <View style={s.header}>
             <View style={s.avatarWrap}>
               <View style={s.avatar}>
-                <Text style={s.avatarText}>
-                  {user.email?.charAt(0).toUpperCase() ?? "U"}
-                </Text>
+                {uploading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : user.avatar_url ? (
+                  <Image source={{ uri: user.avatar_url }} style={s.avatarImg} />
+                ) : (
+                  <Text style={s.avatarText}>
+                    {user.display_name?.charAt(0).toUpperCase() || user.username?.charAt(0).toUpperCase() || "U"}
+                  </Text>
+                )}
               </View>
-              <Pressable style={s.editAvatar}>
+              <Pressable style={s.editAvatar} onPress={handlePickImage} disabled={uploading}>
                 <Ionicons name="camera" size={14} color="#000" />
               </Pressable>
             </View>
-            <Text style={s.email}>{user.email}</Text>
-            <Text style={s.userId}>ID: {user.id.slice(0, 8)}...</Text>
-          </View>
-
-          {/* Stats */}
-          <View style={s.statsRow}>
-            <View style={s.stat}>
-              <Text style={s.statVal}>—</Text>
-              <Text style={s.statLab}>Models</Text>
+            <View style={s.nameContainer}>
+              <Text style={s.displayName}>{user.display_name || user.username}</Text>
+              <Pressable onPress={() => setEditModalVisible(true)} style={s.editNameBtn}>
+                <Ionicons name="pencil" size={14} color="rgba(255,255,255,0.4)" />
+              </Pressable>
             </View>
-            <View style={[s.stat, s.statBorder]}>
-              <Text style={s.statVal}>—</Text>
-              <Text style={s.statLab}>Chats</Text>
-            </View>
-            <View style={s.stat}>
-              <Text style={s.statVal}>Free</Text>
-              <Text style={s.statLab}>Plan</Text>
-            </View>
+            <Text style={s.username}>@{user.username}</Text>
           </View>
 
           {/* Menu */}
@@ -149,11 +202,11 @@ export default function Profile() {
               <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.2)" />
             </Pressable>
 
-            <Pressable style={s.menuItem}>
+            <Pressable style={s.menuItem} onPress={() => router.push("/contact")}>
               <View style={[s.menuIcon, { backgroundColor: "rgba(255,255,255,0.05)" }]}>
-                <Ionicons name="shield-checkmark-outline" size={18} color="#fff" />
+                <Ionicons name="help-buoy-outline" size={18} color="#fff" />
               </View>
-              <Text style={s.menuText}>Privacy</Text>
+              <Text style={s.menuText}>Support</Text>
               <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.2)" />
             </Pressable>
 
@@ -168,6 +221,31 @@ export default function Profile() {
           </View>
         </ScrollView>
       </SafeAreaView>
+
+      {/* Edit Display Name Modal */}
+      <Modal visible={editModalVisible} transparent animationType="fade" onRequestClose={() => setEditModalVisible(false)}>
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            <Text style={s.modalTitle}>Edit Display Name</Text>
+            <TextInput
+              style={s.modalInput}
+              value={newDisplayName}
+              onChangeText={setNewDisplayName}
+              placeholder="Display Name"
+              placeholderTextColor="rgba(255,255,255,0.2)"
+              autoFocus
+            />
+            <View style={s.modalButtons}>
+              <Pressable style={s.modalBtnCancel} onPress={() => setEditModalVisible(false)}>
+                <Text style={s.modalBtnCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={s.modalBtnSave} onPress={handleUpdateDisplayName} disabled={updating}>
+                {updating ? <ActivityIndicator size="small" color="#000" /> : <Text style={s.modalBtnSaveText}>Save</Text>}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -199,6 +277,11 @@ const s = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+  },
+  avatarImg: {
+    width: "100%",
+    height: "100%",
   },
   avatarText: {
     color: "#fff",
@@ -218,51 +301,27 @@ const s = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#000",
   },
-  email: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  userId: {
-    color: "rgba(255,255,255,0.4)",
-    fontSize: 12,
-    letterSpacing: 0.5,
-  },
-  statsRow: {
+  nameContainer: {
     flexDirection: "row",
-    backgroundColor: "rgba(255,255,255,0.05)",
-    marginHorizontal: 20,
-    borderRadius: 16,
-    paddingVertical: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.1)",
-    marginBottom: 24,
-  },
-  stat: {
-    flex: 1,
     alignItems: "center",
-  },
-  statBorder: {
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  statVal: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
+    gap: 8,
     marginBottom: 2,
   },
-  statLab: {
-    color: "rgba(255,255,255,0.4)",
-    fontSize: 11,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+  displayName: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "700",
+  },
+  editNameBtn: {
+    padding: 4,
+  },
+  username: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 14,
+    fontWeight: "500",
   },
   menu: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(255,255,255,0.00)",
     marginHorizontal: 20,
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
@@ -290,7 +349,7 @@ const s = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.43)",
     marginHorizontal: 14,
   },
   emptyInner: {
@@ -344,11 +403,68 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(4, 4, 4, 0.1)",
   },
   secondaryBtnText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  modalContent: {
+    width: "100%",
+    backgroundColor: "#1c1c1e",
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "rgba(19, 18, 18, 0.1)",
+  },
+  modalTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+  },
+  modalInput: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 10,
+    padding: 12,
+    color: "#fff",
+    fontSize: 16,
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  modalBtnCancel: {
+    flex: 1,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalBtnCancelText: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  modalBtnSave: {
+    flex: 1,
+    height: 44,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalBtnSaveText: {
+    color: "#000",
+    fontSize: 15,
     fontWeight: "600",
   },
 });
