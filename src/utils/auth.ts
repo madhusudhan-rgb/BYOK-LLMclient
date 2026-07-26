@@ -1,4 +1,8 @@
-import * as FileSystem from "expo-file-system";
+import {
+  getInfoAsync,
+  readAsStringAsync,
+  EncodingType,
+} from "expo-file-system/legacy";
 import { Profile, supabase } from "./supabase";
 
 // Sign up
@@ -170,14 +174,14 @@ export async function uploadAvatar(uri: string): Promise<string> {
   }
 
   // Verify the file exists before attempting to read it
-  const fileInfo = await FileSystem.getInfoAsync(uri);
+  const fileInfo = await getInfoAsync(uri);
   if (!fileInfo.exists) {
     throw new Error("Could not read image file (file not found)");
   }
 
   // Read the file as base64 — works with both file:// and content:// URIs on Android
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
+  const base64 = await readAsStringAsync(uri, {
+    encoding: EncodingType.Base64,
   });
 
   if (!base64 || base64.length === 0) {

@@ -1,20 +1,20 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-  View,
+  Dimensions,
+  Image,
+  ImageBackground,
+  Modal,
+  Pressable,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
-  ImageBackground,
   TouchableOpacity,
-  ScrollView,
-  Modal,
-  SafeAreaView,
-  StatusBar,
-  Image,
-  Pressable,
-  Dimensions,
+  View,
 } from "react-native";
 import { WebView } from "react-native-webview";
-import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
 
 const { width } = Dimensions.get("window");

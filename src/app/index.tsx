@@ -240,7 +240,7 @@ const s = StyleSheet.create({
     gap: 8,
   },
   ctaText: { color: "#000", fontWeight: "700", fontSize: 15 },
-  tickerWrap: { paddingBottom: 32 },
+  tickerWrap: { paddingBottom: 10 },
   tickerLabel: {
     color: "rgb(255, 255, 255)",
     fontSize: 9,

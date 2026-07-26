@@ -209,15 +209,15 @@ export default function AnimatedTabBar(props: TabBarProps) {
 const s = StyleSheet.create({
   wrapper: {
     position: "absolute",
-    right: 12,
+    right: 6,
   },
 
   shadow: {
     width: PILL_W,
     borderRadius: PILL_R,
-    backgroundColor: "rgba(12, 12, 12, 0.32)",
+    backgroundColor: "rgba(12, 12, 12, 0.18)",
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(255, 255, 255, 0)",
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.6,

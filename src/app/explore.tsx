@@ -704,41 +704,150 @@ export default function Explore() {
 const s = StyleSheet.create({
   fill: { flex: 1 },
   overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0.45)" },
-  tabBar: { flexDirection: "row", alignItems: "center", backgroundColor: "transparent" },
-  information: { width: 30, height: 30, borderRadius: 23, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(238, 228, 228, 0.48)", alignItems: "center", justifyContent: "center", marginBottom: 8, marginLeft: 12 },
-  tabScroll: { paddingHorizontal: 10, paddingTop: 8, paddingBottom: 0, gap: 2, alignItems: "flex-end" },
-  tab: { paddingHorizontal: 13, paddingTop: 7, paddingBottom: 10, maxWidth: 148, position: "relative" },
+  tabBar: { flexDirection: "row", 
+    alignItems: "center", 
+    backgroundColor: "transparent" },
+  information: { width: 30, 
+    height: 30,
+    borderRadius: 23, 
+    borderWidth: StyleSheet.hairlineWidth, 
+    borderColor: "rgba(238, 228, 228, 0.06)", 
+    alignItems: "center", 
+    justifyContent: "center", 
+    marginBottom: 8, 
+    marginLeft: 12 },
+  tabScroll: { 
+    paddingHorizontal: 10, 
+    paddingTop: 8, 
+    paddingBottom: 0, 
+    gap: 2, 
+    alignItems: "flex-end" },
+  tab: { 
+    paddingHorizontal: 13, 
+    paddingTop: 7, 
+    paddingBottom: 10, 
+    maxWidth: 148, 
+    position: "relative" 
+  },
   tabActive: {},
-  tabText: { color: "rgb(250, 248, 248)", fontSize: 13, fontWeight: "500", letterSpacing: 0.1 },
-  tabTextActive: { color: "#f5f2ec", fontWeight: "600" },
-  tabUnderline: { position: "absolute", bottom: 0, left: 13, right: 13, height: 1.5, backgroundColor: "#f2f0ea", borderRadius: 1 },
-  addTab: { width: 30, height: 30, borderRadius: 23, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(250, 238, 238, 0.4)", alignItems: "center", justifyContent: "center", marginBottom: 8, marginLeft: 4 },
-  clearBtn: { paddingRight: 16, paddingLeft: 6, paddingBottom: 17, alignSelf: "flex-end" },
-  emptyState: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 44, gap: 10 },
-  emptyIcon: { width: 56, height: 56, borderRadius: 16, backgroundColor: "rgba(36, 33, 33, 0.56)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", marginBottom: 4 },
-  emptyTitle: { color: "#efe7e7", fontSize: 19, fontWeight: "600", letterSpacing: -0.2 },
-  emptySubtitle: { color: "rgba(255,255,255,0.38)", fontSize: 14, textAlign: "center", lineHeight: 21 },
-  emptyBtn: { marginTop: 10, backgroundColor: "#f6ecec", borderRadius: 10, paddingHorizontal: 22, paddingVertical: 12 },
-  emptyBtnText: { color: "#000", fontSize: 14, fontWeight: "600" },
-  chatList: { paddingVertical: 16, paddingHorizontal: 14, flexGrow: 1, gap: 2 },
-  msgRow: { flexDirection: "row", alignItems: "flex-end", gap: 8, marginVertical: 2 },
-  msgRowUser: { flexDirection: "row-reverse" },
-  avatarCol: { width: 28, alignItems: "center" },
-  botAvatar: { width: 28, height: 28, borderRadius: 9, backgroundColor: "rgba(5, 5, 5, 0)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.44)", alignItems: "center", justifyContent: "center" },
-  botAvatarText: { color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: "700" },
-  bubble: { borderRadius: 18, maxWidth: "78%", overflow: "hidden", paddingHorizontal: 14, paddingVertical: 10 },
-  mediaBubble: { padding: 0, backgroundColor: "transparent" },
-  userBubble: { backgroundColor: "rgba(10, 10, 10, 0.53)", borderBottomRightRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(30, 200, 212, 0.1)" },
-  botBubble: { backgroundColor: "rgba(0, 0, 0, 0.42)", borderBottomLeftRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.53)" },
-  bubbleText: { color: "rgba(255,255,255,0.82)", fontSize: 15, lineHeight: 22 },
-  userBubbleText: { color: "#fff" },
-  generatedImage: { width: 252, height: 252, borderRadius: 15 },
-  videoPlaceholder: { width: 224, height: 126, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.05)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", gap: 8 },
-  videoReadyText: { color: "rgba(255,255,255,0.45)", fontSize: 13 },
-  inputBar: { flexDirection: "row", alignItems: "flex-end", paddingLeft: 12, paddingRight: 68, paddingTop: 10, paddingBottom: Platform.OS === "ios" ? 16 : 14, backgroundColor: "transparent", gap: 8 },
-  chatInput: { flex: 1, backgroundColor: "rgba(2, 2, 2, 0.4)", color: "#fff", borderRadius: 22, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, fontSize: 15, maxHeight: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.32)" },
-  sendBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
-  sendBtnStop: { backgroundColor: "rgba(255,255,255,0.08)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.1)" },
+  tabText: { 
+    color: "rgb(250, 248, 248)", 
+    fontSize: 13,
+     fontWeight: "500",
+      letterSpacing: 0.1 },
+  tabTextActive: {
+     color: "#f5f2ec", 
+     fontWeight: "600" },
+  tabUnderline: { 
+    position: "absolute", 
+    bottom: 0, 
+    left: 13, 
+    right: 13, 
+    height: 1.5, 
+    backgroundColor: "#f2f0ea", 
+    borderRadius: 1 },
+  addTab: { 
+    width: 30,
+     height: 30, 
+     borderRadius: 23, 
+     borderWidth: StyleSheet.hairlineWidth,
+      borderColor: "rgba(250, 238, 238, 0.06)", 
+      alignItems: "center", 
+      justifyContent: "center", 
+      marginBottom: 8, 
+      marginLeft: 4 },
+  clearBtn: { 
+    paddingRight: 16, 
+    paddingLeft: 6, 
+    paddingBottom: 17,
+     alignSelf: "flex-end" },
+  emptyState: { 
+    flex: 1, 
+    alignItems: "center",
+     justifyContent: "center", 
+     paddingHorizontal: 44, gap: 10 },
+  emptyIcon: { 
+    width: 56, 
+    height: 56, 
+    borderRadius: 16,
+     backgroundColor: "rgba(36, 33, 33, 0.56)", 
+     borderWidth: StyleSheet.hairlineWidth, 
+     borderColor: "rgba(255,255,255,0.08)", 
+     alignItems: "center", 
+     justifyContent: "center", 
+     marginBottom: 4 },
+  emptyTitle: { 
+    color: "#efe7e7",
+     fontSize: 19, 
+     fontWeight: "600", 
+     letterSpacing: -0.2 },
+  emptySubtitle: { 
+    color: "rgba(255,255,255,0.38)", 
+    fontSize: 14,
+     textAlign: "center", 
+    lineHeight: 21 },
+  emptyBtn: { 
+    marginTop: 10, 
+    backgroundColor: "#f6ecec", 
+    borderRadius: 10, 
+    paddingHorizontal: 22,
+     paddingVertical: 12 },
+  emptyBtnText: { 
+    color: "#000", 
+    fontSize: 14, 
+    fontWeight: "600" },
+  chatList: { 
+    paddingVertical: 16,
+     paddingHorizontal: 14,
+      flexGrow: 1,
+       gap: 2 },
+  msgRow: { 
+    flexDirection: "row",
+     alignItems: "flex-end",
+      gap: 8,
+       marginVertical: 2 },
+  msgRowUser: { 
+    flexDirection: "row-reverse" },
+  avatarCol: { 
+    width: 28, 
+    alignItems: "center" },
+  botAvatar: { 
+    width: 28, 
+    height: 28, 
+    borderRadius: 9, 
+    backgroundColor: "rgba(5, 5, 5, 0)", 
+    borderWidth: StyleSheet.hairlineWidth, 
+    borderColor: "rgba(255, 255, 255, 0.17)",
+     alignItems: "center", 
+     justifyContent: "center" },
+  botAvatarText: { 
+    color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: "700" },
+  bubble: { 
+    borderRadius: 18, maxWidth: "78%", overflow: "hidden", paddingHorizontal: 14, paddingVertical: 10 },
+  mediaBubble: { 
+    padding: 0, backgroundColor: "transparent" },
+  userBubble: { 
+    backgroundColor: "rgba(10, 10, 10, 0.53)", borderBottomRightRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(30, 200, 212, 0.1)" },
+  botBubble: {
+     backgroundColor: "rgba(0, 0, 0, 0.42)", borderBottomLeftRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.03)" },
+  bubbleText: { 
+    color: "rgba(255,255,255,0.82)", fontSize: 15, lineHeight: 22 },
+  userBubbleText: { 
+    color: "#fff" },
+  generatedImage: { 
+    width: 252, height: 252, borderRadius: 15 },
+  videoPlaceholder: {
+     width: 224, height: 126, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.05)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", gap: 8 },
+  videoReadyText: {
+     color: "rgba(255,255,255,0.45)", fontSize: 13 },
+  inputBar: {
+     flexDirection: "row", alignItems: "flex-end", paddingLeft: 12, paddingRight: 68, paddingTop: 10, paddingBottom: Platform.OS === "ios" ? 16 : 14, backgroundColor: "transparent", gap: 8 },
+  chatInput: { 
+    flex: 1, backgroundColor: "rgba(2, 2, 2, 0.4)", color: "#fff", borderRadius: 22, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, fontSize: 15, maxHeight: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0)" },
+  sendBtn: { 
+    width: 38, height: 38, borderRadius: 19, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
+  sendBtnStop: { 
+    backgroundColor: "rgba(255,255,255,0.08)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.1)" },
 });
 
 const m = StyleSheet.create({

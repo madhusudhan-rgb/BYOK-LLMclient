@@ -78,7 +78,7 @@ export default function Profile() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], // Modern non-deprecated way
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
@@ -321,11 +321,11 @@ const s = StyleSheet.create({
     fontWeight: "500",
   },
   menu: {
-    backgroundColor: "rgba(255,255,255,0.00)",
+    backgroundColor: "rgba(12, 12, 12, 0.56)",
     marginHorizontal: 20,
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(6, 6, 6, 0)",
     overflow: "hidden",
   },
   menuItem: {
@@ -349,7 +349,7 @@ const s = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: "rgba(255, 255, 255, 0.43)",
+    backgroundColor: "rgba(255, 255, 255, 0.0)",
     marginHorizontal: 14,
   },
   emptyInner: {
@@ -403,7 +403,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(4, 4, 4, 0.1)",
+    borderColor: "rgba(255,255,255,0.1)",
   },
   secondaryBtnText: {
     color: "#fff",
@@ -412,7 +412,7 @@ const s = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.1)",
+    backgroundColor: "rgba(0,0,0,0.8)",
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
@@ -423,7 +423,7 @@ const s = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     borderWidth: 1,
-    borderColor: "rgba(19, 18, 18, 0.1)",
+    borderColor: "rgba(255,255,255,0.1)",
   },
   modalTitle: {
     color: "#fff",
