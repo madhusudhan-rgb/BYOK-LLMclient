@@ -1,6 +1,6 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -13,40 +13,43 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
 import { useNavbar } from "../context/NavbarContext";
 import Constants from "expo-constants";
-//List of all models available rn
+
 const MODELS = [
   { image: require("../../assets/images/openai.png"),  label: "GPT-4o · OpenAI" },
-{ image: require("../../assets/images/nvda.png"),   label: "Nemotron · NVIDIA" },
+  { image: require("../../assets/images/nvda.png"),   label: "Nemotron · NVIDIA" },
   { image: require("../../assets/images/pool.jpg"),    label: "Laguna · Poolside AI" },
   { image: require("../../assets/images/llama.png"),   label: "LLaMA 3.1 · Meta" },
   { image: require("../../assets/images/cohere.png"),  label: "Command · Cohere" },
   { image: require("../../assets/images/byte.png"),    label: "Seed 3.0 · ByteDance" },
   { image: require("../../assets/images/flux.png"),    label: "Flux · FluxSchnell" },
-  {image : require("../../assets/images/kling.png"), label : "kling 2.1 - Kuaishou tech"},
-  {image : require ("../../assets/images/mx.jpg"), label :"Minimax - MiniMax group inc"}
+  { image: require("../../assets/images/kling.png"), label : "kling 2.1 - Kuaishou tech" },
+  { image: require("../../assets/images/mx.jpg"), label: "Minimax - MiniMax group inc" }
 ];
-//Main func
+
 export default function HomeScreen() {
   const { setShowNavbar } = useNavbar();
   const bannerX = useRef(new Animated.Value(0)).current;
   const scaleFeedback = useRef(new Animated.Value(1)).current;
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalConfig, setModalConfig] = useState<ModalConfig | null>(null);
+  const [modalConfig, setModalConfig]   = useState<ModalConfig | null>(null);
+
   useEffect(() => { setShowNavbar(true); }, [setShowNavbar]);
+
   const showModal = (config: ModalConfig) => {
     setModalConfig(config);
     setModalVisible(true);
   };
+
   const bounce = (ref: Animated.Value, cb?: () => void) => {
     Animated.sequence([
       Animated.timing(ref, { toValue: 0.92, duration: 100, useNativeDriver: true }),
       Animated.timing(ref, { toValue: 1,    duration: 80, useNativeDriver: true }),
     ]).start(cb);
   };
+
   const sendFeedback = async (rating: "Good" | "Bad") => {
     try {
       const res = await fetch("https://formspree.io/f/mojowgkw", {
@@ -63,42 +66,43 @@ export default function HomeScreen() {
       showModal({ title: "Error", message: "Network error. Try again.", buttons: [{ text: "OK", style: "cancel" }] });
     }
   };
- const version = (Constants.expoConfig as any)?.version ?? "—";
-  const build   = (Constants.expoConfig as any)?.ios?.buildNumber
-    ?? (Constants.expoConfig as any)?.android?.versionCode?.toString()
-    ?? null;
-  const versionLabel = build ? `${version} (${build})` : version;
-const ITEM_WIDTH = 160; 
-const STRIP_WIDTH = MODELS.length * ITEM_WIDTH;
-useEffect(() => {
-  bannerX.setValue(0);
-  const anim = Animated.loop(
-    Animated.timing(bannerX, {
-      toValue: -STRIP_WIDTH,
-      duration: MODELS.length * 2800,
-      easing: Easing.linear,
-      useNativeDriver: true,
-    })
-  );
-  anim.start();
-  return () => anim.stop();
-}, [bannerX]);
-const strip = [...MODELS, ...MODELS];
+
+  const version = Constants?.expoConfig?.version ?? "1.5.0";
+  const build   = (Constants?.expoConfig as any)?.android?.versionCode?.toString() ?? "1";
+  const versionLabel = `${version} (${build})`;
+
+  const ITEM_WIDTH = 160;
+  const STRIP_WIDTH = MODELS.length * ITEM_WIDTH;
+
+  useEffect(() => {
+    bannerX.setValue(0);
+    const anim = Animated.loop(
+      Animated.timing(bannerX, {
+        toValue: -STRIP_WIDTH,
+        duration: MODELS.length * 2800,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [bannerX, STRIP_WIDTH]);
+
+  const strip = [...MODELS, ...MODELS];
+
   return (
-  <ImageBackground source = {require("../../assets/images/bgind.jpg")}
-  style = {s.bg}
-  >
-    <View style={[s.fill]}>
+    <ImageBackground source={require("../../assets/images/bgind.jpg")} style={s.fill}>
+      <View style={s.overlay} />
       <CustomModal visible={modalVisible} config={modalConfig} onClose={() => setModalVisible(false)} />
       <SafeAreaView style={s.fill}>
         <View style={s.topBar}>
-          <Pressable onPress = {()=>showModal({
-            title : "Version Number",
-            message :  "version:\t" + versionLabel ,
-            buttons : [{text : "Ok", style : "cancel" }]
-          })}
-          >
-          <Text style={s.version}>{versionLabel}</Text></Pressable>
+          <Pressable onPress={() => showModal({
+            title: "Version Number",
+            message: "version:\t" + versionLabel,
+            buttons: [{ text: "Ok", style: "cancel" }]
+          })}>
+            <Text style={s.version}>{versionLabel}</Text>
+          </Pressable>
           <View style={s.topRight}>
             <Pressable
               style={s.iconBtn}
@@ -113,6 +117,7 @@ const strip = [...MODELS, ...MODELS];
             >
               <Ionicons name="information-outline" size={20} color="rgba(255,255,255,0.7)" />
             </Pressable>
+
             <Pressable
               style={s.iconBtn}
               onPress={() => {
@@ -121,8 +126,8 @@ const strip = [...MODELS, ...MODELS];
                   title: "Feedback",
                   message: "How are we doing? Your feedback helps us improve.",
                   buttons: [
-                    { text: "Good", onPress: () => sendFeedback("Good") },
-                    { text: "Bad",  onPress: () => sendFeedback("Bad"), style: "danger" },
+                    { text: "👍 Good", onPress: () => sendFeedback("Good") },
+                    { text: "👎 Bad",  onPress: () => sendFeedback("Bad"), style: "danger" },
                     { text: "View Updates", onPress: () => Linking.openURL("https://github.com/madhusudhan-rgb/TSX-proj") },
                     { text: "Cancel", style: "cancel" },
                   ],
@@ -141,6 +146,7 @@ const strip = [...MODELS, ...MODELS];
           <Text style={s.subtitle}>
             Chat, generate images, and utilize the latest AI models — all in one app.
           </Text>
+
           <Link href="/login" asChild>
             <Pressable style={s.cta}>
               <Text style={s.ctaText}>Get Started</Text>
@@ -148,6 +154,7 @@ const strip = [...MODELS, ...MODELS];
             </Pressable>
           </Link>
         </View>
+
         <View style={s.tickerWrap}>
           <Text style={s.tickerLabel}>COMPATIBLE MODELS</Text>
           <View style={s.ticker}>
@@ -162,19 +169,16 @@ const strip = [...MODELS, ...MODELS];
           </View>
         </View>
       </SafeAreaView>
-    </View>
     </ImageBackground>
   );
 }
+
 const s = StyleSheet.create({
-  fill: { flex: 1 ,
+  fill: { flex: 1 },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
   },
-bg:{
-  flex:1,
-  justifyContent : "center",
-  
-},
-  // Top bar
   topBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -196,8 +200,6 @@ bg:{
     borderColor: "rgba(255,255,255,0.1)",
     alignItems: "center", justifyContent: "center",
   },
-
-  // Hero
   hero: {
     flex: 1,
     justifyContent: "center",
@@ -230,16 +232,14 @@ bg:{
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "flex-start",
-    backgroundColor: "#f2e4e4f6",
+    backgroundColor: "#fff",
     borderRadius: 50,
     paddingVertical: 13,
     paddingHorizontal: 24,
     gap: 8,
   },
   ctaText: { color: "#000", fontWeight: "700", fontSize: 15 },
-
-  // Ticker
-  tickerWrap: { paddingBottom: 7 },
+  tickerWrap: { paddingBottom: 32 },
   tickerLabel: {
     color: "rgb(255, 255, 255)",
     fontSize: 9,
@@ -253,7 +253,6 @@ bg:{
     flexDirection: "row",
     alignItems: "center",
     gap: 0,
-    
   },
   tickerItem: {
     flexDirection: "row",

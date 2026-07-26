@@ -8,7 +8,7 @@ import {
   View,
   Alert,
   ActivityIndicator,
-  Pressable
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -41,25 +41,21 @@ export default function Login() {
   };
 
   return (
-    <View style={[s.bg, { backgroundColor: "#0c0c0c" }]}>
-      <Pressable
-        onPress={() => router.push("/profile")}
-        style={{
-          position: "absolute",
-          top: 34,
-          left: 16,
-          zIndex: 10,
-        
-        }}
-      >
-        <Ionicons
-          name="arrow-back-outline"
-          size={25}
-          color="white"
-        />
-      </Pressable>
+    <ImageBackground source={require("../../assets/images/bg4.jpg")} style={s.bg}>
       <View style={s.overlay} />
       <View style={s.inner}>
+        <Pressable
+          onPress={() => router.push("/profile")}
+          style={{
+            position: "absolute",
+            top: 50,
+            left: 20,
+            zIndex: 10,
+          }}
+        >
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </Pressable>
+
         <Text style={s.title}>Welcome back</Text>
         <Text style={s.subtitle}>Sign in to continue</Text>
 
@@ -107,22 +103,20 @@ export default function Login() {
           <TouchableOpacity onPress={() => router.push("/signup")} hitSlop={8}>
             <Text style={s.footerLink}>Sign up</Text>
           </TouchableOpacity>
-          <Text>Have questions?</Text>
         </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
 const s = StyleSheet.create({
   bg: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.72)" },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.65)" },
   inner: {
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 28,
   },
-
   title: {
     color: "#fff",
     fontSize: 28,
@@ -135,7 +129,6 @@ const s = StyleSheet.create({
     fontSize: 15,
     marginBottom: 32,
   },
-
   input: {
     height: 50,
     borderRadius: 11,
@@ -147,7 +140,6 @@ const s = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.12)",
   },
-
   passwordRow: {
     height: 50,
     borderRadius: 11,
@@ -164,7 +156,6 @@ const s = StyleSheet.create({
     color: "#fff",
     fontSize: 15,
   },
-
   button: {
     height: 50,
     borderRadius: 11,
@@ -179,7 +170,6 @@ const s = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
-
   footer: {
     flexDirection: "row",
     justifyContent: "center",

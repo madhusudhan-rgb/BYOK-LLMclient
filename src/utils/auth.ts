@@ -1,4 +1,4 @@
-import * as FileSystem from "expo-file-system/legacy";
+import * as FileSystem from "expo-file-system";
 import { Profile, supabase } from "./supabase";
 
 // Sign up
@@ -185,10 +185,17 @@ export async function uploadAvatar(uri: string): Promise<string> {
   }
 
   // Convert base64 → Uint8Array for Supabase upload
-  const binaryString = atob(base64);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  const bytes = new Uint8Array((base64.length * 3) / 4);
+  let i, j = 0;
+  for (i = 0; i < base64.length; i += 4) {
+    const a = chars.indexOf(base64[i]);
+    const b = chars.indexOf(base64[i + 1]);
+    const c = chars.indexOf(base64[i + 2]);
+    const d = chars.indexOf(base64[i + 3]);
+    bytes[j++] = (a << 2) | (b >> 4);
+    if (c !== 64) bytes[j++] = ((b & 15) << 4) | (c >> 2);
+    if (d !== 64) bytes[j++] = ((c & 3) << 6) | d;
   }
 
   // Infer extension from the URI (ImagePicker URIs usually have an extension)

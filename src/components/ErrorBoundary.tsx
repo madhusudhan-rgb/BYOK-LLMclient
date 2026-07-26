@@ -1,8 +1,8 @@
 import React, { Component, ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, ScrollView, Platform } from "react-native";
 
 type Props = { children: ReactNode };
-type State = { hasError: boolean; error?: Error };
+type State = { hasError: boolean; error?: Error; errorInfo?: React.ErrorInfo };
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
@@ -15,6 +15,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    this.setState({ errorInfo });
     console.error("ErrorBoundary caught:", error, errorInfo);
   }
 
@@ -22,10 +23,20 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <View style={styles.container}>
-          <Text style={styles.title}>Something went wrong</Text>
-          <Text style={styles.message}>
-            {this.state.error?.message || "Unknown error"}
-          </Text>
+          <Text style={styles.title}>Critical Boot Error</Text>
+          <ScrollView style={styles.scroll}>
+            <Text style={styles.message}>
+              {this.state.error?.name}: {this.state.error?.message}
+            </Text>
+            <Text style={styles.stack}>
+              {this.state.error?.stack}
+            </Text>
+            {this.state.errorInfo && (
+              <Text style={styles.stack}>
+                {this.state.errorInfo.componentStack}
+              </Text>
+            )}
+          </ScrollView>
         </View>
       );
     }
@@ -37,19 +48,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: "#000",
+    padding: 24,
+    backgroundColor: "#0c0c0c",
+  },
+  scroll: {
+    marginTop: 20,
   },
   title: {
-    color: "#fff",
-    fontSize: 20,
+    color: "#ff453a",
+    fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   message: {
-    color: "#aaa",
-    fontSize: 14,
-    textAlign: "center",
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
+  stack: {
+    color: "#888",
+    fontSize: 12,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
 });

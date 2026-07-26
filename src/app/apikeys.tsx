@@ -576,8 +576,7 @@ export default function ApiKeyInput() {
                 .from("chat_sessions")
                 .delete()
                 .eq("user_id", userId)
-                .eq("bot_id", model.id)
-                .match(() => {});
+                .eq("bot_id", model.id);
             }
             setModels(prev => prev.filter(m => m.id !== model.id));
           },

@@ -19,7 +19,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../utils/supabase";
 import { getCurrentUser } from "../utils/auth";
-import { isNativePlatformSupported } from "react-native-screens/lib/typescript/core";
 // import { CustomModal, ModalConfig } from "../components/CustomModal";
 // ─── Storage keys
 const KEYS = {
@@ -135,17 +134,12 @@ export default function SettingsScreen() {
 
   // ── Toggle helpers ──
   async function toggleHaptics(v: boolean) {
-     alert("Haptics : "  + haptics)
-   
     setHaptics(v);
-    
     await AsyncStorage.setItem(KEYS.haptics, String(v));
-    
     if (v) Haptics.selectionAsync();
   }
 
   async function toggleTimestamps(v: boolean) {
-    alert("Timestamps : " + timestamps)
     setTimestamps(v);
     await AsyncStorage.setItem(KEYS.timestamps, String(v));
     if (haptics) Haptics.selectionAsync();
@@ -212,10 +206,10 @@ export default function SettingsScreen() {
   }
 
   // ── Version string ──
-  // Note: In Expo SDK 57, use expoConfig from app.json or manifest.version
-  const version = (Constants.expoConfig as any)?.version ?? "—";
-  const build   = (Constants.expoConfig as any)?.ios?.buildNumber
-    ?? (Constants.expoConfig as any)?.android?.versionCode?.toString()
+  const version = Constants?.expoConfig?.version ?? Constants?.manifest2?.extra?.expoClient?.version ?? "—";
+  const build   = (Constants?.expoConfig as any)?.ios?.buildNumber
+    ?? (Constants?.expoConfig as any)?.android?.versionCode?.toString()
+    ?? (Constants?.manifest2?.extra?.expoClient as any)?.android?.versionCode?.toString()
     ?? null;
   const versionLabel = build ? `${version} (${build})` : version;
 // const showModal = (config: ModalConfig) => {
@@ -235,36 +229,6 @@ export default function SettingsScreen() {
         >
           
           <Text style={s.pageTitle}>Settings</Text>
-
-          {/*Profile card */}
-          {/* <Pressable
-            style={({ pressed }) => [s.profileCard, pressed && s.rowPressed]}
-            onPress={() => router.push("/profile")}
-          >
-            <View style={s.avatar}>
-              <Text style={s.avatarText}>{initial(profile?.full_name)}</Text>
-            </View>
-            <View style={s.profileInfo}>
-              <Text style={s.profileName} numberOfLines={1}>
-                {loading ? "Loading…" : (profile?.full_name ?? "Your Account")}
-              </Text>
-              <Text style={s.profileEmail} numberOfLines={1}>
-                {profile?.email ?? ""}
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={15} color="rgba(255,255,255,0.22)" />
-          </Pressable> */}
-
-          {/* ── Notifications */}
-          <SectionLabel label="NOTIFICATIONS" />
-          <Group>
-            <Row
-              label="Notification settings"
-              subtitle="Manage in system settings"
-              onPress={() => Linking.openURL("app-settings:")}
-              last
-            />
-          </Group>
 
           {/* ── Chat behavior */}
           <SectionLabel label="CHAT" />

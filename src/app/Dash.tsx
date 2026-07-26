@@ -18,7 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
 
 const { width } = Dimensions.get("window");
-const CARD = (width - 48 - 12) / 2;
+const CARD = (Math.max(width, 300) - 48 - 12) / 2;
 
 const PROVIDERS = [
   { name: "Groq",         sub: "groq.com",          url: "https://console.groq.com/settings/organization/usage",  image: require("../../assets/images/groq.png") },
@@ -60,10 +60,7 @@ export default function Dash() {
   }
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/dash.bg.jpg")}
-      style={styles.bg}
-    >
+    <ImageBackground source={require("../../assets/images/dash.bg.jpg")} style={styles.bg}>
       <StatusBar barStyle="light-content" />
 
       <SafeAreaView style={styles.safe}>
@@ -163,10 +160,10 @@ export default function Dash() {
     </ImageBackground>
   );
 }
+
 const styles = StyleSheet.create({
   bg:   { flex: 1 },
   safe: { flex: 1 },
-
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -175,7 +172,6 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 29,
   },
-
   eyebrow: {
     color: "rgba(252, 245, 245, 0.89)",
     fontSize: 10,
@@ -183,26 +179,21 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 4,
   },
-
   title: {
     color: "#fff",
     fontSize: 28,
     fontWeight: "200",
     letterSpacing: -0.3,
   },
-
-  // Grid
   grid: {
     paddingHorizontal: 24,
     paddingBottom: 40,
     gap: 12,
   },
-
   row: {
     flexDirection: "row",
     gap: 12,
   },
-
   card: {
     width: CARD,
     backgroundColor: "rgba(21, 20, 20, 0.24)",
@@ -212,11 +203,9 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "flex-start",
   },
-
   cardEmpty: {
     width: CARD,
   },
-
   logo: {
     width: 55,
     height: 40,
@@ -224,26 +213,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     resizeMode: "cover",
   },
-
   cardName: {
     color: "#eff0ee",
     fontSize: 15,
     fontWeight: "400",
     marginBottom: 3,
   },
-
   cardSub: {
     color: "rgb(243, 245, 240)",
     fontSize: 11,
     letterSpacing: 0.2,
   },
-
-  // Modal
   modal: {
     flex: 1,
     backgroundColor: "#080808",
   },
-
   bar: {
     flexDirection: "row",
     alignItems: "center",
@@ -253,7 +237,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "rgba(255,255,255,0.07)",
   },
-
   closeBtn: {
     width: 36,
     height: 36,
@@ -262,19 +245,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   barTitle: {
     color: "rgba(255,255,255,0.8)",
     fontSize: 14,
     fontWeight: "400",
     letterSpacing: 0.2,
   },
-
   progressTrack: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: "rgba(255,255,255,0.06)",
   },
-
   progressFill: {
     width: "35%",
     height: "100%",

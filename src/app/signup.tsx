@@ -9,11 +9,11 @@ import {
   ImageBackground,
   ActivityIndicator,
   Pressable,
-
 } from "react-native";
 import { router } from "expo-router";
 import { register } from "../utils/auth";
-import {Ionicons} from  "@expo/vector-icons"
+import { Ionicons } from "@expo/vector-icons";
+
 export default function Signup() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -45,25 +45,21 @@ export default function Signup() {
   };
 
   return (
-    <View style={[s.bg, { backgroundColor: "#0c0c0c" }]}>
-      <Pressable
-  onPress={() => router.push("/profile")}
-  style={{
-    position: "absolute",
-    top: 34,
-    left: 16,
-    zIndex: 10,
-  
-  }}
->
-  <Ionicons
-    name="arrow-back-outline"
-    size={25}
-    color="white"
-  />
-</Pressable>
+    <ImageBackground source={require("../../assets/images/bg4.jpg")} style={s.bg}>
       <View style={s.overlay} />
       <View style={s.inner}>
+        <Pressable
+          onPress={() => router.push("/profile")}
+          style={{
+            position: "absolute",
+            top: 50,
+            left: 20,
+            zIndex: 10,
+          }}
+        >
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </Pressable>
+
         <Text style={s.title}>Create account</Text>
         <Text style={s.subtitle}>Sign up to get started</Text>
 
@@ -104,19 +100,18 @@ export default function Signup() {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
 const s = StyleSheet.create({
   bg: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.72)" },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.65)" },
   inner: {
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 28,
   },
-
   title: {
     color: "#fff",
     fontSize: 28,
@@ -129,7 +124,6 @@ const s = StyleSheet.create({
     fontSize: 15,
     marginBottom: 32,
   },
-
   input: {
     height: 50,
     borderRadius: 11,
@@ -141,7 +135,6 @@ const s = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.12)",
   },
-
   button: {
     height: 50,
     borderRadius: 11,
@@ -156,7 +149,6 @@ const s = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
-
   footer: {
     flexDirection: "row",
     justifyContent: "center",

@@ -1,443 +1,354 @@
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
-import { router, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
-  Animated,
-  Dimensions,
-  Easing,
   Image,
   ImageBackground,
   Pressable,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
-import { ErrorBoundary } from "../components/ErrorBoundary";
-import {
-  getCurrentUser,
-  logout,
-  updateProfile,
-  uploadAvatar,
-} from "../utils/auth";
-
-// const { width: SCREEN_WIDTH } = Dimensions.get("window");
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavbar } from "../context/NavbarContext";
+import { getCurrentUser, logout } from "../utils/auth";
+import { supabase } from "../utils/supabase";
 
 export default function Profile() {
-  return (
-    <ErrorBoundary>
-      <ProfileContent />
-    </ErrorBoundary>
-  );
-}
-
-function ProfileContent() {
-  const [open, setOpen] = useState(false);
+  const { setShowNavbar } = useNavbar();
   const [user, setUser] = useState<any>(null);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [displayName, setDisplayName] = useState("");
-  // const [displayDate, setDisplayDate] = useState("");
-  const [editingName, setEditingName] = useState(false);
-  // const [editingDatejoined, setEditingDate] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // const bannerX = useRef(new Animated.Value(SCREEN_WIDTH)).current;
+  useEffect(() => {
+    setShowNavbar(true);
+    checkUser();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      let cancelled = false;
-      (async () => {
-        try {
-          const current = await getCurrentUser();
-          if (!cancelled) {
-            setUser(current);
-            if (current) {
-              setProfileImage(current.avatar_url);
-              setDisplayName(current.display_name || current.username);
-            } else {
-              setProfileImage(null);
-              setDisplayName("");
-            }
-          }
-        } catch (error) {
-          console.error("Failed to load user:", error);
-        }
-      })();
-      return () => { cancelled = true; };
-    }, [])
-  );
-//BANNER ANIMATION (buggy syntax but it works lol)
-  // useEffect(() => {
-  //   const animation = Animated.loop(
-  //     Animated.sequence([
-  //       Animated.timing(bannerX, {
-  //         toValue: -500,
-  //         duration: 10000,
-  //         easing: Easing.linear,
-  //         useNativeDriver: true,
-  //       }),
-  //       Animated.timing(bannerX, {
-  //         toValue: SCREEN_WIDTH,
-  //         duration: 0,
-  //         useNativeDriver: true,
-  //       }),
-  //     ])
-  //   );
-  //   animation.start();
-  //   return () => animation.stop();
-  // }, []);
-
-  const pickImage = async () => {
-    if (!user) {
-      Alert.alert("Login Required", "Please log in to change your profile picture.");
-      return;
-    }
-    const previousAvatar = profileImage;
+  async function checkUser() {
     try {
-      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        Alert.alert("Permission Required", "Permission to access your photos is required.");
-        return;
-      }
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.7,
-      });
-      if (!result.canceled && result.assets?.[0]) {
-        const uri = result.assets[0].uri;
-        setProfileImage(uri);
-        try {
-          const publicUrl = await uploadAvatar(uri);
-          await updateProfile({ avatar_url: publicUrl });
-          setProfileImage(publicUrl);
-          setUser((prev: any) => prev ? { ...prev, avatar_url: publicUrl } : prev);
-        } catch (err) {
-          setProfileImage(previousAvatar);
-          Alert.alert("Upload Issue", err instanceof Error ? err.message : "Unknown error");
-        }
-      }
-    } catch {
-      Alert.alert("Error", "Failed to pick image. Please try again.");
-    }
-  };
-
-  const saveDisplayName = async () => {
-    const trimmed = displayName.trim();
-    if (!trimmed) { Alert.alert("Error", "Display name cannot be empty"); return; }
-    setSaving(true);
-    try {
-      await updateProfile({ display_name: trimmed });
-      setEditingName(false);
-      setUser((prev: any) => prev ? { ...prev, display_name: trimmed } : prev);
-    } catch {
-      Alert.alert("Error", "Failed to save name");
+      const u = await getCurrentUser();
+      setUser(u);
+    } catch (err) {
+      console.error(err);
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
-  };
-// const saveDisplayDate = async() => {
-//   const trimmed  = displayDate.trim();
-//   if (!trimmed ) {Alert.alert("error", "displaydate cannot be empty") ; return;}
-//   setSaving(true);
-//   try {
-//     await updateProfile({ display_Date : trimmed});
-//     setEditingDate(false);
-//     setUser((prev : any) => prev ? {...prev, display_Date : trimmed}: prev);}
-//     catch {
-//       Alert.alert("error", "Failed to save date");
-//     }
-//     finally {
-//       setSaving(false);
-//     }
-//   };
+  }
 
-// }
-  const handleLogout = async () => {
-    Alert.alert("Log out", `Log out as ${displayName}?`, [
+  async function handleLogout() {
+    Alert.alert("Log out", "Are you sure?", [
       { text: "Cancel", style: "cancel" },
       {
-        text: "Log out", style: "destructive", onPress: async () => {
+        text: "Log out",
+        style: "destructive",
+        onPress: async () => {
           await logout();
-          setUser(null);
-          setProfileImage(null);
           router.replace("/login");
-        }
+        },
       },
     ]);
-  };
+  }
 
-  const avatarSource = profileImage
-    ? { uri: profileImage }
-    : require("../../assets/images/profile.jpg");
+  if (loading) {
+    return (
+      <View style={[s.fill, { backgroundColor: "#000", justifyContent: "center" }]}>
+        <ActivityIndicator color="#fff" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <ImageBackground source={require("../../assets/images/bgprof23.jpg")} style={s.fill}>
+        <View style={s.overlay} />
+        <SafeAreaView style={s.fill}>
+          <View style={s.emptyInner}>
+            <View style={s.emptyIcon}>
+              <Ionicons name="person-outline" size={32} color="rgba(255,255,255,0.2)" />
+            </View>
+            <Text style={s.emptyTitle}>Sign in to sync</Text>
+            <Text style={s.emptySubtitle}>
+              Create an account to save your API keys and custom models across devices.
+            </Text>
+            <View style={s.emptyActions}>
+              <Pressable style={s.primaryBtn} onPress={() => router.push("/login")}>
+                <Text style={s.primaryBtnText}>Log in</Text>
+              </Pressable>
+              <Pressable style={s.secondaryBtn} onPress={() => router.push("/signup")}>
+                <Text style={s.secondaryBtnText}>Sign up</Text>
+              </Pressable>
+            </View>
+          </View>
+        </SafeAreaView>
+      </ImageBackground>
+    );
+  }
 
   return (
-    <ImageBackground source = {require("../../assets/images/bgprof23.jpg")} style = {styles.bg}>
-    <View style={[styles.bg]}>
-      {/* Dark overlay */}
-      <View style={styles.overlay} />
-
-      {/* Top bar */}
-      <View style={styles.topBar}>
-        <Text style={styles.screenTitle}>Profile</Text>
-        <Pressable onPress={() => setOpen(!open)} style={styles.menuBtn}>
-          <Ionicons name="menu" size={24} color="#fff" />
-        </Pressable>
-      </View>
-
-      {/* Dropdown menu */}
-      {open && (
-        <View style={styles.popup}>
-          {!user && (
-            <Pressable style={styles.option} onPress={() => { setOpen(false); router.push("/login"); }}>
-              <Text style={styles.optionText}>Login / Signup</Text>
-            </Pressable>
-          )}
-          <Pressable style={styles.option} onPress={() => { setOpen(false); router.push("/contact"); }}>
-            <Text style={styles.optionText}>More Info</Text>
-          </Pressable>
-          {/* <Pressable style={styles.option} onPress={() => {handleLogout}}>
-            <Text style={styles.optionText}>Log out</Text>
-          </Pressable> */}
-           {/* Logout */}
-          {user && (
-        <Pressable style={styles.option} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Log out</Text>
-        </Pressable>
-      )}
-          <Pressable style={styles.option} onPress={() => { setOpen(false); router.push("/settingstab"); }}>
-            <Text style={styles.optionText}>Settings</Text>
-          </Pressable>
-          <Pressable style={[styles.option, { borderBottomWidth: 0 }]} onPress={() => setOpen(false)}>
-            <Text style={styles.optionText}>Close</Text>
-          </Pressable>
-        </View>
-      )}
-
-      {/* Avatar + name */}
-      
-      <View style={styles.profileSection}>
-        <Pressable onPress={pickImage} style={styles.avatarWrap}>
-          <Image
-            key={profileImage ?? "default"}
-            source={avatarSource}
-            style={styles.avatar}
-          />
-          <View style={styles.avatarBadge}>
-            <Ionicons name="camera" size={12} color="#fff" />
+    <ImageBackground source={require("../../assets/images/bgprof23.jpg")} style={s.fill}>
+      <StatusBar barStyle="light-content" />
+      <View style={s.overlay} />
+      <SafeAreaView style={s.fill}>
+        <ScrollView style={s.fill} contentContainerStyle={s.scroll}>
+          {/* Profile Header */}
+          <View style={s.header}>
+            <View style={s.avatarWrap}>
+              <View style={s.avatar}>
+                <Text style={s.avatarText}>
+                  {user.email?.charAt(0).toUpperCase() ?? "U"}
+                </Text>
+              </View>
+              <Pressable style={s.editAvatar}>
+                <Ionicons name="camera" size={14} color="#000" />
+              </Pressable>
+            </View>
+            <Text style={s.email}>{user.email}</Text>
+            <Text style={s.userId}>ID: {user.id.slice(0, 8)}...</Text>
           </View>
-        </Pressable>
-        {/* {editingDatejoined ? (
-          <View style={styles.editRow}>
-            <TextInput
-              style={styles.nameInput}
-              value={displayDate}
-              onChangeText={setDisplayName}
-              placeholder="Display name"
-              placeholderTextColor="#555"
-              autoFocus
-            />
-            <Pressable style={styles.saveBtn} onPress={saveDisplayDate} disabled={saving}>
-              <Text style={styles.saveBtnText}>{saving ? "…" : "Save"}</Text>
-            </Pressable>
-            <Pressable onPress={() => { setEditingDate(false); setDisplayDate(user?.display_date || user?.date || ""); }}>
-              <Ionicons name="close" size={20} color="#666" />
-            </Pressable>
+
+          {/* Stats */}
+          <View style={s.statsRow}>
+            <View style={s.stat}>
+              <Text style={s.statVal}>—</Text>
+              <Text style={s.statLab}>Models</Text>
+            </View>
+            <View style={[s.stat, s.statBorder]}>
+              <Text style={s.statVal}>—</Text>
+              <Text style={s.statLab}>Chats</Text>
+            </View>
+            <View style={s.stat}>
+              <Text style={s.statVal}>Free</Text>
+              <Text style={s.statLab}>Plan</Text>
+            </View>
           </View>
-        ) : (
-              <Pressable onPress={() => setEditingDate(true)} style={styles.nameWrap}>
-            <Text style={styles.displayName}>{displayName || "Tap to set a date"}</Text>
-            <Text style={styles.username}>@{user?.username || "Date joined : N/A"}</Text>
-          </Pressable>
-        )} */}
-        <Pressable onPress = {()=>alert("Date you joined feature is coming soon!!!")} style= {{position : "absolute", bottom  : 176}}>
-          <Text style=  {{color : "white", fontWeight : "200"}}>Joined date : N/A</Text>
-          </Pressable>
-        {editingName ? (
-          <View style={styles.editRow}>
-            <TextInput
-              style={styles.nameInput}
-              value={displayName}
-              onChangeText={setDisplayName}
-              placeholder="Display name"
-              placeholderTextColor="#555"
-              autoFocus
-            />
-            <Pressable style={styles.saveBtn} onPress={saveDisplayName} disabled={saving}>
-              <Text style={styles.saveBtnText}>{saving ? "…" : "Save"}</Text>
+
+          {/* Menu */}
+          <View style={s.menu}>
+            <Pressable style={s.menuItem} onPress={() => router.push("/apikeys")}>
+              <View style={[s.menuIcon, { backgroundColor: "rgba(255,255,255,0.05)" }]}>
+                <Ionicons name="key-outline" size={18} color="#fff" />
+              </View>
+              <Text style={s.menuText}>API Keys</Text>
+              <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.2)" />
             </Pressable>
-            <Pressable onPress={() => { setEditingName(false); setDisplayName(user?.display_name || user?.username || ""); }}>
-              <Ionicons name="close" size={20} color="#666" />
+
+            <Pressable style={s.menuItem} onPress={() => router.push("/settingstab")}>
+              <View style={[s.menuIcon, { backgroundColor: "rgba(255,255,255,0.05)" }]}>
+                <Ionicons name="settings-outline" size={18} color="#fff" />
+              </View>
+              <Text style={s.menuText}>Settings</Text>
+              <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.2)" />
+            </Pressable>
+
+            <Pressable style={s.menuItem}>
+              <View style={[s.menuIcon, { backgroundColor: "rgba(255,255,255,0.05)" }]}>
+                <Ionicons name="shield-checkmark-outline" size={18} color="#fff" />
+              </View>
+              <Text style={s.menuText}>Privacy</Text>
+              <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.2)" />
+            </Pressable>
+
+            <View style={s.divider} />
+
+            <Pressable style={s.menuItem} onPress={handleLogout}>
+              <View style={[s.menuIcon, { backgroundColor: "rgba(255,59,48,0.1)" }]}>
+                <Ionicons name="log-out-outline" size={18} color="#ff3b30" />
+              </View>
+              <Text style={[s.menuText, { color: "#ff3b30" }]}>Log out</Text>
             </Pressable>
           </View>
-        ) : (
-          <Pressable onPress={() => setEditingName(true)} style={styles.nameWrap}>
-            <Text style={styles.displayName}>{displayName || "Tap to set name"}</Text>
-            <Text style={styles.username}>@{user?.username || "guest"}</Text>
-          </Pressable>
-        )}
-      </View>
-    {/* Main banner */}
-      {/* Scrolling banner */}
-      {/* <View style={styles.bannerWrap}>
-        <Animated.View style={{ transform: [{ translateX: bannerX }] }}>
-          <Text style={styles.bannerText}>
-            ✦ New models added! Check it out{displayName ? `, ${displayName}` : ""}
-          </Text>
-        </Animated.View>
-      </View> */}
-    </View>
+        </ScrollView>
+      </SafeAreaView>
     </ImageBackground>
   );
 }
-const styles = StyleSheet.create({
-  bg: { flex: 1 },
+
+const s = StyleSheet.create({
+  fill: { flex: 1 },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(9, 9, 9, 0)",
+    backgroundColor: "rgba(0,0,0,0.6)",
   },
-
-  /* Top bar */
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 60,
-    paddingHorizontal: 24,
-    paddingBottom: 16,
+  scroll: {
+    paddingBottom: 40,
   },
-  screenTitle: { color: "#fafafa", fontSize: 18, fontWeight: "700" },
-  menuBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "rgba(1, 1, 1, 0.75)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  /* Popup */
-  popup: {
-    position: "absolute",
-    top: 108,
-    right: 20,
-    width: 190,
-    backgroundColor: "#0b0a0afe",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-    overflow: "hidden",
-    zIndex: 20,
-    elevation: 10,
-  },
-  option: {
-    paddingVertical: 13,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#2a2a2a",
-    
-  },
-  optionText: { color: "#efeeee", fontSize: 15 },
-
-  /* Profile */
-  profileSection: {
+  header: {
     alignItems: "center",
     paddingTop: 40,
-    gap: 16,
-    position : "absolute",
-    right : 63,
-    height  : 400,
-    top : 100,
-    width : "70%",
-    borderRadius : 45,
-    backgroundColor : "rgba(9, 9, 9, 0)"
+    paddingBottom: 32,
   },
-  avatarWrap: { position: "relative" },
+  avatarWrap: {
+    position: "relative",
+    marginBottom: 16,
+  },
   avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 2,
-    borderColor: "rgba(0, 236, 16, 0.99)",
-  },
-  avatarBadge: {
-    position: "absolute",
-    bottom: 2,
-    right: 2,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#030303",
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: "#111",
   },
-  nameWrap: { alignItems: "center", gap: 4 },
-  displayName: { color: "#fbf4f4", fontSize: 20, fontWeight: "200" },
-  username: { color: "rgba(254, 243, 243, 0.72)", fontSize: 13 },
-
-  /* Edit name */
-  editRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 24,
+  avatarText: {
+    color: "#fff",
+    fontSize: 32,
+    fontWeight: "600",
   },
-  nameInput: {
-    flex: 1,
-    backgroundColor: "#1c1c1c",
-    color: "#f2e2e2",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    fontSize: 15,
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  saveBtn: {
+  editAvatar: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#000",
   },
-  saveBtnText: { color: "#111", fontWeight: "700", fontSize: 13 },
-
-  /* Logout */
-  logoutBtn: {
+  email: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  userId: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 12,
+    letterSpacing: 0.5,
+  },
+  statsRow: {
+    flexDirection: "row",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    marginHorizontal: 20,
+    borderRadius: 16,
+    paddingVertical: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.1)",
+    marginBottom: 24,
+  },
+  stat: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statBorder: {
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  statVal: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  statLab: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 11,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  menu: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    marginHorizontal: 20,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.1)",
+    overflow: "hidden",
+  },
+  menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    alignSelf: "center",
-    marginTop: 24,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(255,69,58,0.3)",
-    backgroundColor: "rgba(255,69,58,0.08)",
+    padding: 14,
+    gap: 12,
   },
-  logoutText: { color: "#ff453a", fontWeight: "600", fontSize: 14 },
-
-  /* Banner */
-  // bannerWrap: {
-  //   position: "absolute",
-  //   bottom: 60,
-  //   left: 0,
-  //   right: 0,
-  //   overflow: "hidden",
-  //   paddingVertical: 8,
-  //   backgroundColor: "rgba(0, 0, 0, 0)",
-  // },
-  // bannerText: {
-  //   color: "#000000",
-  //   fontSize: 14,
-  //   fontWeight: "600",
-  //   letterSpacing: 0.3,
-  //   paddingHorizontal: 16,
-  //   width: 500,
-  // },
+  menuIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  menuText: {
+    flex: 1,
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    marginHorizontal: 14,
+  },
+  emptyInner: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 40,
+  },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 15,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 32,
+  },
+  emptyActions: {
+    width: "100%",
+    gap: 12,
+  },
+  primaryBtn: {
+    height: 50,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryBtnText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  secondaryBtn: {
+    height: 50,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  secondaryBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });

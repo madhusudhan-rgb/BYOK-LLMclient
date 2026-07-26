@@ -210,7 +210,6 @@ const s = StyleSheet.create({
   wrapper: {
     position: "absolute",
     right: 12,
-    top: 500,
   },
 
   shadow: {
