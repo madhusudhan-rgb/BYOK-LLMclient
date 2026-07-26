@@ -827,9 +827,9 @@ const s = StyleSheet.create({
   mediaBubble: { 
     padding: 0, backgroundColor: "transparent" },
   userBubble: { 
-    backgroundColor: "rgba(10, 10, 10, 0.53)", borderBottomRightRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(30, 200, 212, 0.1)" },
+    backgroundColor: "rgba(161, 153, 153, 0.24)", borderBottomRightRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(0, 0, 0, 0.1)" },
   botBubble: {
-     backgroundColor: "rgba(0, 0, 0, 0.42)", borderBottomLeftRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.03)" },
+     backgroundColor: "rgba(220, 213, 213, 0.12)", borderBottomLeftRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.03)" },
   bubbleText: { 
     color: "rgba(255,255,255,0.82)", fontSize: 15, lineHeight: 22 },
   userBubbleText: { 
@@ -841,9 +841,18 @@ const s = StyleSheet.create({
   videoReadyText: {
      color: "rgba(255,255,255,0.45)", fontSize: 13 },
   inputBar: {
-     flexDirection: "row", alignItems: "flex-end", paddingLeft: 12, paddingRight: 68, paddingTop: 10, paddingBottom: Platform.OS === "ios" ? 16 : 14, backgroundColor: "transparent", gap: 8 },
+     flexDirection: "row", alignItems: "flex-end", paddingLeft: 12, paddingRight: 68, paddingTop: 10, paddingBottom: Platform.OS === "ios" ? 16 : 14, backgroundColor: "transparent", gap: 10, width : "110%" },
   chatInput: { 
-    flex: 1, backgroundColor: "rgba(2, 2, 2, 0.4)", color: "#fff", borderRadius: 22, paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, fontSize: 15, maxHeight: 120, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0)" },
+    flex: 1,
+     backgroundColor: "rgba(23, 22, 22, 0.4)", 
+     color: "#fff", borderRadius: 22, 
+     paddingHorizontal: 16, 
+     paddingTop: 10, 
+     paddingBottom: 10, 
+     fontSize: 15, 
+     maxHeight: 120, 
+     borderWidth: StyleSheet.hairlineWidth,
+     borderColor: "rgba(255, 255, 255, 0)" },
   sendBtn: { 
     width: 38, height: 38, borderRadius: 19, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
   sendBtnStop: { 

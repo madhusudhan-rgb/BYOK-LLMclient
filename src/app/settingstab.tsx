@@ -181,7 +181,7 @@ export default function SettingsScreen() {
   const versionLabel = `${version} (${build})`;
 
   return (
-    <ImageBackground source={require("../../assets/images/bgexplore.jpg")} style={s.fill}>
+    <ImageBackground source={require("../../assets/images/settings.jpg")} style={s.fill}>
       <View style={s.overlay} />
 
       <SafeAreaView style={s.fill} edges={["top"]}>
@@ -295,7 +295,7 @@ const s = StyleSheet.create({
   },
 
   group: {
-    backgroundColor: "rgba(11, 10, 10, 0.35)",
+    backgroundColor: "rgb(11, 10, 10)",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(15, 15, 15, 0.14)",
     borderRadius: 14,

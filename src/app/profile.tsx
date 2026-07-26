@@ -204,7 +204,7 @@ export default function Profile() {
 
             <Pressable style={s.menuItem} onPress={() => router.push("/contact")}>
               <View style={[s.menuIcon, { backgroundColor: "rgba(255,255,255,0.05)" }]}>
-                <Ionicons name="help-buoy-outline" size={18} color="#fff" />
+                <Ionicons name="information-outline" size={18} color="#fff" />
               </View>
               <Text style={s.menuText}>Support</Text>
               <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.2)" />
