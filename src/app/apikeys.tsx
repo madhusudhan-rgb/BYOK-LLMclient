@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../utils/supabase";
 import { getCurrentUser } from "../utils/auth";
-
+//Keys aint here gng :)
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 type ModelType = "text" | "image" | "video";
