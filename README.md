@@ -1,4 +1,4 @@
-# AI Playground
+
 
 <p align="center">
   <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB">
@@ -11,7 +11,7 @@
 </p>
 
 <h3 align="center">
-AI Playground
+LLMclient
 </h3>
 
 <p align="center">
