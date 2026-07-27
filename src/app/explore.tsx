@@ -638,7 +638,7 @@ export default function Explore() {
   };
 
   return (
-    <ImageBackground source={require("../../assets/images/bgexplore.jpg")} style={s.fill}>
+    <ImageBackground source={require("../../assets/images/bg1.jpg")} style={s.fill}>
       <View style={s.overlay} />
       <SafeAreaView style={s.fill}>
         <View style={s.tabBar}>
@@ -703,7 +703,7 @@ export default function Explore() {
 
 const s = StyleSheet.create({
   fill: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0.45)" },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0.01)" },
   tabBar: { flexDirection: "row", 
     alignItems: "center", 
     backgroundColor: "transparent" },
@@ -827,9 +827,9 @@ const s = StyleSheet.create({
   mediaBubble: { 
     padding: 0, backgroundColor: "transparent" },
   userBubble: { 
-    backgroundColor: "rgba(161, 153, 153, 0.24)", borderBottomRightRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(0, 0, 0, 0.1)" },
+    backgroundColor: "rgba(235, 226, 226, 0.15)", borderBottomRightRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(0, 0, 0, 0.1)" },
   botBubble: {
-     backgroundColor: "rgba(220, 213, 213, 0.12)", borderBottomLeftRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.03)" },
+     backgroundColor: "rgba(240, 232, 232, 0.11)", borderBottomLeftRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.03)" },
   bubbleText: { 
     color: "rgba(255,255,255,0.82)", fontSize: 15, lineHeight: 22 },
   userBubbleText: { 
@@ -844,7 +844,7 @@ const s = StyleSheet.create({
      flexDirection: "row", alignItems: "flex-end", paddingLeft: 12, paddingRight: 68, paddingTop: 10, paddingBottom: Platform.OS === "ios" ? 16 : 14, backgroundColor: "transparent", gap: 10, width : "110%" },
   chatInput: { 
     flex: 1,
-     backgroundColor: "rgba(23, 22, 22, 0.4)", 
+     backgroundColor: "rgba(64, 61, 61, 0.33)", 
      color: "#fff", borderRadius: 22, 
      paddingHorizontal: 16, 
      paddingTop: 10, 
