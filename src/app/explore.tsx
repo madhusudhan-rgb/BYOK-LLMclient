@@ -703,7 +703,8 @@ export default function Explore() {
 
 const s = StyleSheet.create({
   fill: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0, 0, 0, 0.01)" },
+  overlay: { ...StyleSheet.absoluteFill,
+  backgroundColor: "rgba(0, 0, 0, 0.01)" },
   tabBar: { flexDirection: "row", 
     alignItems: "center", 
     backgroundColor: "transparent" },

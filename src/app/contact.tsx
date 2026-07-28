@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  Touchable,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -17,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 const CONTACT_EMAIL = "madhusudhant207@gmail.com";
+const CONTACT_NUMBER = "+1 (772)-259-0947"
 
 export default function Contact() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -121,7 +123,14 @@ export default function Contact() {
           </View>
           <Ionicons name="mail-outline" size={20} color="rgba(255,255,255,0.4)" />
         </TouchableOpacity>
-
+         <View style={s.divider} />
+      <TouchableOpacity onPress={() => Linking.openURL(`tel:${CONTACT_NUMBER}`)} style={s.NumCard} activeOpacity={0.7}>
+          <View>
+            <Text style={s.cardLabel}>SUPPORT NUMBER</Text>
+            <Text style={s.cardValue}>{CONTACT_NUMBER}</Text>
+          </View>
+          <Ionicons name="mail-outline" size={20} color="rgba(255,255,255,0.4)" />
+        </TouchableOpacity>
         <View style={s.divider} />
 
         {/* Form */}
@@ -150,7 +159,10 @@ export default function Contact() {
           <TouchableOpacity onPress={showPrivacyAlert} style={s.footerLink} activeOpacity={0.6}>
             <Text style={s.footerLinkText}>PRIVACY POLICY & TERMS</Text>
           </TouchableOpacity>
-          <Text style={s.footerNote}>© 2024 LLMclient. All rights reserved.</Text>
+          <TouchableOpacity onPress = {()=>Linking.openURL("https://github.com/madhusudhan-rgb/TSX-proj")}>
+          <Text style = {{color : "grey", textDecorationLine : "underline"}}>Visit the github page for more information</Text>
+          </TouchableOpacity>
+          <Text style={s.footerNote}>© 2026 LLMclient. All rights reserved.</Text>
         </View>
 
         <View style={{ height: 40 }} />
@@ -192,6 +204,19 @@ const s = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: 16,
     padding: 20,
+    paddingVertical : 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+   NumCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 16,
+    padding: 20,
+    paddingVertical : 12,
+
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.1)",
   },
@@ -211,7 +236,7 @@ const s = StyleSheet.create({
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: "rgba(255,255,255,0.1)",
-    marginVertical: 32,
+    marginVertical: 15,
   },
 
   formLabel: {

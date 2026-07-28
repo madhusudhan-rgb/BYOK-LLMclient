@@ -159,6 +159,7 @@ export default function Profile() {
         <ScrollView style={s.fill} contentContainerStyle={s.scroll}>
           {/* Profile Header */}
           <View style={s.header}>
+            <Text style= {{color : "white", padding : 5, fontWeight : "200", fontSize : 25, margin : 10}}>Profile</Text>
             <View style={s.avatarWrap}>
               <View style={s.avatar}>
                 {uploading ? (
