@@ -1,7 +1,6 @@
-# AI Playground
+
 
 <p align="center">
-  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB">
   <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB">
   <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
   <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white">
@@ -12,7 +11,7 @@
 </p>
 
 <h3 align="center">
-AI Playground
+LLMclient
 </h3>
 
 <p align="center">
@@ -73,13 +72,7 @@ The application is provider-agnostic and is intended to work with any service ex
 
 ---
 
-## Screenshots
 
-| Home | Chatbox |
-|------|----------|
-| <img src="https://github.com/user-attachments/assets/59cbaf0d-407e-42a5-bf3a-b842aa7048d9" width="250"> | <img src="https://github.com/user-attachments/assets/5a3b108b-20b1-4415-950c-6fe447717698" width="250"> 
-
----
 
 ## Supported Model Types
 
