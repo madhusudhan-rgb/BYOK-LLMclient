@@ -238,8 +238,8 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   logo: {
-    width: 55,
-    height: 40,
+    width: 70,
+    height: 50,
     borderRadius: 12,
     marginBottom: 16,
     resizeMode: "cover",
