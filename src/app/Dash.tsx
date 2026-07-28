@@ -18,7 +18,7 @@ import { WebView } from "react-native-webview";
 import { CustomModal, ModalConfig } from "../components/CustomModal";
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = (width - 48 - 12) / 2; // 2 columns with gap
+const CARD_WIDTH = (width - 45) / 2; // 2 columns with gap
 const CARD = CARD_WIDTH;
 
 const PROVIDERS = [
@@ -107,6 +107,22 @@ export default function Dash() {
     </TouchableOpacity>
   );
 
+  const renderRow = ({ item }: { item: (typeof PROVIDERS)[number][] }) => (
+    <FlatList
+      data={item}
+      renderItem={renderItem}
+      keyExtractor={(rowItem) => rowItem.name}
+      horizontal={true}
+      contentContainerStyle={styles.row}
+      showsHorizontalScrollIndicator={false}
+    />
+  );
+
+  const rows = PROVIDERS.reduce<(typeof PROVIDERS)[number][][]>((acc, _, i) => {
+    if (i % 3 === 0) acc.push(PROVIDERS.slice(i, i + 3));
+    return acc;
+  }, []);
+
   return (
     <ImageBackground source={require("../../assets/images/dash.bg.jpg")} style={styles.bg}>
       <StatusBar barStyle="light-content" />
@@ -133,13 +149,11 @@ export default function Dash() {
           </Pressable>
         </View>
 
-        {/* Grid - using FlatList for better performance with many items */}
+        {/* Grid with vertical and horizontal scrolling */}
         <FlatList
-          data={PROVIDERS}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.name}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
+          data={rows}
+          renderItem={renderRow}
+          keyExtractor={(row, index) => `row-${index}`}
           contentContainerStyle={styles.grid}
           showsVerticalScrollIndicator={false}
         />
@@ -225,8 +239,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   row: {
-    flexDirection: "row",
     gap: 12,
+    marginBottom: 12,
   },
   card: {
     width: CARD,

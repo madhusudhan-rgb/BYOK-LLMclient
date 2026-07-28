@@ -1,69 +1,40 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
   FlatList,
   Image,
-  ImageBackground,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Switch,
   Text,
   TextInput,
   View,
+  ImageBackground
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { supabase } from "../utils/supabase";
 import { getCurrentUser } from "../utils/auth";
 
-type ModelType = "text" | "image" | "video";
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type ModelType   = "text" | "image" | "video";
 type VideoFormat = "fal" | "direct";
 type ImageFormat = "pollinations" | "url";
-
-type ApiFormat =
-  // Chat / Text
-  | "openai"          // OpenAI-compatible APIs
-  | "anthropic"       // Claude Messages API
-  | "google"          // Gemini native API
-  | "cohere"          // Cohere Command models
-  | "mistral"         // Mistral native API
-  | "deepseek"        // DeepSeek native API
-  | "xai"             // Grok API
-  | "perplexity"      // Perplexity API
-  | "azure"           // Azure OpenAI
-  // Image
-  | "stability"       // Stability AI
-  | "replicate"       // Replicate models
-  | "fal"             // fal.ai models
-  | "ideogram"        // Ideogram
-  | "bfl"             // Black Forest Labs Flux
-  | "leonardo"        // Leonardo AI
-  | "getimg"          // Getimg.ai
-  | "segmind"         // Segmind
-  // Video
-  | "runway"          // Runway
-  | "luma"            // Luma Dream Machine
-  | "pika"            // Pika
-  | "haiper"         // Haiper
-  | "pixverse"       // PixVerse
-  | "vidu"            // Vidu
-  | "minimax"         // MiniMax
-  // Audio
-  | "elevenlabs"      // ElevenLabs
-  | "cartesia"        // Cartesia
-  | "playht"          // PlayHT
-  | "murf"            // Murf
-  // Embeddings / Search
-  | "voyage"          // Voyage AI
-  | "jina"            // Jina AI
-  // Local
-  | "ollama"          // Ollama native API
-  | "huggingface";    // HuggingFace native API
+type ApiFormat   =
+  | "openai" | "anthropic" | "google" | "cohere" | "mistral"
+  | "deepseek" | "xai" | "perplexity" | "azure"
+  | "stability" | "replicate" | "fal" | "ideogram" | "bfl"
+  | "leonardo" | "getimg" | "segmind"
+  | "runway" | "luma" | "pika" | "haiper" | "pixverse" | "vidu" | "minimax"
+  | "elevenlabs" | "cartesia" | "playht" | "murf"
+  | "voyage" | "jina" | "ollama" | "huggingface";
 
 type CustomModel = {
   id: string;
@@ -94,48 +65,62 @@ type History = {
   content: string | any[];
 };
 
-// Optimized: Batch updates for smoother streaming
+// ─── Presets ─────────────────────────────────────────────────────────────────
+
 const PRESETS: {
-  label: string;
-  apiUrl: string;
-  model: string;
-  type: ModelType;
-  apiFormat: ApiFormat;
-  imageFormat?: ImageFormat;
-  videoFormat?: VideoFormat;
+  label: string; apiUrl: string; model: string;
+  type: ModelType; apiFormat: ApiFormat;
+  imageFormat?: ImageFormat; videoFormat?: VideoFormat;
 }[] = [
-  { label: "OpenAI",       apiUrl: "https://api.openai.com/v1/chat/completions",                                 model: "gpt-4o",                  type: "text",  apiFormat: "openai"    },
-  { label: "Anthropic",    apiUrl: "https://api.anthropic.com/v1/messages",                                     model: "claude-opus-4-5",         type: "text",  apiFormat: "anthropic" },
-  { label: "Groq",         apiUrl: "https://api.groq.com/openai/v1/chat/completions",                          model: "llama-3.3-70b-versatile", type: "text",  apiFormat: "openai"    },
-  { label: "OpenRouter",   apiUrl: "https://openrouter.ai/api/v1/chat/completions",                            model: "",                        type: "text",  apiFormat: "openai"    },
-  { label: "Gemini",       apiUrl: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", model: "gemini-2.0-flash",        type: "text",  apiFormat: "openai"    },
-  { label: "Mistral",      apiUrl: "https://api.mistral.ai/v1/chat/completions",                               model: "mistral-large-latest",    type: "text",  apiFormat: "openai"    },
-  { label: "Ollama",       apiUrl: "http://localhost:11434/v1/chat/completions",                               model: "llama3",                  type: "text",  apiFormat: "openai"    },
-  { label: "DALL·E",       apiUrl: "https://api.openai.com/v1/images/generations",                             model: "dall-e-3",                type: "image", apiFormat: "openai",   imageFormat: "url"          },
-  { label: "Pollinations",   apiUrl: "",                                                                         model: "flux",                    type: "image", apiFormat: "openai",   imageFormat: "pollinations" },
-  { label: "fal · Kling",    apiUrl: "https://queue.fal.run/fal-ai/kling-video/v2.1/standard/text-to-video",    model: "kling-video",             type: "video", apiFormat: "openai",   videoFormat: "fal"          },
-  { label: "fal · MiniMax",  apiUrl: "https://queue.fal.run/fal-ai/minimax/video-01",                         model: "minimax-video-01",        type: "video", apiFormat: "openai",   videoFormat: "fal"          },
-  { label: "Cohere",         apiUrl: "https://api.cohere.ai/v2/chat",                                         model: "command-a-03-2025",       type: "text",  apiFormat: "cohere" },
-  { label: "DeepSeek",       apiUrl: "https://api.deepseek.com/chat/completions",                             model: "deepseek-chat",           type: "text",  apiFormat: "openai" },
-  { label: "xAI",            apiUrl: "https://api.x.ai/v1/chat/completions",                                  model: "grok-4",                  type: "text",  apiFormat: "openai" },
-  { label: "Together AI",    apiUrl: "https://api.together.xyz/v1/chat/completions",                            model: "meta-llama/Llama-3.3-70B-Instruct-Turbo", type: "text", apiFormat: "openai" },
-  { label: "Fireworks AI",   apiUrl: "https://api.fireworks.ai/inference/v1/chat/completions",                   model: "accounts/fireworks/models/llama-v3p3-70b-instruct", type: "text", apiFormat: "openai" },
-  { label: "Cerebras",       apiUrl: "https://api.cerebras.ai/v1/chat/completions",                            model: "llama-4-scout-17b-16e-instruct", type: "text", apiFormat: "openai" },
-  { label: "SambaNova",      apiUrl: "https://api.sambanova.ai/v1/chat/completions",                             model: "Meta-Llama-3.3-70B-Instruct", type: "text", apiFormat: "openai" },
-  { label: "Perplexity",     apiUrl: "https://api.perplexity.ai/chat/completions",                              model: "sonar-pro",               type: "text",  apiFormat: "openai" },
-  { label: "Stability AI",   apiUrl: "https://api.stability.ai/v2beta/stable-image/generate/core",              model: "stable-image-core",       type: "image", apiFormat: "stability" },
-  { label: "Ideogram",       apiUrl: "https://api.ideogram.ai/generate",                                       model: "ideogram-v3",             type: "image", apiFormat: "ideogram" },
-  { label: "Black Forest",   apiUrl: "https://api.bfl.ai/v1/flux-pro",                                        model: "flux-pro",                type: "image", apiFormat: "bfl" },
-  { label: "Replicate",      apiUrl: "https://api.replicate.com/v1/predictions",                                model: "flux-dev",                type: "image", apiFormat: "replicate" },
-  { label: "Leonardo AI",    apiUrl: "https://cloud.leonardo.ai/api/rest/v1/generations",                       model: "phoenix",                 type: "image", apiFormat: "leonardo" },
-  { label: "Getimg.ai",      apiUrl: "https://api.getimg.ai/v1/stable-diffusion/text-to-image",                 model: "flux-dev",                type: "image", apiFormat: "getimg" },
+  { label: "OpenAI",        apiUrl: "https://api.openai.com/v1/chat/completions",                                 model: "gpt-4o",                  type: "text",  apiFormat: "openai"    },
+  { label: "Anthropic",     apiUrl: "https://api.anthropic.com/v1/messages",                                     model: "claude-opus-4-5",         type: "text",  apiFormat: "anthropic" },
+  { label: "Groq",          apiUrl: "https://api.groq.com/openai/v1/chat/completions",                          model: "llama-3.3-70b-versatile", type: "text",  apiFormat: "openai"    },
+  { label: "OpenRouter",    apiUrl: "https://openrouter.ai/api/v1/chat/completions",                            model: "",                        type: "text",  apiFormat: "openai"    },
+  { label: "Gemini",        apiUrl: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", model: "gemini-2.0-flash",        type: "text",  apiFormat: "openai"    },
+  { label: "Mistral",       apiUrl: "https://api.mistral.ai/v1/chat/completions",                               model: "mistral-large-latest",    type: "text",  apiFormat: "openai"    },
+  { label: "Ollama",        apiUrl: "http://localhost:11434/v1/chat/completions",                               model: "llama3",                  type: "text",  apiFormat: "openai"    },
+  { label: "DALL·E",        apiUrl: "https://api.openai.com/v1/images/generations",                             model: "dall-e-3",                type: "image", apiFormat: "openai",   imageFormat: "url"          },
+  { label: "Pollinations",  apiUrl: "",                                                                          model: "flux",                    type: "image", apiFormat: "openai",   imageFormat: "pollinations" },
+  { label: "fal · Kling",   apiUrl: "https://queue.fal.run/fal-ai/kling-video/v2.1/standard/text-to-video",    model: "kling-video",             type: "video", apiFormat: "openai",   videoFormat: "fal"          },
+  { label: "fal · MiniMax", apiUrl: "https://queue.fal.run/fal-ai/minimax/video-01",                           model: "minimax-video-01",        type: "video", apiFormat: "openai",   videoFormat: "fal"          },
+  { label: "Cohere",        apiUrl: "https://api.cohere.ai/v2/chat",                                           model: "command-a-03-2025",       type: "text",  apiFormat: "cohere"    },
+  { label: "DeepSeek",      apiUrl: "https://api.deepseek.com/chat/completions",                               model: "deepseek-chat",           type: "text",  apiFormat: "openai"    },
+  { label: "xAI",           apiUrl: "https://api.x.ai/v1/chat/completions",                                    model: "grok-4",                  type: "text",  apiFormat: "openai"    },
+  { label: "Together AI",   apiUrl: "https://api.together.xyz/v1/chat/completions",                            model: "meta-llama/Llama-3.3-70B-Instruct-Turbo", type: "text", apiFormat: "openai" },
+  { label: "Fireworks AI",  apiUrl: "https://api.fireworks.ai/inference/v1/chat/completions",                  model: "accounts/fireworks/models/llama-v3p3-70b-instruct", type: "text", apiFormat: "openai" },
+  { label: "Cerebras",      apiUrl: "https://api.cerebras.ai/v1/chat/completions",                             model: "llama-4-scout-17b-16e-instruct", type: "text", apiFormat: "openai" },
+  { label: "SambaNova",     apiUrl: "https://api.sambanova.ai/v1/chat/completions",                            model: "Meta-Llama-3.3-70B-Instruct", type: "text", apiFormat: "openai" },
+  { label: "Perplexity",    apiUrl: "https://api.perplexity.ai/chat/completions",                              model: "sonar-pro",               type: "text",  apiFormat: "openai"    },
+  { label: "Stability AI",  apiUrl: "https://api.stability.ai/v2beta/stable-image/generate/core",              model: "stable-image-core",       type: "image", apiFormat: "stability" },
+  { label: "Ideogram",      apiUrl: "https://api.ideogram.ai/generate",                                        model: "ideogram-v3",             type: "image", apiFormat: "ideogram"  },
+  { label: "Black Forest",  apiUrl: "https://api.bfl.ai/v1/flux-pro",                                          model: "flux-pro",                type: "image", apiFormat: "bfl"       },
+  { label: "Replicate",     apiUrl: "https://api.replicate.com/v1/predictions",                                model: "flux-dev",                type: "image", apiFormat: "replicate" },
+  { label: "Leonardo AI",   apiUrl: "https://cloud.leonardo.ai/api/rest/v1/generations",                       model: "phoenix",                 type: "image", apiFormat: "leonardo"  },
+  { label: "Getimg.ai",     apiUrl: "https://api.getimg.ai/v1/stable-diffusion/text-to-image",                 model: "flux-dev",                type: "image", apiFormat: "getimg"    },
 ];
+
+
+
+const C = {
+  bg:       "#09090971",              
+  surface:  "#191817",              
+  surfaceHigh: "#0f1010",            // elevated surface (active states)
+  border:   "rgba(240, 233, 233, 0)",
+  border2:  "rgba(255,255,255,0.10)",
+  text:     "#eeecea",               // warm off-white
+  muted:    "rgba(240, 231, 231, 0.87)",
+  dim:      "rgba(255, 255, 255, 0.92)",
+  userBg:   "rgba(92, 87, 87, 0.3)",
+  inputBg:  "#0f0f0e",
+  sendBtn:  "#454340",               // off-white send button
+  sendIcon: "#e9e3dd",               // dark icon on send button
+};
+
+// ─── Supabase helpers ─────────────────────────────────────────────────────────
 
 async function fetchModels(userId: string): Promise<CustomModel[]> {
   const { data, error } = await supabase
-    .from("custom_models")
-    .select("*")
-    .eq("user_id", userId)
+    .from("custom_models").select("*").eq("user_id", userId)
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data ?? []) as CustomModel[];
@@ -143,13 +128,10 @@ async function fetchModels(userId: string): Promise<CustomModel[]> {
 
 async function insertModel(
   userId: string,
-  fields: Omit<CustomModel, "id" | "user_id" | "created_at">
+  fields: Omit<CustomModel, "id" | "user_id" | "created_at">,
 ): Promise<CustomModel> {
   const { data, error } = await supabase
-    .from("custom_models")
-    .insert({ ...fields, user_id: userId })
-    .select()
-    .single();
+    .from("custom_models").insert({ ...fields, user_id: userId }).select().single();
   if (error) throw error;
   return data as CustomModel;
 }
@@ -160,30 +142,22 @@ async function deleteModel(id: string): Promise<void> {
 
 async function updateModel(
   id: string,
-  fields: Omit<CustomModel, "id" | "user_id" | "created_at">
+  fields: Omit<CustomModel, "id" | "user_id" | "created_at">,
 ): Promise<CustomModel> {
   const { data, error } = await supabase
-    .from("custom_models")
-    .update(fields)
-    .eq("id", id)
-    .select()
-    .single();
+    .from("custom_models").update(fields).eq("id", id).select().single();
   if (error) throw error;
   return data as CustomModel;
 }
 
 async function loadSession(
   userId: string,
-  botId: string
+  botId: string,
 ): Promise<{ messages: Message[]; history: History[] } | null> {
   const { data, error } = await supabase
-    .from("chat_sessions")
-    .select("messages")
-    .eq("user_id", userId)
-    .eq("bot_id", botId)
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .single();
+    .from("chat_sessions").select("messages")
+    .eq("user_id", userId).eq("bot_id", botId)
+    .order("updated_at", { ascending: false }).limit(1).single();
   if (error || !data) return null;
   const stored = data.messages as any[];
   if (!stored?.length) return null;
@@ -194,47 +168,30 @@ async function loadSession(
     imageUrl: m.image_url || undefined,
     videoUrl: m.video_url || undefined,
   }));
-  return {
-    messages,
-    history: messages.map(m => ({ role: m.role, content: m.text })),
-  };
+  return { messages, history: messages.map(m => ({ role: m.role, content: m.text })) };
 }
 
 async function saveSession(
-  userId: string,
-  botId: string,
-  messages: Message[],
-  history: History[]
+  userId: string, botId: string, messages: Message[], _history: History[],
 ): Promise<void> {
   const stored = messages.map(m => ({
-    role: m.role,
-    content: m.text,
-    image_url: m.imageUrl || null,
-    video_url: m.videoUrl || null,
+    role: m.role, content: m.text,
+    image_url: m.imageUrl || null, video_url: m.videoUrl || null,
   }));
   const { data: existing } = await supabase
-    .from("chat_sessions")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("bot_id", botId)
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .single();
+    .from("chat_sessions").select("id")
+    .eq("user_id", userId).eq("bot_id", botId)
+    .order("updated_at", { ascending: false }).limit(1).single();
   if (existing) {
     await supabase.from("chat_sessions").update({ messages: stored }).eq("id", existing.id);
   } else {
-    await supabase
-      .from("chat_sessions")
-      .insert({ user_id: userId, bot_id: botId, messages: stored });
+    await supabase.from("chat_sessions").insert({ user_id: userId, bot_id: botId, messages: stored });
   }
 }
 
 async function clearSession(userId: string, botId: string): Promise<void> {
-  await supabase
-    .from("chat_sessions")
-    .delete()
-    .eq("user_id", userId)
-    .eq("bot_id", botId);
+  await supabase.from("chat_sessions").delete()
+    .eq("user_id", userId).eq("bot_id", botId);
 }
 
 const localCache: Record<string, { messages: Message[]; history: History[] }> = {};
@@ -242,25 +199,83 @@ const localCache: Record<string, { messages: Message[]; history: History[] }> = 
 function initCache(model: CustomModel) {
   if (!localCache[model.id]) {
     const greeting =
-      model.type === "image"
-        ? `Hi! I'm ${model.name}. Describe what you'd like me to draw.`
-        : model.type === "video"
-        ? `Hi! I'm ${model.name}. Describe the video you want me to create.`
-        : `Hi! I'm ${model.name}. How can I help?`;
+      model.type === "image" ? "Describe what you'd like me to generate."
+      : model.type === "video" ? "Describe the video you want me to create."
+      : "How can I help you today?";
     localCache[model.id] = {
       messages: [{ id: "0", role: "assistant", text: greeting }],
-      history: model.system_prompt
-        ? [{ role: "system", content: model.system_prompt }]
-        : [],
+      history: model.system_prompt ? [{ role: "system", content: model.system_prompt }] : [],
     };
   }
   return localCache[model.id];
 }
 
+// ─── Blinking cursor ──────────────────────────────────────────────────────────
+
+function BlinkCursor() {
+  const op = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(op, { toValue: 0, duration: 550, useNativeDriver: true }),
+        Animated.timing(op, { toValue: 1, duration: 550, useNativeDriver: true }),
+      ]),
+    ).start();
+  }, [op]);
+  return (
+    <Animated.Text style={{ color: C.muted, fontSize: 15, lineHeight: 24, opacity: op }}>
+      {" ▍"}
+    </Animated.Text>
+  );
+}
+
+// ─── Message row ──────────────────────────────────────────────────────────────
+
+type MsgProps = { item: Message; isStreaming: boolean; modelInitial: string };
+
+function MessageRow({ item, isStreaming, modelInitial }: MsgProps) {
+  const isUser = item.role === "user";
+
+  if (isUser) {
+    return (
+      <View style={row.userWrap}>
+        <View style={row.userBubble}>
+          <Text style={row.userText} selectable>{item.text}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={row.asstWrap}>
+      {/* Avatar */}
+      <View style={row.avatar}>
+        <Text style={row.avatarLetter}>{modelInitial}</Text>
+      </View>
+
+      <View style={row.asstBody}>
+        {item.imageUrl ? (
+          <Image source={{ uri: item.imageUrl }} style={row.image} resizeMode="cover" />
+        ) : item.videoUrl ? (
+          <View style={row.videoCard}>
+            <Ionicons name="play-circle-outline" size={22} color={C.muted} />
+            <Text style={row.videoLabel}>Video ready</Text>
+          </View>
+        ) : (
+          <Text style={row.asstText} selectable>
+            {item.text}
+            {isStreaming ? <BlinkCursor /> : null}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+// ─── Add / Edit model sheet ───────────────────────────────────────────────────
+
 function AddModelSheet({
-  initialModel,
-  onSave,
-  onClose,
+  initialModel, onSave, onClose,
 }: {
   initialModel?: CustomModel;
   onSave: (fields: Omit<CustomModel, "id" | "user_id" | "created_at">) => Promise<void>;
@@ -277,15 +292,12 @@ function AddModelSheet({
   const [videoFormat, setVideoFormat]       = useState<VideoFormat>(initialModel?.video_format ?? "fal");
   const [systemPrompt, setSystemPrompt]     = useState(initialModel?.system_prompt ?? "");
   const [supportsVision, setSupportsVision] = useState(initialModel?.supports_vision ?? false);
-  const [showSystemPrompt, setShowSystemPrompt] = useState(!!(initialModel?.system_prompt));
+  const [showSys, setShowSys]               = useState(!!(initialModel?.system_prompt));
   const [keyVisible, setKeyVisible]         = useState(false);
   const [saving, setSaving]                 = useState(false);
 
   const applyPreset = (p: typeof PRESETS[0]) => {
-    setApiUrl(p.apiUrl);
-    setModel(p.model);
-    setType(p.type);
-    setApiFormat(p.apiFormat);
+    setApiUrl(p.apiUrl); setModel(p.model); setType(p.type); setApiFormat(p.apiFormat);
     if (p.imageFormat) setImageFormat(p.imageFormat);
     if (p.videoFormat) setVideoFormat(p.videoFormat);
     if (!name) setName(p.label);
@@ -293,42 +305,36 @@ function AddModelSheet({
 
   const handleSave = async () => {
     if (!name.trim()) { Alert.alert("Name required", "Give this model a name."); return; }
-    const isPollinationsImage = type === "image" && imageFormat === "pollinations";
-    if (!isPollinationsImage && !apiKey.trim()) { Alert.alert("API key required", "Enter your API key."); return; }
-    if (!isPollinationsImage && !apiUrl.trim()) { Alert.alert("Endpoint required", "Enter the API endpoint URL."); return; }
+    const isPoll = type === "image" && imageFormat === "pollinations";
+    if (!isPoll && !apiKey.trim()) { Alert.alert("API key required", "Enter your API key."); return; }
+    if (!isPoll && !apiUrl.trim()) { Alert.alert("Endpoint required", "Enter the API endpoint URL."); return; }
     setSaving(true);
     try {
       await onSave({
-        name: name.trim(),
-        api_key: isPollinationsImage ? "" : apiKey.trim(),
-        api_url: isPollinationsImage ? "" : apiUrl.trim(),
-        model: model.trim(),
-        type,
-        api_format: apiFormat,
-        image_format: type === "image" ? imageFormat : null,
+        name: name.trim(), api_key: isPoll ? "" : apiKey.trim(),
+        api_url: isPoll ? "" : apiUrl.trim(), model: model.trim(), type,
+        api_format: apiFormat, image_format: type === "image" ? imageFormat : null,
         video_format: type === "video" ? videoFormat : null,
         system_prompt: systemPrompt.trim(),
         supports_vision: type === "text" ? supportsVision : false,
       });
       onClose();
     } catch (err) {
-      Alert.alert("Error", err instanceof Error ? err.message : "Failed to save model.");
-    } finally {
-      setSaving(false);
-    }
+      Alert.alert("Error", err instanceof Error ? err.message : "Failed to save.");
+    } finally { setSaving(false); }
   };
 
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={m.sheet}>
-        <View style={m.handle} />
-        <View style={m.sheetHeader}>
+      <View style={sh.root}>
+        <View style={sh.handle} />
+        <View style={sh.header}>
           <Pressable onPress={onClose} hitSlop={12}>
-            <Text style={m.cancelBtn}>Cancel</Text>
+            <Text style={sh.cancel}>Cancel</Text>
           </Pressable>
-          <Text style={m.sheetTitle}>{isEditing ? "Edit model" : "Add model"}</Text>
+          <Text style={sh.title}>{isEditing ? "Edit model" : "Add model"}</Text>
           <Pressable onPress={handleSave} disabled={saving} hitSlop={12}>
-            <Text style={[m.doneBtn, saving && { opacity: 0.35 }]}>
+            <Text style={[sh.done, saving && { opacity: 0.3 }]}>
               {saving ? "Saving…" : isEditing ? "Save" : "Add"}
             </Text>
           </Pressable>
@@ -336,84 +342,132 @@ function AddModelSheet({
 
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={m.sheetBody}
+          contentContainerStyle={sh.body}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Text style={m.sectionLabel}>QUICK FILL</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={m.presetsRow}>
+          {/* Quick fill */}
+          <Text style={sh.sectionLabel}>QUICK FILL</Text>
+          <ScrollView
+            horizontal showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 6, paddingBottom: 22 }}
+          >
             {PRESETS.map(p => (
-              <Pressable key={p.label} style={m.presetPill} onPress={() => applyPreset(p)}>
-                <Text style={m.presetText}>{p.label}</Text>
+              <Pressable key={p.label} style={sh.chip} onPress={() => applyPreset(p)}>
+                <Text style={sh.chipText}>{p.label}</Text>
               </Pressable>
             ))}
           </ScrollView>
 
-          <Text style={m.sectionLabel}>NAME</Text>
-          <View style={m.group}>
-            <TextInput style={m.field} placeholder="My GPT-4o" placeholderTextColor="rgba(255,255,255,0.2)" value={name} onChangeText={setName} />
+          {/* Name */}
+          <Text style={sh.sectionLabel}>NAME</Text>
+          <View style={sh.group}>
+            <TextInput
+              style={sh.input} placeholder="My GPT-4o"
+              placeholderTextColor={C.dim} value={name} onChangeText={setName}
+            />
           </View>
 
+          {/* API Key */}
           {!(type === "image" && imageFormat === "pollinations") && (
-          <>
-            <Text style={m.sectionLabel}>API KEY</Text>
-            <View style={m.group}>
-              <View style={m.fieldRow}>
-                <TextInput style={[m.field, { flex: 1, borderWidth: 0 }]} placeholder="sk-..." placeholderTextColor="rgba(255,255,255,0.2)" value={apiKey} onChangeText={setApiKey} secureTextEntry={!keyVisible} autoCapitalize="none" autoCorrect={false} />
-                <Pressable onPress={() => setKeyVisible(v => !v)} hitSlop={12} style={m.fieldIcon}>
-                  <Ionicons name={keyVisible ? "eye-off-outline" : "eye-outline"} size={17} color="rgba(255,255,255,0.3)" />
-                </Pressable>
+            <>
+              <Text style={sh.sectionLabel}>API KEY</Text>
+              <View style={sh.group}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <TextInput
+                    style={[sh.input, { flex: 1, borderWidth: 0 }]}
+                    placeholder="sk-…" placeholderTextColor={C.dim}
+                    value={apiKey} onChangeText={setApiKey}
+                    secureTextEntry={!keyVisible} autoCapitalize="none" autoCorrect={false}
+                  />
+                  <Pressable onPress={() => setKeyVisible(v => !v)} hitSlop={12} style={{ paddingRight: 14 }}>
+                    <Ionicons name={keyVisible ? "eye-off-outline" : "eye-outline"} size={17} color={C.dim} />
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          </>)}
+            </>
+          )}
 
-          <Text style={m.sectionLabel}>ENDPOINT & MODEL</Text>
-          <View style={m.group}>
-            <TextInput style={[m.field, m.fieldDivider]} placeholder="https://api.openai.com/v1/chat/completions" placeholderTextColor="rgba(255,255,255,0.2)" value={apiUrl} onChangeText={setApiUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url" />
-            <TextInput style={m.field} placeholder="gpt-4o" placeholderTextColor="rgba(255,255,255,0.2)" value={model} onChangeText={setModel} autoCapitalize="none" autoCorrect={false} />
+          {/* Endpoint & model */}
+          <Text style={sh.sectionLabel}>ENDPOINT & MODEL</Text>
+          <View style={sh.group}>
+            <TextInput
+              style={[sh.input, sh.inputDivider]}
+              placeholder="https://api.openai.com/v1/chat/completions"
+              placeholderTextColor={C.dim} value={apiUrl} onChangeText={setApiUrl}
+              autoCapitalize="none" autoCorrect={false} keyboardType="url"
+            />
+            <TextInput
+              style={sh.input} placeholder="gpt-4o"
+              placeholderTextColor={C.dim} value={model} onChangeText={setModel}
+              autoCapitalize="none" autoCorrect={false}
+            />
           </View>
 
-          <Text style={m.sectionLabel}>TYPE</Text>
-          <View style={m.group}>
-            <View style={m.segmentRow}>
+          {/* Type */}
+          <Text style={sh.sectionLabel}>TYPE</Text>
+          <View style={sh.group}>
+            <View style={sh.segRow}>
               {(["text", "image", "video"] as ModelType[]).map(t => (
-                <Pressable key={t} style={[m.segment, type === t && m.segmentActive]} onPress={() => setType(t)}>
-                  <Text style={[m.segmentText, type === t && m.segmentTextActive]}>{t.charAt(0).toUpperCase() + t.slice(1)}</Text>
+                <Pressable
+                  key={t} style={[sh.seg, type === t && sh.segActive]}
+                  onPress={() => setType(t)}
+                >
+                  <Text style={[sh.segText, type === t && sh.segTextActive]}>
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </Text>
                 </Pressable>
               ))}
             </View>
           </View>
 
+          {/* Text-specific */}
           {type === "text" && (
             <>
-              <Text style={m.sectionLabel}>API FORMAT</Text>
-              <View style={m.group}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={m.apiFormatRow}>
-                  {(["openai", "anthropic", "cohere", "google", "deepseek", "xai", "perplexity", "azure", "mistral", "fal", "replicate", "stability", "ideogram", "bfl", "leonardo", "getimg", "runway", "luma", "pika", "vidu", "minimax", "elevenlabs", "cartesia", "playht", "murf", "voyage", "jina", "ollama", "huggingface"] as ApiFormat[]).map(f => (
-                    <Pressable key={f} style={[m.apiFormatPill, apiFormat === f && m.apiFormatPillActive]} onPress={() => setApiFormat(f)}>
-                      <Text style={[m.apiFormatText, apiFormat === f && m.apiFormatTextActive]} numberOfLines={1}>{f}</Text>
+              <Text style={sh.sectionLabel}>API FORMAT</Text>
+              <View style={sh.group}>
+                <ScrollView
+                  horizontal showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 4, paddingVertical: 6, gap: 4 }}
+                >
+                  {(["openai","anthropic","cohere","google","deepseek","xai","perplexity",
+                    "azure","mistral","fal","replicate","stability","ideogram","bfl","leonardo",
+                    "getimg","runway","luma","pika","vidu","minimax","elevenlabs","cartesia",
+                    "playht","murf","voyage","jina","ollama","huggingface"] as ApiFormat[]).map(f => (
+                    <Pressable
+                      key={f}
+                      style={[sh.fmtChip, apiFormat === f && sh.fmtChipActive]}
+                      onPress={() => setApiFormat(f)}
+                    >
+                      <Text style={[sh.fmtText, apiFormat === f && sh.fmtTextActive]}>{f}</Text>
                     </Pressable>
                   ))}
                 </ScrollView>
               </View>
-              <Text style={m.sectionLabel}>OPTIONS</Text>
-              <View style={m.group}>
-                <View style={m.toggleRow}>
-                  <Text style={m.toggleLabel}>Supports image input (vision)</Text>
-                  <Switch value={supportsVision} onValueChange={setSupportsVision} trackColor={{ false: "rgba(255,255,255,0.1)", true: "rgba(255,255,255,0.75)" }} thumbColor="#000" />
+
+              <Text style={sh.sectionLabel}>OPTIONS</Text>
+              <View style={sh.group}>
+                <View style={sh.toggleRow}>
+                  <Text style={sh.toggleLabel}>Supports image input (vision)</Text>
+                  <Switch
+                    value={supportsVision} onValueChange={setSupportsVision}
+                    trackColor={{ false: "rgba(255,255,255,0.10)", true: "rgba(255,255,255,0.55)" }}
+                    thumbColor={supportsVision ? C.text : "rgba(255,255,255,0.4)"}
+                  />
                 </View>
               </View>
             </>
           )}
 
+          {/* Image-specific */}
           {type === "image" && (
             <>
-              <Text style={m.sectionLabel}>IMAGE FORMAT</Text>
-              <View style={m.group}>
-                <View style={m.segmentRow}>
+              <Text style={sh.sectionLabel}>IMAGE FORMAT</Text>
+              <View style={sh.group}>
+                <View style={sh.segRow}>
                   {([["url", "Direct URL"], ["pollinations", "Pollinations"]] as [ImageFormat, string][]).map(([f, label]) => (
-                    <Pressable key={f} style={[m.segment, imageFormat === f && m.segmentActive]} onPress={() => setImageFormat(f)}>
-                      <Text style={[m.segmentText, imageFormat === f && m.segmentTextActive]}>{label}</Text>
+                    <Pressable key={f} style={[sh.seg, imageFormat === f && sh.segActive]} onPress={() => setImageFormat(f)}>
+                      <Text style={[sh.segText, imageFormat === f && sh.segTextActive]}>{label}</Text>
                     </Pressable>
                   ))}
                 </View>
@@ -421,14 +475,15 @@ function AddModelSheet({
             </>
           )}
 
+          {/* Video-specific */}
           {type === "video" && (
             <>
-              <Text style={m.sectionLabel}>VIDEO FORMAT</Text>
-              <View style={m.group}>
-                <View style={m.segmentRow}>
+              <Text style={sh.sectionLabel}>VIDEO FORMAT</Text>
+              <View style={sh.group}>
+                <View style={sh.segRow}>
                   {([["fal", "fal.ai (queue)"], ["direct", "Direct URL"]] as [VideoFormat, string][]).map(([f, label]) => (
-                    <Pressable key={f} style={[m.segment, videoFormat === f && m.segmentActive]} onPress={() => setVideoFormat(f)}>
-                      <Text style={[m.segmentText, videoFormat === f && m.segmentTextActive]}>{label}</Text>
+                    <Pressable key={f} style={[sh.seg, videoFormat === f && sh.segActive]} onPress={() => setVideoFormat(f)}>
+                      <Text style={[sh.segText, videoFormat === f && sh.segTextActive]}>{label}</Text>
                     </Pressable>
                   ))}
                 </View>
@@ -436,48 +491,80 @@ function AddModelSheet({
             </>
           )}
 
+          {/* System prompt */}
           {type === "text" && (
             <>
-              <Pressable style={m.collapsibleHeader} onPress={() => setShowSystemPrompt(v => !v)}>
-                <Text style={m.sectionLabel}>SYSTEM PROMPT</Text>
-                <Ionicons name={showSystemPrompt ? "chevron-up" : "chevron-down"} size={13} color="rgba(255,255,255,0.25)" />
+              <Pressable
+                style={sh.collapsRow}
+                onPress={() => setShowSys(v => !v)}
+              >
+                <Text style={sh.sectionLabel}>SYSTEM PROMPT</Text>
+                <Ionicons name={showSys ? "chevron-up" : "chevron-down"} size={13} color={C.dim} />
               </Pressable>
-              {showSystemPrompt && (
-                <View style={m.group}>
-                  <TextInput style={[m.field, { minHeight: 88, paddingTop: 14 }]} placeholder="You are a helpful assistant." placeholderTextColor="rgba(255,255,255,0.2)" value={systemPrompt} onChangeText={setSystemPrompt} multiline />
+              {showSys && (
+                <View style={sh.group}>
+                  <TextInput
+                    style={[sh.input, { minHeight: 90, paddingTop: 14, textAlignVertical: "top" }]}
+                    placeholder="You are a helpful assistant."
+                    placeholderTextColor={C.dim}
+                    value={systemPrompt} onChangeText={setSystemPrompt}
+                    multiline
+                  />
                 </View>
               )}
             </>
           )}
-          <View style={{ height: 48 }} />
+
+          <View style={{ height: 56 }} />
         </ScrollView>
       </View>
     </Modal>
   );
 }
 
+// ─── Main screen ─────────────────────────────────────────────────────────────
+
 export default function Explore() {
-  const [userId, setUserId]                 = useState<string | null>(null);
-  const [models, setModels]                 = useState<CustomModel[]>([]);
-  const [activeId, setActiveId]             = useState<string | null>(null);
-  const [messages, setMessages]             = useState<Message[]>([]);
-  const [input, setInput]                   = useState("");
-  const [loading, setLoading]               = useState(false);
-  const [addOpen, setAddOpen]               = useState(false);
-  const [editingModel, setEditingModel]     = useState<CustomModel | null>(null);
-  const [loadingModels, setLoadingModels]   = useState(true);
+  const insets = useSafeAreaInsets();
 
-  const historyRef  = useRef<History[]>([]);
-  const messagesRef = useRef<Message[]>([]);
-  const listRef     = useRef<FlatList<Message>>(null);
-  const abortRef    = useRef<AbortController | null>(null);
-  const inputScale  = useRef(new Animated.Value(1)).current;
+  const [userId, setUserId]               = useState<string | null>(null);
+  const [models, setModels]               = useState<CustomModel[]>([]);
+  const [activeId, setActiveId]           = useState<string | null>(null);
+  const [messages, setMessages]           = useState<Message[]>([]);
+  const [input, setInput]                 = useState("");
+  const [loading, setLoading]             = useState(false);
+  const [streamingId, setStreamingId]     = useState<string | null>(null);
+  const [addOpen, setAddOpen]             = useState(false);
+  const [editingModel, setEditingModel]   = useState<CustomModel | null>(null);
+  const [sidebarOpen, setSidebarOpen]     = useState(false);
+  const [loadingModels, setLoadingModels] = useState(true);
 
-  const activeModel = models.find(m => m.id === activeId) ?? null;
+  const historyRef   = useRef<History[]>([]);
+  const messagesRef  = useRef<Message[]>([]);
+  const listRef      = useRef<FlatList<Message>>(null);
+  const abortRef     = useRef<AbortController | null>(null);
+  const sidebarAnim  = useRef(new Animated.Value(0)).current;
+  const streamBuf    = useRef<string>("");
+  const rafRef       = useRef<number | null>(null);
 
+  const activeModel = useMemo(
+    () => models.find(m => m.id === activeId) ?? null,
+    [models, activeId],
+  );
+
+  // Sidebar spring
+  useEffect(() => {
+    Animated.spring(sidebarAnim, {
+      toValue: sidebarOpen ? 1 : 0,
+      useNativeDriver: true,
+      tension: 80, friction: 14,
+    }).start();
+  }, [sidebarOpen, sidebarAnim]);
+
+  // Auth init
   useEffect(() => {
     let mounted = true;
-    const checkUser = async () => {
+    const init = async () => {
       const user = await getCurrentUser();
       if (!mounted) return;
       if (user) {
@@ -488,82 +575,80 @@ export default function Explore() {
             setModels(list);
             if (list.length > 0) switchToModel(list[0], user.id);
           }
-        } catch (err) {
-          console.error("Failed to load models:", err);
-        } finally {
-          if (mounted) setLoadingModels(false);
+        } catch { /* silent */ }
+        finally { if (mounted) setLoadingModels(false); }
+      } else {
+        if (mounted) { setUserId(null); setModels([]); setLoadingModels(false); }
+      }
+    };
+    init();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_e, session) => {
+      if (!mounted) return;
+      if (session?.user) {
+        setUserId(session.user.id);
+        const list = await fetchModels(session.user.id);
+        if (mounted) {
+          setModels(list);
+          if (list.length > 0 && !activeId) switchToModel(list[0], session.user.id);
         }
       } else {
-        if (mounted) {
-          setUserId(null);
-          setModels([]);
-          setLoadingModels(false);
-        }
-      }
-    };
-    checkUser();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (mounted) {
-        if (session?.user) {
-          setUserId(session.user.id);
-          const list = await fetchModels(session.user.id);
-          if (mounted) {
-            setModels(list);
-            if (list.length > 0 && !activeId) switchToModel(list[0], session.user.id);
-          }
-        } else {
-          setUserId(null);
-          setModels([]);
-          setActiveId(null);
-        }
+        setUserId(null); setModels([]); setActiveId(null);
       }
     });
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    return () => { mounted = false; subscription.unsubscribe(); };
   }, []);
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
-  const switchToModel = async (model: CustomModel, uid?: string) => {
+  // RAF-batched flush for streaming
+  const scheduleFlush = useCallback((msgId: string) => {
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      const t = streamBuf.current;
+      setMessages(prev => prev.map(m => m.id === msgId ? { ...m, text: t } : m));
+    });
+  }, []);
+
+  const flushFinal = useCallback((msgId: string) => {
+    if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+    const t = streamBuf.current;
+    setMessages(prev => prev.map(m => m.id === msgId ? { ...m, text: t } : m));
+  }, []);
+
+  const switchToModel = useCallback(async (model: CustomModel, uid?: string) => {
     abortRef.current?.abort();
     const id = uid ?? userId;
-    setActiveId(model.id);
-    setInput("");
-    setLoading(false);
+    setActiveId(model.id); setInput(""); setLoading(false);
+    setStreamingId(null); setSidebarOpen(false);
     if (id) {
       const session = await loadSession(id, model.id);
-      if (session) {
-        historyRef.current = session.history;
-        setMessages(session.messages);
-        return;
-      }
+      if (session) { historyRef.current = session.history; setMessages(session.messages); return; }
     }
     const cache = initCache(model);
     historyRef.current = [...cache.history];
     setMessages([...cache.messages]);
-  };
+  }, [userId]);
 
-  const handleAddModel = async (fields: Omit<CustomModel, "id" | "user_id" | "created_at">) => {
-    if (!userId) throw new Error("You must be logged in to add models.");
+  const handleAddModel = useCallback(async (fields: Omit<CustomModel, "id" | "user_id" | "created_at">) => {
+    if (!userId) throw new Error("You must be logged in.");
     const created = await insertModel(userId, fields);
-    const updated = [...models, created];
-    setModels(updated);
+    setModels(prev => [...prev, created]);
     switchToModel(created);
-  };
+  }, [userId, switchToModel]);
 
-  const handleEditModel = async (fields: Omit<CustomModel, "id" | "user_id" | "created_at">) => {
+  const handleEditModel = useCallback(async (fields: Omit<CustomModel, "id" | "user_id" | "created_at">) => {
     if (!editingModel) return;
     const updated = await updateModel(editingModel.id, fields);
     setModels(prev => prev.map(m => m.id === updated.id ? updated : m));
     setEditingModel(null);
-  };
+  }, [editingModel]);
 
-  const handleDeleteModel = (model: CustomModel) => {
+  const handleDeleteModel = useCallback((model: CustomModel) => {
     Alert.alert(`Remove "${model.name}"?`, "This will also delete its chat history.", [
       { text: "Cancel", style: "cancel" },
-      { text: "Remove", style: "destructive", onPress: async () => {
+      {
+        text: "Remove", style: "destructive", onPress: async () => {
           await deleteModel(model.id);
           if (userId) await clearSession(userId, model.id).catch(() => {});
           const updated = models.filter(m => m.id !== model.id);
@@ -575,104 +660,101 @@ export default function Explore() {
         },
       },
     ]);
-  };
+  }, [models, activeId, userId, switchToModel]);
 
-  const resetChat = async () => {
+  const resetChat = useCallback(async () => {
     if (!activeModel) return;
     abortRef.current?.abort();
-    const greeting = activeModel.type === "image" ? `Hi! I'm ${activeModel.name}. Describe what you'd like me to draw.` : activeModel.type === "video" ? `Hi! I'm ${activeModel.name}. Describe the video you want me to create.` : `Hi! I'm ${activeModel.name}. How can I help?`;
-    const fresh = [{ id: "0", role: "assistant" as const, text: greeting }];
-    historyRef.current = activeModel.system_prompt ? [{ role: "system", content: activeModel.system_prompt }] : [];
-    setMessages(fresh);
-    setLoading(false);
+    const greeting =
+      activeModel.type === "image" ? "Describe what you'd like me to generate."
+      : activeModel.type === "video" ? "Describe the video you want me to create."
+      : "How can I help you today?";
+    historyRef.current = activeModel.system_prompt
+      ? [{ role: "system", content: activeModel.system_prompt }] : [];
+    setMessages([{ id: "0", role: "assistant", text: greeting }]);
+    setLoading(false); setStreamingId(null);
     if (userId) await clearSession(userId, activeModel.id).catch(() => {});
-  };
+  }, [activeModel, userId]);
 
-  const persist = async () => {
+  const persist = useCallback(() => {
     if (!activeModel || !userId) return;
     localCache[activeModel.id] = { messages: messagesRef.current, history: historyRef.current };
-    await saveSession(userId, activeModel.id, messagesRef.current, historyRef.current).catch(err => console.error("Save failed:", err));
-  };
+    // Defer DB write to avoid blocking the UI frame
+    setTimeout(() => {
+      saveSession(userId, activeModel.id, messagesRef.current, historyRef.current).catch(() => {});
+    }, 0);
+  }, [activeModel, userId]);
 
-  // Optimized streaming with debounced UI updates for smoother performance
-  const sendText = async (prompt: string, botMsgId: string, model: CustomModel) => {
+  // ── Streaming ─────────────────────────────────────────────────────────────
+
+  const sendText = useCallback(async (prompt: string, botMsgId: string, model: CustomModel) => {
     if (!model.api_url?.trim()) throw new Error("No endpoint URL configured.");
     if (!model.api_key?.trim()) throw new Error("No API key configured.");
     historyRef.current.push({ role: "user", content: prompt });
     abortRef.current = new AbortController();
-    
-    // Debounced update reference
-    let lastUpdate = 0;
-    const updateDebounced = (text: string) => {
-      const now = Date.now();
-      if (now - lastUpdate > 50) { // Update max 20 times per second
-        lastUpdate = now;
-        setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text } : m));
-      }
-    };
-    
+    streamBuf.current = "";
+
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    let body: any;
+
     if (model.api_format === "anthropic") {
-      const body: any = { model: model.model, max_tokens: 1024, messages: historyRef.current.filter(h => h.role !== "system"), stream: true };
-      const sysPmt = historyRef.current.find(h => h.role === "system");
-      if (sysPmt) body.system = sysPmt.content;
-      const res = await fetch(model.api_url, { method: "POST", signal: abortRef.current.signal, headers: { "Content-Type": "application/json", "x-api-key": model.api_key, "anthropic-version": "2023-06-01" }, body: JSON.stringify(body) });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error?.message ?? `HTTP ${res.status}`); }
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullReply = "";
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          for (const line of decoder.decode(value, { stream: true }).split("\n")) {
-            if (!line.startsWith("data: ")) continue;
-            const payload = line.slice(6).trim();
-            if (payload === "[DONE]") break;
-            try {
-              const parsed = JSON.parse(payload);
-              const delta = parsed?.delta?.text;
-              if (delta) {
-                fullReply += delta;
-                updateDebounced(fullReply);
-              }
-            } catch { }
-          }
-        }
-      }
-      setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: fullReply } : m));
-      if (!fullReply) throw new Error("Empty reply.");
-      historyRef.current.push({ role: "assistant", content: fullReply });
-      return;
+      headers["x-api-key"] = model.api_key;
+      headers["anthropic-version"] = "2023-06-01";
+      body = {
+        model: model.model, max_tokens: 2048,
+        messages: historyRef.current.filter(h => h.role !== "system"),
+        stream: true,
+      };
+      const sys = historyRef.current.find(h => h.role === "system");
+      if (sys) body.system = sys.content;
+    } else {
+      headers["Authorization"] = `Bearer ${model.api_key}`;
+      body = { model: model.model, messages: historyRef.current, stream: true, max_tokens: 2048 };
     }
-    const res = await fetch(model.api_url, { method: "POST", signal: abortRef.current.signal, headers: { "Content-Type": "application/json", Authorization: `Bearer ${model.api_key}` }, body: JSON.stringify({ model: model.model, messages: historyRef.current, stream: true, max_tokens: 1024 }) });
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error?.message ?? `HTTP ${res.status}`); }
+
+    const res = await fetch(model.api_url, {
+      method: "POST", signal: abortRef.current.signal,
+      headers, body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error?.message ?? `HTTP ${res.status}`);
+    }
+
     const reader = res.body?.getReader();
     const decoder = new TextDecoder();
-    let fullReply = "";
+    let remainder = "";
+
     if (reader) {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        for (const line of decoder.decode(value, { stream: true }).split("\n")) {
+        const chunk = remainder + decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        remainder = lines.pop() ?? "";
+        for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
           const payload = line.slice(6).trim();
           if (payload === "[DONE]") break;
           try {
-            const delta = JSON.parse(payload)?.choices?.[0]?.delta?.content;
-            if (delta) {
-              fullReply += delta;
-              updateDebounced(fullReply);
-            }
-          } catch { }
+            const parsed = JSON.parse(payload);
+            const delta =
+              model.api_format === "anthropic"
+                ? parsed?.delta?.text
+                : parsed?.choices?.[0]?.delta?.content;
+            if (delta) { streamBuf.current += delta; scheduleFlush(botMsgId); }
+          } catch { /* malformed chunk */ }
         }
       }
     }
-    setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: fullReply } : m));
+
+    flushFinal(botMsgId);
+    const fullReply = streamBuf.current;
     if (!fullReply) throw new Error("Empty reply.");
     historyRef.current.push({ role: "assistant", content: fullReply });
-  };
+  }, [scheduleFlush, flushFinal]);
 
-  const sendImage = async (prompt: string, botMsgId: string, model: CustomModel) => {
+  const sendImage = useCallback(async (prompt: string, botMsgId: string, model: CustomModel) => {
     if (model.image_format === "pollinations") {
       const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=${model.model}&width=1024&height=1024&seed=${Date.now()}&nologo=true`;
       setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: "", imageUrl } : m));
@@ -680,317 +762,532 @@ export default function Explore() {
     }
     if (!model.api_url?.trim()) throw new Error("No endpoint URL configured.");
     if (!model.api_key?.trim()) throw new Error("No API key configured.");
-    const res = await fetch(model.api_url, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${model.api_key}` }, body: JSON.stringify({ model: model.model, prompt, n: 1, size: "1024x1024" }) });
+    const res = await fetch(model.api_url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${model.api_key}` },
+      body: JSON.stringify({ model: model.model, prompt, n: 1, size: "1024x1024" }),
+    });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error?.message ?? `HTTP ${res.status}`); }
     const data = await res.json();
     const imageUrl = data?.data?.[0]?.url;
     if (!imageUrl) throw new Error("No image returned.");
     setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: "", imageUrl } : m));
-  };
+  }, []);
 
-  const sendVideo = async (prompt: string, botMsgId: string, model: CustomModel) => {
+  const sendVideo = useCallback(async (prompt: string, botMsgId: string, model: CustomModel) => {
     if (!model.api_url?.trim()) throw new Error("No endpoint URL configured.");
     if (!model.api_key?.trim()) throw new Error("No API key configured.");
     setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: "Starting generation…" } : m));
+
     if (model.video_format === "fal") {
-      const submitRes = await fetch(model.api_url, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Key ${model.api_key}` }, body: JSON.stringify({ prompt }) });
-      if (!submitRes.ok) { const e = await submitRes.json().catch(() => ({})); throw new Error(e.detail ?? `HTTP ${submitRes.status}`); }
-      const submitted = await submitRes.json();
-      const requestId: string = submitted.request_id;
-      if (!requestId) throw new Error("No request ID returned.");
-      const pollUrl = `${model.api_url}/requests/${requestId}`;
-      let videoUrl: string | null = null;
+      const sub = await fetch(model.api_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Key ${model.api_key}` },
+        body: JSON.stringify({ prompt }),
+      });
+      if (!sub.ok) { const e = await sub.json().catch(() => ({})); throw new Error(e.detail ?? `HTTP ${sub.status}`); }
+      const { request_id: reqId } = await sub.json();
+      if (!reqId) throw new Error("No request ID.");
+      const pollUrl = `${model.api_url}/requests/${reqId}`;
       for (let i = 0; i < 120; i++) {
         await new Promise(r => setTimeout(r, 3000));
-        const pollRes = await fetch(pollUrl, { headers: { Authorization: `Key ${model.api_key}` } });
-        if (!pollRes.ok) continue;
-        const pollData = await pollRes.json();
-        if (pollData.status === "COMPLETED") { videoUrl = pollData.video?.url || pollData.output?.video_url || pollData.output?.video?.url || null; break; }
-        if (pollData.status === "FAILED") throw new Error(pollData.error ?? "Generation failed.");
-        setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: `Generating… (${(i + 1) * 3}s)` } : m));
+        const poll = await fetch(pollUrl, { headers: { Authorization: `Key ${model.api_key}` } });
+        if (!poll.ok) continue;
+        const pd = await poll.json();
+        if (pd.status === "COMPLETED") {
+          const videoUrl = pd.video?.url || pd.output?.video_url || pd.output?.video?.url || null;
+          if (!videoUrl) throw new Error("No video URL in response.");
+          setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: "", videoUrl } : m));
+          return;
+        }
+        if (pd.status === "FAILED") throw new Error(pd.error ?? "Generation failed.");
+        setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: `Generating… ${(i + 1) * 3}s` } : m));
       }
-      if (!videoUrl) throw new Error("Timed out waiting for video.");
-      setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: "", videoUrl } : m));
-      return;
+      throw new Error("Timed out waiting for video.");
     }
-    const res = await fetch(model.api_url, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${model.api_key}` }, body: JSON.stringify({ model: model.model, prompt }) });
+
+    const res = await fetch(model.api_url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${model.api_key}` },
+      body: JSON.stringify({ model: model.model, prompt }),
+    });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error?.message ?? `HTTP ${res.status}`); }
     const data = await res.json();
     const videoUrl = data?.video_url || data?.data?.[0]?.url;
     if (!videoUrl) throw new Error("No video returned.");
     setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: "", videoUrl } : m));
-  };
+  }, []);
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (!input.trim() || loading || !activeModel) return;
     const prompt = input.trim();
     const botMsgId = `${Date.now()}-b`;
-    Animated.sequence([ Animated.timing(inputScale, { toValue: 0.97, duration: 60, useNativeDriver: true }), Animated.timing(inputScale, { toValue: 1, duration: 60, useNativeDriver: true }) ]).start();
-    setMessages(prev => [ ...prev, { id: `${Date.now()}-u`, role: "user", text: prompt }, { id: botMsgId, role: "assistant", text: "" } ]);
-    setInput("");
-    setLoading(true);
+    setMessages(prev => [
+      ...prev,
+      { id: `${Date.now()}-u`, role: "user", text: prompt },
+      { id: botMsgId, role: "assistant", text: "" },
+    ]);
+    setInput(""); setLoading(true); setStreamingId(botMsgId);
     try {
       if (activeModel.type === "video") await sendVideo(prompt, botMsgId, activeModel);
       else if (activeModel.type === "image") await sendImage(prompt, botMsgId, activeModel);
       else await sendText(prompt, botMsgId, activeModel);
-      await persist();
+      persist();
     } catch (err: any) {
       if (err?.name === "AbortError") return;
-      setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: err instanceof Error ? err.message : "Something went wrong." } : m));
-    } finally { setLoading(false); }
-  };
+      setMessages(prev => prev.map(m => m.id === botMsgId
+        ? { ...m, text: err instanceof Error ? err.message : "Something went wrong." }
+        : m,
+      ));
+    } finally {
+      setLoading(false); setStreamingId(null);
+    }
+  }, [input, loading, activeModel, sendText, sendImage, sendVideo, persist]);
+
+  // ── Derived ───────────────────────────────────────────────────────────────
+
+  const sideTranslate = sidebarAnim.interpolate({ inputRange: [0, 1], outputRange: [-276, 0] });
+  const scrimOpacity  = sidebarAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
+
+  const modelInitial = activeModel ? activeModel.name.charAt(0).toUpperCase() : "A";
+
+  const renderItem = useCallback(({ item }: { item: Message }) => (
+    <MessageRow
+      item={item}
+      isStreaming={streamingId === item.id}
+      modelInitial={modelInitial}
+    />
+  ), [streamingId, modelInitial]);
+
+  const keyExtractor = useCallback((item: Message) => item.id, []);
+
+  const inputPlaceholder =
+    activeModel?.type === "video" ? "Describe a video…"
+    : activeModel?.type === "image" ? "Describe an image…"
+    : "Message";
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <ImageBackground source={require("../../assets/images/bg1.jpg")} style={s.fill}>
-      <View style={s.overlay} />
-      <SafeAreaView style={s.fill}>
-        <View style={s.tabBar}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.tabScroll}>
-            {models.map(model => {
-              const active = activeId === model.id;
-              return (
-                <Pressable key={model.id} style={[s.tab, active && s.tabActive]} onPress={() => switchToModel(model)} onLongPress={() => { Alert.alert(model.name, undefined, [ { text: "Edit", onPress: () => { setEditingModel(model); setAddOpen(true); } }, { text: "Delete", style: "destructive", onPress: () => handleDeleteModel(model) }, { text: "Cancel", style: "cancel" } ]); }} delayLongPress={500}>
-                  <Text style={[s.tabText, active && s.tabTextActive]} numberOfLines={1}>{model.name}</Text>
-                  {active && <View style={s.tabUnderline} />}
-                </Pressable>
-              );
-            })}
-            <Pressable style={s.addTab} onPress={() => { if (!userId) { Alert.alert("Sign in required", "Log in to save and manage your models."); return; } setAddOpen(true); }}>
-              <Ionicons name="add" size={17} color="rgba(255,255,255,0.5)" />
-            </Pressable>
-            <Pressable style={s.information} onPress={() => Alert.alert("Info", "To make new tabs click on the + on the top left corner\nTo go to a new tab click on the messageicon or home icon on the right side and the location depends on the devices viewport size\n\nhave fun")}>
-              <Ionicons name="information" size={23} color="white"/>
-            </Pressable>
-          </ScrollView>
-          {activeModel && <Pressable onPress={resetChat} hitSlop={12} style={s.clearBtn}><Ionicons name="trash-outline" size={15} color="rgba(255,255,255,0.35)" /></Pressable>}
+    <ImageBackground source = {require("../../assets/images/bgexplore.jpg")} style= {{flex:1}}>
+    <View style={{ flex: 1, backgroundColor: C.bg }}>
+
+      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
+
+      {/* Sidebar overlay */}
+      {sidebarOpen && (
+        <Animated.View
+          pointerEvents="box-none"
+          style={[StyleSheet.absoluteFill, { zIndex: 50 }]}
+        >
+          {/* Scrim */}
+          <Animated.View
+            pointerEvents="auto"
+            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.6)", opacity: scrimOpacity }]}
+          >
+            <Pressable style={StyleSheet.absoluteFill} onPress={() => setSidebarOpen(false)} />
+          </Animated.View>
+
+          {/* Panel */}
+          <Animated.View
+            style={[
+              side.panel,
+              { transform: [{ translateX: sideTranslate }], paddingTop: insets.top + 20 },
+            ]}
+          >
+            <View style={side.header}>
+              <Text style={side.title}>Models</Text>
+              <Pressable
+                style={side.addBtn}
+                hitSlop={8}
+                onPress={() => {
+                  if (!userId) { Alert.alert("Sign in required", "Log in to save models."); return; }
+                  setSidebarOpen(false);
+                  setAddOpen(true);
+                }}
+              >
+                <Ionicons name="add" size={18} color={C.text} />
+              </Pressable>
+            </View>
+
+            <ScrollView
+              style={{ flex: 1 }}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingVertical: 8, paddingBottom: 40 }}
+            >
+              {models.map(m => {
+                const isActive = m.id === activeId;
+                return (
+                  <Pressable
+                    key={m.id}
+                    style={[side.item, isActive && side.itemActive]}
+                    onPress={() => switchToModel(m)}
+                    onLongPress={() => {
+                      Alert.alert(m.name, undefined, [
+                        { text: "Edit", onPress: () => { setEditingModel(m); setAddOpen(true); setSidebarOpen(false); } },
+                        { text: "Delete", style: "destructive", onPress: () => handleDeleteModel(m) },
+                        { text: "Cancel", style: "cancel" },
+                      ]);
+                    }}
+                    delayLongPress={500}
+                  >
+                    <View style={[side.itemInitial, isActive && side.itemInitialActive]}>
+                      <Text style={[side.itemInitialText, isActive && side.itemInitialTextActive]}>
+                        {m.name.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[side.itemName, isActive && side.itemNameActive]} numberOfLines={1}>
+                        {m.name}
+                      </Text>
+                      <Text style={side.itemSub} numberOfLines={1}>
+                        {m.model || m.api_format}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+
+              {models.length === 0 && !loadingModels && (
+                <View style={{ alignItems: "center", paddingTop: 48, gap: 8 }}>
+                  <Text style={{ color: C.dim, fontSize: 13 }}>No models yet</Text>
+                </View>
+              )}
+            </ScrollView>
+          </Animated.View>
+        </Animated.View>
+      )}
+
+      <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
+        {/* Top bar */}
+        <View style={topbar.root}>
+          <Pressable style={topbar.iconBtn} onPress={() => setSidebarOpen(true)} hitSlop={8}>
+            <Ionicons name="menu-outline" size={21} color={C.muted} />
+          </Pressable>
+
+          <Pressable style={topbar.center} onPress={() => setSidebarOpen(true)}>
+            <Text style={topbar.modelName} numberOfLines={1}>
+              {activeModel ? activeModel.name : "Select a model"}
+            </Text>
+            <Ionicons name="chevron-down" size={12} color={C.dim} style={{ marginTop: 1 }} />
+          </Pressable>
+
+          <Pressable
+            style={[topbar.iconBtn, !activeModel && { opacity: 0 }]}
+            onPress={resetChat}
+            disabled={!activeModel}
+            hitSlop={8}
+          >
+            <Ionicons name="trash-outline" size={20} color={C.muted} />
+          </Pressable>
         </View>
 
+        {/* Empty state */}
         {!loadingModels && models.length === 0 && (
-          <View style={s.emptyState}>
-            <View style={s.emptyIcon}><Ionicons name="build" size={28} color="rgba(255,255,255,0.3)" /></View>
-            <Text style={s.emptyTitle}>No models yet</Text>
-            <Text style={s.emptySubtitle}>Tap + to add any AI model using your own API key.{"\n"}Works with OpenAI, Anthropic, Groq, Ollama, fal.ai, and more.</Text>
-            <Pressable style={({ pressed }) => [s.emptyBtn, pressed && { opacity: 0.8 }]} onPress={() => { if (!userId) { Alert.alert("Login required", "Log in to save and manage your models."); return; } setAddOpen(true); }}><Text style={s.emptyBtnText}>Add your first model</Text></Pressable>
+          <View style={empty.root}>
+            <Text style={empty.title}>No models connected</Text>
+            <Text style={empty.sub}>
+              Add any model using your own API key.{"\n"}
+              OpenAI, Anthropic, Groq, Ollama, and more.
+            </Text>
+            <Pressable
+              style={empty.btn}
+              onPress={() => { if (!userId) { Alert.alert("Sign in required"); return; } setAddOpen(true); }}
+            >
+              <Text style={empty.btnText}>Add a model</Text>
+            </Pressable>
           </View>
         )}
 
+        {/* Chat */}
         {activeModel && (
-          <KeyboardAvoidingView style={s.fill} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}>
-            <FlatList ref={listRef} data={messages} keyExtractor={m => m.id} contentContainerStyle={s.chatList} onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })} onLayout={() => listRef.current?.scrollToEnd({ animated: false })} keyboardShouldPersistTaps="handled" renderItem={({ item, index }) => {
-                const isUser = item.role === "user";
-                const prev = messages[index - 1];
-                const showAvatar = !isUser && (!prev || prev.role === "user");
-                return (
-                  <View style={[s.msgRow, isUser && s.msgRowUser]}>
-                    {!isUser && <View style={s.avatarCol}>{showAvatar ? <View style={s.botAvatar}><Text style={s.botAvatarText}>{activeModel.name.charAt(0).toUpperCase()}</Text></View> : <View style={{ width: 28 }} />}</View>}
-                    <View style={[s.bubble, isUser ? s.userBubble : s.botBubble, (item.imageUrl || item.videoUrl) && s.mediaBubble]}>
-                      {item.imageUrl ? <Image source={{ uri: item.imageUrl }} style={s.generatedImage} /> : item.videoUrl ? <View style={s.videoPlaceholder}><Ionicons name="play-circle-outline" size={34} color="rgba(255,255,255,0.5)" /><Text style={s.videoReadyText}>Video ready</Text></View> : <Text style={[s.bubbleText, isUser && s.userBubbleText]}>{item.text || (item.role === "assistant" && loading ? "▍" : "")}</Text>}
-                    </View>
-                  </View>
-                );
-              }}
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 16}
+          >
+            <FlatList
+              ref={listRef}
+              data={messages}
+              keyExtractor={keyExtractor}
+              renderItem={renderItem}
+              contentContainerStyle={chat.list}
+              onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
+              onLayout={() => listRef.current?.scrollToEnd({ animated: false })}
+              keyboardShouldPersistTaps="handled"
+              removeClippedSubviews={Platform.OS === "android"}
+              maxToRenderPerBatch={8}
+              windowSize={10}
+              initialNumToRender={14}
+              showsVerticalScrollIndicator={false}
             />
-            <Animated.View style={[s.inputBar, { transform: [{ scale: inputScale }] }]}>
-              <TextInput value={input} onChangeText={setInput} placeholder={activeModel.type === "video" ? "Describe a video…" : activeModel.type === "image" ? "Describe an image…" : "Message"} placeholderTextColor="rgba(255,255,255,0.25)" style={s.chatInput} onSubmitEditing={sendMessage} returnKeyType="send" multiline selectionColor="#fff" />
-              <Pressable style={({ pressed }) => [s.sendBtn, loading && s.sendBtnStop, pressed && { opacity: 0.7 }]} onPress={loading ? () => abortRef.current?.abort() : sendMessage}>
-                <Ionicons name={loading ? "stop" : activeModel.type === "video" ? "videocam" : activeModel.type === "image" ? "image-outline" : "arrow-up"} size={15} color={loading ? "rgba(255,255,255,0.45)" : "#000"} />
-              </Pressable>
-            </Animated.View>
+
+            {/* Input bar */}
+            <View style={[inputbar.wrap, { paddingBottom: Math.max(insets.bottom, 14) }]}>
+              <View style={inputbar.row}>
+                <TextInput
+                  value={input}
+                  onChangeText={setInput}
+                  placeholder={inputPlaceholder}
+                  placeholderTextColor={C.dim}
+                  style={inputbar.field}
+                  onSubmitEditing={sendMessage}
+                  returnKeyType="send"
+                  multiline
+                  selectionColor={C.muted}
+                  maxFontSizeMultiplier={1.2}
+                  blurOnSubmit={false}
+                />
+                <Pressable
+                  style={({ pressed }) => [inputbar.sendBtn, loading && inputbar.sendBtnStop, pressed && { opacity: 0.7 }]}
+                  onPress={loading ? () => abortRef.current?.abort() : sendMessage}
+                >
+                  {loading ? (
+                    <View style={inputbar.stopSquare} />
+                  ) : (
+                    <Ionicons
+                      name={
+                        activeModel.type === "video" ? "arrow-up"
+                        : activeModel.type === "image" ? "arrow-up"
+                        : "arrow-up"
+                      }
+                      size={15}
+                      color={input.trim() ? C.sendIcon : C.muted}
+                    />
+                  )}
+                </Pressable>
+              </View>
+              <Text style={inputbar.hint} numberOfLines={1}>
+                {activeModel.model || activeModel.api_format} · {activeModel.name}
+              </Text>
+            </View>
           </KeyboardAvoidingView>
         )}
       </SafeAreaView>
-      {addOpen && <AddModelSheet initialModel={editingModel ?? undefined} onSave={editingModel ? handleEditModel : handleAddModel} onClose={() => { setAddOpen(false); setEditingModel(null); }} />}
+
+      {addOpen && (
+        <AddModelSheet
+          initialModel={editingModel ?? undefined}
+          onSave={editingModel ? handleEditModel : handleAddModel}
+          onClose={() => { setAddOpen(false); setEditingModel(null); }}
+        />
+      )}
+    </View>
     </ImageBackground>
   );
 }
 
-const s = StyleSheet.create({
-  fill: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFill,
-  backgroundColor: "rgba(0, 0, 0, 0.01)" },
-  tabBar: { flexDirection: "row", 
-    alignItems: "center", 
-    backgroundColor: "transparent" },
-  information: { width: 30, 
-    height: 30,
-    borderRadius: 23, 
-    borderWidth: StyleSheet.hairlineWidth, 
-    borderColor: "rgba(238, 228, 228, 0.06)", 
-    alignItems: "center", 
-    justifyContent: "center", 
-    marginBottom: 8, 
-    marginLeft: 12 },
-  tabScroll: { 
-    paddingHorizontal: 10, 
-    paddingTop: 8, 
-    paddingBottom: 0, 
-    gap: 2, 
-    alignItems: "flex-end" },
-  tab: { 
-    paddingHorizontal: 13, 
-    paddingTop: 7, 
-    paddingBottom: 10, 
-    maxWidth: 148, 
-    position: "relative" 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+const topbar = StyleSheet.create({
+  root: {
+    flexDirection: "row", alignItems: "center",
+    paddingHorizontal: 8, paddingVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: C.border,
   },
-  tabActive: {},
-  tabText: { 
-    color: "rgb(250, 248, 248)", 
-    fontSize: 13,
-     fontWeight: "500",
-      letterSpacing: 0.1 },
-  tabTextActive: {
-     color: "#f5f2ec", 
-     fontWeight: "600" },
-  tabUnderline: { 
-    position: "absolute", 
-    bottom: 0, 
-    left: 13, 
-    right: 13, 
-    height: 1.5, 
-    backgroundColor: "#f2f0ea", 
-    borderRadius: 1 },
-  addTab: { 
-    width: 30,
-     height: 30, 
-     borderRadius: 23, 
-     borderWidth: StyleSheet.hairlineWidth,
-      borderColor: "rgba(250, 238, 238, 0.06)", 
-      alignItems: "center", 
-      justifyContent: "center", 
-      marginBottom: 8, 
-      marginLeft: 4 },
-  clearBtn: { 
-    paddingRight: 16, 
-    paddingLeft: 6, 
-    paddingBottom: 17,
-     alignSelf: "flex-end" },
-  emptyState: { 
-    flex: 1, 
-    alignItems: "center",
-     justifyContent: "center", 
-     paddingHorizontal: 44, gap: 10 },
-  emptyIcon: { 
-    width: 56, 
-    height: 56, 
-    borderRadius: 16,
-     backgroundColor: "rgba(36, 33, 33, 0.56)", 
-     borderWidth: StyleSheet.hairlineWidth, 
-     borderColor: "rgba(255,255,255,0.08)", 
-     alignItems: "center", 
-     justifyContent: "center", 
-     marginBottom: 4 },
-  emptyTitle: { 
-    color: "#efe7e7",
-     fontSize: 19, 
-     fontWeight: "600", 
-     letterSpacing: -0.2 },
-  emptySubtitle: { 
-    color: "rgba(255,255,255,0.38)", 
-    fontSize: 14,
-     textAlign: "center", 
-    lineHeight: 21 },
-  emptyBtn: { 
-    marginTop: 10, 
-    backgroundColor: "#f6ecec", 
-    borderRadius: 10, 
-    paddingHorizontal: 22,
-     paddingVertical: 12 },
-  emptyBtnText: { 
-    color: "#000", 
-    fontSize: 14, 
-    fontWeight: "600" },
-  chatList: { 
-    paddingVertical: 16,
-     paddingHorizontal: 14,
-      flexGrow: 1,
-       gap: 2 },
-  msgRow: { 
-    flexDirection: "row",
-     alignItems: "flex-end",
-      gap: 8,
-       marginVertical: 2 },
-  msgRowUser: { 
-    flexDirection: "row-reverse" },
-  avatarCol: { 
-    width: 28, 
-    alignItems: "center" },
-  botAvatar: { 
-    width: 28, 
-    height: 28, 
-    borderRadius: 9, 
-    backgroundColor: "rgba(5, 5, 5, 0)", 
-    borderWidth: StyleSheet.hairlineWidth, 
-    borderColor: "rgba(255, 255, 255, 0.17)",
-     alignItems: "center", 
-     justifyContent: "center" },
-  botAvatarText: { 
-    color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: "700" },
-  bubble: { 
-    borderRadius: 18, maxWidth: "78%", overflow: "hidden", paddingHorizontal: 14, paddingVertical: 10 },
-  mediaBubble: { 
-    padding: 0, backgroundColor: "transparent" },
-  userBubble: { 
-    backgroundColor: "rgba(235, 226, 226, 0.15)", borderBottomRightRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(0, 0, 0, 0.1)" },
-  botBubble: {
-     backgroundColor: "rgba(240, 232, 232, 0.11)", borderBottomLeftRadius: 5, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255, 255, 255, 0.03)" },
-  bubbleText: { 
-    color: "rgba(255,255,255,0.82)", fontSize: 15, lineHeight: 22 },
-  userBubbleText: { 
-    color: "#fff" },
-  generatedImage: { 
-    width: 252, height: 252, borderRadius: 15 },
-  videoPlaceholder: {
-     width: 224, height: 126, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.05)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", gap: 8 },
-  videoReadyText: {
-     color: "rgba(255,255,255,0.45)", fontSize: 13 },
-  inputBar: {
-     flexDirection: "row", alignItems: "flex-end", paddingLeft: 12, paddingRight: 68, paddingTop: 10, paddingBottom: Platform.OS === "ios" ? 16 : 14, backgroundColor: "transparent", gap: 10, width : "110%" },
-  chatInput: { 
-    flex: 1,
-     backgroundColor: "rgba(64, 61, 61, 0.33)", 
-     color: "#fff", borderRadius: 22, 
-     paddingHorizontal: 16, 
-     paddingTop: 10, 
-     paddingBottom: 10, 
-     fontSize: 15, 
-     maxHeight: 120, 
-     borderWidth: StyleSheet.hairlineWidth,
-     borderColor: "rgba(255, 255, 255, 0)" },
-  sendBtn: { 
-    width: 38, height: 38, borderRadius: 19, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
-  sendBtnStop: { 
-    backgroundColor: "rgba(255,255,255,0.08)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.1)" },
+  iconBtn: {
+    width: 38, height: 38, borderRadius: 8,
+    alignItems: "center", justifyContent: "center",
+  },
+  center: {
+    flex: 1, flexDirection: "row", alignItems: "center",
+    justifyContent: "center", gap: 5,
+  },
+  modelName: {
+    color: C.text, fontSize: 15, fontWeight: "600",
+    letterSpacing: -0.2, maxWidth: 200,
+  },
 });
 
-const m = StyleSheet.create({
-  sheet: { flex: 1, backgroundColor: "rgba(9, 10, 10, 0.99)" },
-  handle: { width: 36, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.15)", alignSelf: "center", marginTop: 10, marginBottom: 6 },
-  sheetHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "rgba(255, 255, 255, 0.54)" },
-  sheetTitle: { color: "#fff", fontSize: 16, fontWeight: "600", letterSpacing: -0.1 },
-  cancelBtn: { color: "rgba(255,255,255,0.45)", fontSize: 15, minWidth: 56 },
-  doneBtn:   { color: "#fff", fontSize: 15, fontWeight: "600", minWidth: 56, textAlign: "right" },
-  sheetBody: { paddingHorizontal: 20, paddingTop: 24 },
-  sectionLabel: { color: "rgba(255,255,255,0.28)", fontSize: 11, fontWeight: "600", letterSpacing: 0.7, marginBottom: 8, marginLeft: 2 },
-  presetsRow: { gap: 6, marginBottom: 24 },
-  presetPill: { paddingHorizontal: 13, paddingVertical: 7, borderRadius: 8, backgroundColor: "rgba(255, 255, 255, 0.05)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.09)" },
-  presetText: { color: "rgba(255,255,255,0.65)", fontSize: 13, fontWeight: "500" },
-  group: { backgroundColor: "rgba(255,255,255,0.04)", borderRadius: 13, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.08)", overflow: "hidden", marginBottom: 20 },
-  field: { color: "#fff", fontSize: 15, paddingHorizontal: 16, paddingVertical: 14 },
-  fieldDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "rgba(255,255,255,0.07)" },
-  fieldRow: { flexDirection: "row", alignItems: "center" },
-  fieldIcon: { paddingRight: 14 },
-  segmentRow: { flexDirection: "row", padding: 4, gap: 4 },
-  segment: { flex: 1, paddingVertical: 9, borderRadius: 9, alignItems: "center" },
-  segmentActive: { backgroundColor: "rgba(255,255,255,0.11)" },
-  segmentText:       { color: "rgba(255,255,255,0.3)",  fontSize: 13, fontWeight: "500" },
-  segmentTextActive: { color: "#fff",                    fontSize: 13, fontWeight: "600" },
-  toggleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 13 },
-  toggleLabel: { color: "#fff", fontSize: 15, flex: 1 },
-  collapsibleHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12, paddingRight: 4 },
-  apiFormatRow: { paddingHorizontal: 4, paddingVertical: 6, gap: 4 },
-  apiFormatPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.06)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.09)", flexShrink: 0 },
-  apiFormatPillActive: { backgroundColor: "rgba(255,255,255,0.11)" },
-  apiFormatText: { color: "rgba(255,255,255,0.3)", fontSize: 12, fontWeight: "500" },
-  apiFormatTextActive: { color: "#fff", fontSize: 12, fontWeight: "600" },
+const side = StyleSheet.create({
+  panel: {
+    position: "absolute", left: 0, top: 0, bottom: 0, width: 276,
+    backgroundColor: C.surface,
+    borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: C.border2,
+    zIndex: 51,
+  },
+  header: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    paddingHorizontal: 18, paddingBottom: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.border,
+  },
+  title: { color: C.text, fontSize: 16, fontWeight: "700", letterSpacing: -0.3 },
+  addBtn: {
+    width: 28, height: 28, borderRadius: 7,
+    backgroundColor: C.surfaceHigh,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+  },
+  item: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    paddingHorizontal: 12, paddingVertical: 10,
+    marginHorizontal: 6, borderRadius: 9,
+  },
+  itemActive: { backgroundColor: C.surfaceHigh },
+  itemInitial: {
+    width: 30, height: 30, borderRadius: 8,
+    backgroundColor: C.surfaceHigh,
+    alignItems: "center", justifyContent: "center",
+  },
+  itemInitialActive: { backgroundColor: "rgba(255,255,255,0.12)" },
+  itemInitialText: { color: C.dim, fontSize: 12, fontWeight: "700" },
+  itemInitialTextActive: { color: C.text },
+  itemName: { color: C.muted, fontSize: 14, fontWeight: "500" },
+  itemNameActive: { color: C.text, fontWeight: "600" },
+  itemSub: { color: C.dim, fontSize: 11, marginTop: 1 },
+});
+
+const row = StyleSheet.create({
+  userWrap: {
+    flexDirection: "row", justifyContent: "flex-end",
+    paddingHorizontal: 16, marginVertical: 3,
+  },
+  userBubble: {
+    maxWidth: "76%",
+    backgroundColor: C.userBg,
+    paddingHorizontal: 14, paddingVertical: 10,
+    borderRadius: 18, borderBottomRightRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+  },
+  userText: { color: C.text, fontSize: 15, lineHeight: 22 },
+
+  asstWrap: {
+    flexDirection: "row", alignItems: "flex-start",
+    paddingHorizontal: 14, paddingVertical: 6, gap: 10,
+  },
+  avatar: {
+    width: 28, height: 28, borderRadius: 8,
+    backgroundColor: C.surfaceHigh,
+    alignItems: "center", justifyContent: "center",
+    flexShrink: 0, marginTop: 3,
+  },
+  avatarLetter: { color: C.muted, fontSize: 11, fontWeight: "700" },
+
+  asstBody: { flex: 1, paddingTop: 2 },
+  asstText: { color: "rgba(255,255,255,0.86)", fontSize: 15, lineHeight: 24 },
+
+  image: { width: 256, height: 256, borderRadius: 12 },
+  videoCard: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    paddingHorizontal: 14, paddingVertical: 10,
+    backgroundColor: C.surfaceHigh, borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+    alignSelf: "flex-start",
+  },
+  videoLabel: { color: C.muted, fontSize: 14 },
+});
+
+const chat = StyleSheet.create({
+  list: { paddingVertical: 16, flexGrow: 1 },
+});
+
+const inputbar = StyleSheet.create({
+  wrap: {
+    paddingHorizontal: 12, paddingTop: 10,
+    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.border,
+    backgroundColor: C.bg,
+    gap: 7,
+  },
+  row: {
+    flexDirection: "row", alignItems: "flex-end", gap: 8,
+    backgroundColor: C.inputBg,
+    borderRadius: 24,
+    paddingLeft: 16, paddingRight: 6, paddingTop: 8, paddingBottom: 8,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+  },
+  field: {
+    flex: 1, color: C.text, fontSize: 15, lineHeight: 22,
+    maxHeight: 120, paddingTop: 2, paddingBottom: 2,
+  },
+  sendBtn: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: C.sendBtn,
+    alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
+  },
+  sendBtnStop: {
+    backgroundColor: C.surfaceHigh,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+  },
+  stopSquare: {
+    width: 9, height: 9, borderRadius: 2,
+    backgroundColor: C.muted,
+  },
+  hint: {
+    color: C.dim, fontSize: 11,
+    textAlign: "center", letterSpacing: 0.1,
+  },
+});
+
+const empty = StyleSheet.create({
+  root: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 44, gap: 10 },
+  title: { color: C.text, fontSize: 19, fontWeight: "700", letterSpacing: -0.3 },
+  sub: { color: C.muted, fontSize: 14, textAlign: "center", lineHeight: 22 },
+  btn: {
+    marginTop: 10,
+    paddingHorizontal: 22, paddingVertical: 11,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+    backgroundColor: C.surfaceHigh,
+  },
+  btnText: { color: C.text, fontSize: 14, fontWeight: "600" },
+});
+
+const sh = StyleSheet.create({
+  root: { flex: 1, backgroundColor: C.bg },
+  handle: {
+    width: 34, height: 3.5, borderRadius: 2,
+    backgroundColor: "rgba(233, 224, 224, 0.12)",
+    alignSelf: "center", marginTop: 10, marginBottom: 6,
+  },
+  header: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.border,
+  },
+  title: { color: C.text, fontSize: 16, fontWeight: "600" },
+  cancel: { color: C.muted, fontSize: 15, minWidth: 56 },
+  done: { color: C.text, fontSize: 15, fontWeight: "600", minWidth: 56, textAlign: "right" },
+  body: { paddingHorizontal: 20, paddingTop: 24 },
+  sectionLabel: {
+    color: C.dim, fontSize: 11, fontWeight: "600",
+    letterSpacing: 0.7, marginBottom: 8, marginLeft: 2,
+  },
+  chip: {
+    paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8,
+    backgroundColor: C.surfaceHigh,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+  },
+  chipText: { color: C.muted, fontSize: 13, fontWeight: "500" },
+  group: {
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border,
+    overflow: "hidden", marginBottom: 20,
+  },
+  input: { color: C.text, fontSize: 15, paddingHorizontal: 16, paddingVertical: 10 },
+  inputDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.border },
+  segRow: { flexDirection: "row", padding: 4, gap: 4 },
+  seg: { flex: 1, paddingVertical: 9, borderRadius: 8, alignItems: "center" },
+  segActive: { backgroundColor: C.surfaceHigh },
+  segText: { color: C.dim, fontSize: 13, fontWeight: "500" },
+  segTextActive: { color: C.text, fontSize: 13, fontWeight: "600" },
+  fmtChip: {
+    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 7, flexShrink: 0,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border,
+  },
+  fmtChipActive: { backgroundColor: C.surfaceHigh },
+  fmtText: { color: C.dim, fontSize: 12, fontWeight: "500" },
+  fmtTextActive: { color: C.text, fontSize: 12, fontWeight: "600" },
+  toggleRow: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    paddingHorizontal: 16, paddingVertical: 13,
+  },
+  toggleLabel: { color: C.text, fontSize: 15, flex: 1 },
+  collapsRow: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    marginBottom: 12, paddingRight: 4,
+  },
 });
