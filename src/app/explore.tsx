@@ -384,7 +384,7 @@ function AddModelSheet({
             </View>
           </View>
 
-{type === "text" && (
+          {type === "text" && (
             <>
               <Text style={m.sectionLabel}>API FORMAT</Text>
               <View style={m.group}>
