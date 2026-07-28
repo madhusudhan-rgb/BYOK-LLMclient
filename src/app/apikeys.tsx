@@ -22,8 +22,50 @@ import { getCurrentUser } from "../utils/auth";
 type ModelType = "text" | "image" | "video";
 type VideoFormat = "fal" | "direct";
 type ImageFormat = "pollinations" | "url";
-type ApiFormat = "openai" | "anthropic";
+type ApiFormat =
+  // Chat / Text
+  | "openai"          // OpenAI-compatible APIs
+  | "anthropic"       // Claude Messages API
+  | "google"          // Gemini native API
+  | "cohere"          // Cohere Command models
+  | "mistral"         // Mistral native API
+  | "deepseek"        // DeepSeek native API
+  | "xai"             // Grok API
+  | "perplexity"      // Perplexity API
+  | "azure"           // Azure OpenAI
 
+  // Image
+  | "stability"       // Stability AI
+  | "replicate"       // Replicate models
+  | "fal"             // fal.ai models
+  | "ideogram"        // Ideogram
+  | "bfl"             // Black Forest Labs Flux
+  | "leonardo"        // Leonardo AI
+  | "getimg"          // Getimg.ai
+  | "segmind"         // Segmind
+
+  // Video
+  | "runway"          // Runway
+  | "luma"            // Luma Dream Machine
+  | "pika"            // Pika
+  | "haiper"          // Haiper
+  | "pixverse"        // PixVerse
+  | "vidu"    
+  | "minimax"        // Vidu
+
+  // Audio
+  | "elevenlabs"      // ElevenLabs
+  | "cartesia"        // Cartesia
+  | "playht"          // PlayHT
+  | "murf"            // Murf
+
+  // Embeddings / Search
+  | "voyage"          // Voyage AI
+  | "jina"            // Jina AI
+
+  // Local
+  | "ollama"          // Ollama native API
+  | "huggingface";    // HuggingFace native API
 type CustomModel = {
   id: string;
   user_id: string;
@@ -62,6 +104,55 @@ const PRESETS: {
   { label: "Pollinations", apiUrl: "",                                                                          model: "flux",                    type: "image", apiFormat: "openai",   imageFormat: "pollinations" },
   { label: "fal · Kling",  apiUrl: "https://queue.fal.run/fal-ai/kling-video/v2.1/standard/text-to-video",    model: "kling-video",             type: "video", apiFormat: "openai",   videoFormat: "fal"          },
   { label: "fal · MiniMax",apiUrl: "https://queue.fal.run/fal-ai/minimax/video-01",                           model: "minimax-video-01",        type: "video", apiFormat: "openai",   videoFormat: "fal"          },
+   { label: "Cohere",         apiUrl: "https://api.cohere.ai/v2/chat",                                              model: "command-a-03-2025",                   type: "text", apiFormat: "cohere" },
+  { label: "DeepSeek",       apiUrl: "https://api.deepseek.com/chat/completions",                                 model: "deepseek-chat",                       type: "text", apiFormat: "openai" },
+  { label: "xAI",            apiUrl: "https://api.x.ai/v1/chat/completions",                                      model: "grok-4",                              type: "text", apiFormat: "openai" },
+  { label: "Together AI",    apiUrl: "https://api.together.xyz/v1/chat/completions",                              model: "meta-llama/Llama-3.3-70B-Instruct-Turbo", type: "text", apiFormat: "openai" },
+  { label: "Fireworks AI",   apiUrl: "https://api.fireworks.ai/inference/v1/chat/completions",                    model: "accounts/fireworks/models/llama-v3p3-70b-instruct", type: "text", apiFormat: "openai" },
+  { label: "Cerebras",       apiUrl: "https://api.cerebras.ai/v1/chat/completions",                               model: "llama-4-scout-17b-16e-instruct",       type: "text", apiFormat: "openai" },
+  { label: "SambaNova",      apiUrl: "https://api.sambanova.ai/v1/chat/completions",                              model: "Meta-Llama-3.3-70B-Instruct",         type: "text", apiFormat: "openai" },
+  { label: "Perplexity",     apiUrl: "https://api.perplexity.ai/chat/completions",                                model: "sonar-pro",                           type: "text", apiFormat: "openai" },
+  { label: "AI21",           apiUrl: "https://api.ai21.com/studio/v1/chat/completions",                           model: "jamba-large",                         type: "text", apiFormat: "openai" },
+  { label: "Inference.net",  apiUrl: "https://api.inference.net/v1/chat/completions",                             model: "llama-3.3-70b-instruct",              type: "text", apiFormat: "openai" },
+  { label: "Nebius AI",      apiUrl: "https://api.studio.nebius.ai/v1/chat/completions",                          model: "meta-llama/Llama-3.3-70B-Instruct",   type: "text", apiFormat: "openai" },
+  { label: "Novita AI",      apiUrl: "https://api.novita.ai/v3/openai/chat/completions",                          model: "meta-llama/llama-3.3-70b-instruct",   type: "text", apiFormat: "openai" },
+  { label: "Lambda",         apiUrl: "https://api.lambda.ai/v1/chat/completions",                                 model: "llama-3.3-70b-instruct",              type: "text", apiFormat: "openai" },
+  { label: "Lepton AI",      apiUrl: "https://api.lepton.ai/v1/chat/completions",                                 model: "llama3-70b",                          type: "text", apiFormat: "openai" },
+  { label: "Cloudflare AI",  apiUrl: "https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/v1/chat/completions", model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", type: "text", apiFormat: "openai" },
+  { label: "GitHub Models",  apiUrl: "https://models.inference.ai.azure.com/chat/completions",                    model: "gpt-4.1",                             type: "text", apiFormat: "openai" },
+  { label: "Azure OpenAI",   apiUrl: "",                                                                           model: "gpt-4.1",                             type: "text", apiFormat: "azure" },
+  { label: "Hugging Face",   apiUrl: "https://router.huggingface.co/v1/chat/completions",                         model: "meta-llama/Llama-3.3-70B-Instruct",   type: "text", apiFormat: "openai" },
+  { label: "NVIDIA NIM",     apiUrl: "https://integrate.api.nvidia.com/v1/chat/completions",                      model: "meta/llama-3.3-70b-instruct",         type: "text", apiFormat: "openai" },
+  { label: "DeepInfra",      apiUrl: "https://api.deepinfra.com/v1/openai/chat/completions",                      model: "meta-llama/Llama-3.3-70B-Instruct",   type: "text", apiFormat: "openai" },
+  { label: "Hyperbolic",     apiUrl: "https://api.hyperbolic.xyz/v1/chat/completions",                            model: "meta-llama/Meta-Llama-3.3-70B-Instruct", type: "text", apiFormat: "openai" },
+  { label: "Featherless",    apiUrl: "https://api.featherless.ai/v1/chat/completions",                            model: "Qwen/Qwen3-235B-A22B-Instruct",       type: "text", apiFormat: "openai" },
+  { label: "Alibaba Qwen",   apiUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",        model: "qwen-max",                            type: "text", apiFormat: "openai" },
+  { label: "Moonshot AI",    apiUrl: "https://api.moonshot.ai/v1/chat/completions",                               model: "kimi-k2",                             type: "text", apiFormat: "openai" },
+  { label: "MiniMax",        apiUrl: "https://api.minimax.io/v1/text/chatcompletion_v2",                          model: "MiniMax-M1",                          type: "text", apiFormat: "minimax" },
+  { label: "Zhipu AI",       apiUrl: "https://open.bigmodel.cn/api/paas/v4/chat/completions",                     model: "glm-4.5",                             type: "text", apiFormat: "openai" },
+  { label: "SiliconFlow",    apiUrl: "https://api.siliconflow.cn/v1/chat/completions",                            model: "Qwen/Qwen3-235B-A22B",                type: "text", apiFormat: "openai" },
+
+  // Images
+  { label: "DALL·E",         apiUrl: "https://api.openai.com/v1/images/generations",                              model: "dall-e-3",                            type: "image", apiFormat: "openai", imageFormat: "url" },
+  { label: "Pollinations",   apiUrl: "",                                                                           model: "flux",                                type: "image", apiFormat: "openai", imageFormat: "pollinations" },
+  { label: "Stability AI",   apiUrl: "https://api.stability.ai/v2beta/stable-image/generate/core",                model: "stable-image-core",                   type: "image", apiFormat: "stability" },
+  { label: "Ideogram",       apiUrl: "https://api.ideogram.ai/generate",                                          model: "ideogram-v3",                         type: "image", apiFormat: "ideogram" },
+  { label: "Black Forest",   apiUrl: "https://api.bfl.ai/v1/flux-pro",                                            model: "flux-pro",                            type: "image", apiFormat: "bfl" },
+  { label: "Replicate",      apiUrl: "https://api.replicate.com/v1/predictions",                                  model: "flux-dev",                            type: "image", apiFormat: "replicate" },
+  { label: "Leonardo AI",    apiUrl: "https://cloud.leonardo.ai/api/rest/v1/generations",                         model: "phoenix",                             type: "image", apiFormat: "leonardo" },
+  { label: "Getimg.ai",      apiUrl: "https://api.getimg.ai/v1/stable-diffusion/text-to-image",                   model: "flux-dev",                            type: "image", apiFormat: "getimg" },
+  { label: "Segmind",        apiUrl: "https://api.segmind.com/v1/flux-schnell",                                   model: "flux-schnell",                        type: "image", apiFormat: "segmind" },
+
+  // Video
+  { label: "fal · Kling",    apiUrl: "https://queue.fal.run/fal-ai/kling-video/v2.1/standard/text-to-video",     model: "kling-video",                         type: "video", apiFormat: "openai", videoFormat: "fal" },
+  { label: "fal · MiniMax",  apiUrl: "https://queue.fal.run/fal-ai/minimax/video-01",                            model: "minimax-video-01",                    type: "video", apiFormat: "openai", videoFormat: "fal" },
+  { label: "Runway",         apiUrl: "https://api.dev.runwayml.com/v1/tasks",                                     model: "gen4",                                type: "video", apiFormat: "runway" },
+  { label: "Luma Dream",     apiUrl: "https://api.lumalabs.ai/dream-machine/v1/generations",                      model: "dream-machine",                       type: "video", apiFormat: "luma" },
+  { label: "Pika",           apiUrl: "https://api.pika.art/v1/generations",                                       model: "pika-2.2",                            type: "video", apiFormat: "pika" },
+  { label: "Haiper",         apiUrl: "",                                                                           model: "haiper",                              type: "video", apiFormat: "haiper" },
+  { label: "PixVerse",       apiUrl: "",                                                                           model: "pixverse-v4",                         type: "video", apiFormat: "pixverse" },
+  { label: "Vidu",           apiUrl: "",                                                                           model: "vidu-2.0",                            type: "video", apiFormat: "vidu" },
+
 ];
 
 const TYPE_LABEL: Record<ModelType, string> = { text: "Text", image: "Image", video: "Video" };

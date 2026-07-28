@@ -24,7 +24,46 @@ import { getCurrentUser } from "../utils/auth";
 type ModelType = "text" | "image" | "video";
 type VideoFormat = "fal" | "direct";
 type ImageFormat = "pollinations" | "url";
-type ApiFormat = "openai" | "anthropic";
+
+type ApiFormat =
+  // Chat / Text
+  | "openai"          // OpenAI-compatible APIs
+  | "anthropic"       // Claude Messages API
+  | "google"          // Gemini native API
+  | "cohere"          // Cohere Command models
+  | "mistral"         // Mistral native API
+  | "deepseek"        // DeepSeek native API
+  | "xai"             // Grok API
+  | "perplexity"      // Perplexity API
+  | "azure"           // Azure OpenAI
+  // Image
+  | "stability"       // Stability AI
+  | "replicate"       // Replicate models
+  | "fal"             // fal.ai models
+  | "ideogram"        // Ideogram
+  | "bfl"             // Black Forest Labs Flux
+  | "leonardo"        // Leonardo AI
+  | "getimg"          // Getimg.ai
+  | "segmind"         // Segmind
+  // Video
+  | "runway"          // Runway
+  | "luma"            // Luma Dream Machine
+  | "pika"            // Pika
+  | "haiper"         // Haiper
+  | "pixverse"       // PixVerse
+  | "vidu"            // Vidu
+  | "minimax"         // MiniMax
+  // Audio
+  | "elevenlabs"      // ElevenLabs
+  | "cartesia"        // Cartesia
+  | "playht"          // PlayHT
+  | "murf"            // Murf
+  // Embeddings / Search
+  | "voyage"          // Voyage AI
+  | "jina"            // Jina AI
+  // Local
+  | "ollama"          // Ollama native API
+  | "huggingface";    // HuggingFace native API
 
 type CustomModel = {
   id: string;
@@ -55,6 +94,7 @@ type History = {
   content: string | any[];
 };
 
+// Optimized: Batch updates for smoother streaming
 const PRESETS: {
   label: string;
   apiUrl: string;
@@ -72,9 +112,23 @@ const PRESETS: {
   { label: "Mistral",      apiUrl: "https://api.mistral.ai/v1/chat/completions",                               model: "mistral-large-latest",    type: "text",  apiFormat: "openai"    },
   { label: "Ollama",       apiUrl: "http://localhost:11434/v1/chat/completions",                               model: "llama3",                  type: "text",  apiFormat: "openai"    },
   { label: "DALL·E",       apiUrl: "https://api.openai.com/v1/images/generations",                             model: "dall-e-3",                type: "image", apiFormat: "openai",   imageFormat: "url"          },
-  { label: "Pollinations", apiUrl: "",                                                                          model: "flux",                    type: "image", apiFormat: "openai",   imageFormat: "pollinations" },
-  { label: "fal · Kling",  apiUrl: "https://queue.fal.run/fal-ai/kling-video/v2.1/standard/text-to-video",    model: "kling-video",             type: "video", apiFormat: "openai",   videoFormat: "fal"          },
-  { label: "fal · MiniMax",apiUrl: "https://queue.fal.run/fal-ai/minimax/video-01",                           model: "minimax-video-01",        type: "video", apiFormat: "openai",   videoFormat: "fal"          },
+  { label: "Pollinations",   apiUrl: "",                                                                         model: "flux",                    type: "image", apiFormat: "openai",   imageFormat: "pollinations" },
+  { label: "fal · Kling",    apiUrl: "https://queue.fal.run/fal-ai/kling-video/v2.1/standard/text-to-video",    model: "kling-video",             type: "video", apiFormat: "openai",   videoFormat: "fal"          },
+  { label: "fal · MiniMax",  apiUrl: "https://queue.fal.run/fal-ai/minimax/video-01",                         model: "minimax-video-01",        type: "video", apiFormat: "openai",   videoFormat: "fal"          },
+  { label: "Cohere",         apiUrl: "https://api.cohere.ai/v2/chat",                                         model: "command-a-03-2025",       type: "text",  apiFormat: "cohere" },
+  { label: "DeepSeek",       apiUrl: "https://api.deepseek.com/chat/completions",                             model: "deepseek-chat",           type: "text",  apiFormat: "openai" },
+  { label: "xAI",            apiUrl: "https://api.x.ai/v1/chat/completions",                                  model: "grok-4",                  type: "text",  apiFormat: "openai" },
+  { label: "Together AI",    apiUrl: "https://api.together.xyz/v1/chat/completions",                            model: "meta-llama/Llama-3.3-70B-Instruct-Turbo", type: "text", apiFormat: "openai" },
+  { label: "Fireworks AI",   apiUrl: "https://api.fireworks.ai/inference/v1/chat/completions",                   model: "accounts/fireworks/models/llama-v3p3-70b-instruct", type: "text", apiFormat: "openai" },
+  { label: "Cerebras",       apiUrl: "https://api.cerebras.ai/v1/chat/completions",                            model: "llama-4-scout-17b-16e-instruct", type: "text", apiFormat: "openai" },
+  { label: "SambaNova",      apiUrl: "https://api.sambanova.ai/v1/chat/completions",                             model: "Meta-Llama-3.3-70B-Instruct", type: "text", apiFormat: "openai" },
+  { label: "Perplexity",     apiUrl: "https://api.perplexity.ai/chat/completions",                              model: "sonar-pro",               type: "text",  apiFormat: "openai" },
+  { label: "Stability AI",   apiUrl: "https://api.stability.ai/v2beta/stable-image/generate/core",              model: "stable-image-core",       type: "image", apiFormat: "stability" },
+  { label: "Ideogram",       apiUrl: "https://api.ideogram.ai/generate",                                       model: "ideogram-v3",             type: "image", apiFormat: "ideogram" },
+  { label: "Black Forest",   apiUrl: "https://api.bfl.ai/v1/flux-pro",                                        model: "flux-pro",                type: "image", apiFormat: "bfl" },
+  { label: "Replicate",      apiUrl: "https://api.replicate.com/v1/predictions",                                model: "flux-dev",                type: "image", apiFormat: "replicate" },
+  { label: "Leonardo AI",    apiUrl: "https://cloud.leonardo.ai/api/rest/v1/generations",                       model: "phoenix",                 type: "image", apiFormat: "leonardo" },
+  { label: "Getimg.ai",      apiUrl: "https://api.getimg.ai/v1/stable-diffusion/text-to-image",                 model: "flux-dev",                type: "image", apiFormat: "getimg" },
 ];
 
 async function fetchModels(userId: string): Promise<CustomModel[]> {
@@ -330,17 +384,17 @@ function AddModelSheet({
             </View>
           </View>
 
-          {type === "text" && (
+{type === "text" && (
             <>
               <Text style={m.sectionLabel}>API FORMAT</Text>
               <View style={m.group}>
-                <View style={m.segmentRow}>
-                  {(["openai", "anthropic"] as ApiFormat[]).map(f => (
-                    <Pressable key={f} style={[m.segment, apiFormat === f && m.segmentActive]} onPress={() => setApiFormat(f)}>
-                      <Text style={[m.segmentText, apiFormat === f && m.segmentTextActive]}>{f === "openai" ? "OpenAI-compatible" : "Anthropic"}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={m.apiFormatRow}>
+                  {(["openai", "anthropic", "cohere", "google", "deepseek", "xai", "perplexity", "azure", "mistral", "fal", "replicate", "stability", "ideogram", "bfl", "leonardo", "getimg", "runway", "luma", "pika", "vidu", "minimax", "elevenlabs", "cartesia", "playht", "murf", "voyage", "jina", "ollama", "huggingface"] as ApiFormat[]).map(f => (
+                    <Pressable key={f} style={[m.apiFormatPill, apiFormat === f && m.apiFormatPillActive]} onPress={() => setApiFormat(f)}>
+                      <Text style={[m.apiFormatText, apiFormat === f && m.apiFormatTextActive]} numberOfLines={1}>{f}</Text>
                     </Pressable>
                   ))}
-                </View>
+                </ScrollView>
               </View>
               <Text style={m.sectionLabel}>OPTIONS</Text>
               <View style={m.group}>
@@ -540,11 +594,23 @@ export default function Explore() {
     await saveSession(userId, activeModel.id, messagesRef.current, historyRef.current).catch(err => console.error("Save failed:", err));
   };
 
+  // Optimized streaming with debounced UI updates for smoother performance
   const sendText = async (prompt: string, botMsgId: string, model: CustomModel) => {
     if (!model.api_url?.trim()) throw new Error("No endpoint URL configured.");
     if (!model.api_key?.trim()) throw new Error("No API key configured.");
     historyRef.current.push({ role: "user", content: prompt });
     abortRef.current = new AbortController();
+    
+    // Debounced update reference
+    let lastUpdate = 0;
+    const updateDebounced = (text: string) => {
+      const now = Date.now();
+      if (now - lastUpdate > 50) { // Update max 20 times per second
+        lastUpdate = now;
+        setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text } : m));
+      }
+    };
+    
     if (model.api_format === "anthropic") {
       const body: any = { model: model.model, max_tokens: 1024, messages: historyRef.current.filter(h => h.role !== "system"), stream: true };
       const sysPmt = historyRef.current.find(h => h.role === "system");
@@ -554,7 +620,26 @@ export default function Explore() {
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let fullReply = "";
-      if (reader) { while (true) { const { done, value } = await reader.read(); if (done) break; for (const line of decoder.decode(value, { stream: true }).split("\n")) { if (!line.startsWith("data: ")) continue; const payload = line.slice(6).trim(); if (payload === "[DONE]") break; try { const parsed = JSON.parse(payload); const delta = parsed?.delta?.text; if (delta) { fullReply += delta; setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: fullReply } : m)); } } catch { } } } }
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          for (const line of decoder.decode(value, { stream: true }).split("\n")) {
+            if (!line.startsWith("data: ")) continue;
+            const payload = line.slice(6).trim();
+            if (payload === "[DONE]") break;
+            try {
+              const parsed = JSON.parse(payload);
+              const delta = parsed?.delta?.text;
+              if (delta) {
+                fullReply += delta;
+                updateDebounced(fullReply);
+              }
+            } catch { }
+          }
+        }
+      }
+      setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: fullReply } : m));
       if (!fullReply) throw new Error("Empty reply.");
       historyRef.current.push({ role: "assistant", content: fullReply });
       return;
@@ -564,7 +649,25 @@ export default function Explore() {
     const reader = res.body?.getReader();
     const decoder = new TextDecoder();
     let fullReply = "";
-    if (reader) { while (true) { const { done, value } = await reader.read(); if (done) break; for (const line of decoder.decode(value, { stream: true }).split("\n")) { if (!line.startsWith("data: ")) continue; const payload = line.slice(6).trim(); if (payload === "[DONE]") break; try { const delta = JSON.parse(payload)?.choices?.[0]?.delta?.content; if (delta) { fullReply += delta; setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: fullReply } : m)); } } catch { } } } }
+    if (reader) {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        for (const line of decoder.decode(value, { stream: true }).split("\n")) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6).trim();
+          if (payload === "[DONE]") break;
+          try {
+            const delta = JSON.parse(payload)?.choices?.[0]?.delta?.content;
+            if (delta) {
+              fullReply += delta;
+              updateDebounced(fullReply);
+            }
+          } catch { }
+        }
+      }
+    }
+    setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, text: fullReply } : m));
     if (!fullReply) throw new Error("Empty reply.");
     historyRef.current.push({ role: "assistant", content: fullReply });
   };
@@ -885,4 +988,9 @@ const m = StyleSheet.create({
   toggleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 13 },
   toggleLabel: { color: "#fff", fontSize: 15, flex: 1 },
   collapsibleHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12, paddingRight: 4 },
+  apiFormatRow: { paddingHorizontal: 4, paddingVertical: 6, gap: 4 },
+  apiFormatPill: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.06)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.09)", flexShrink: 0 },
+  apiFormatPillActive: { backgroundColor: "rgba(255,255,255,0.11)" },
+  apiFormatText: { color: "rgba(255,255,255,0.3)", fontSize: 12, fontWeight: "500" },
+  apiFormatTextActive: { color: "#fff", fontSize: 12, fontWeight: "600" },
 });
