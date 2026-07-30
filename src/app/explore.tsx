@@ -1,6 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView, type BlurMethod } from "expo-blur";
-import { LinearGradient } from "expo-linear-gradient";
 import { type ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
@@ -105,8 +103,8 @@ const PRESETS: {
 
 
 const C = {
-  bg: "#08090b15",
-  surface: "rgba(17, 18, 22, 0.22)",
+  bg: "#08090b",
+  surface: "rgba(17, 18, 22, 0.84)",
   surfaceSolid: "#121318",
   surfaceHigh: "rgba(255,255,255,0.08)",
   surfacePressed: "rgba(255,255,255,0.12)",
@@ -114,18 +112,16 @@ const C = {
   border2: "rgba(255,255,255,0.12)",
   text: "#f5f2ea",
   muted: "rgba(245,242,234,0.72)",
-  dim: "rgba(245,242,234,0.45)",
-  userBg: "rgba(157,230,198,0.14)",
-  userBorder: "rgba(157,230,198,0.26)",
-  accent: "#f1fff9",
-  accent2: "#8ea7ff",
+  dim: "rgb(255, 254, 252)",
+  userBg: "rgba(153, 247, 206, 0.14)",
+  userBorder: "rgba(13, 14, 13, 0.26)",
+  accent: "#f2f8f5",
+  accent2: "#6c83d5",
   danger: "#ff6b5f",
   inputBg: "rgba(10, 11, 14, 0.94)",
   sendBtn: "#f5f2ea",
   sendIcon: "#090a0d",
 };
-
-const glassBlurMethod: BlurMethod | undefined = undefined;
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -297,14 +293,9 @@ function MessageRow({ item, isStreaming, modelInitial, modelType }: MsgProps) {
   if (isUser) {
     return (
       <View style={row.userWrap}>
-        <BlurView
-          tint="systemUltraThinMaterialDark"
-          intensity={28}
-          blurMethod={glassBlurMethod}
-          style={row.userBubble}
-        >
+        <View style={row.userBubble}>
           <Text style={row.userText} selectable>{item.text}</Text>
-        </BlurView>
+        </View>
       </View>
     );
   }
@@ -325,12 +316,7 @@ function MessageRow({ item, isStreaming, modelInitial, modelType }: MsgProps) {
             <Image source={{ uri: item.imageUrl }} style={row.image} resizeMode="cover" />
           </View>
         ) : item.videoUrl ? (
-          <BlurView
-            tint="systemUltraThinMaterialDark"
-            intensity={30}
-            blurMethod={glassBlurMethod}
-            style={row.videoCard}
-          >
+          <View style={row.videoCard}>
             <View style={row.videoIcon}>
               <Ionicons name="play" size={15} color={C.text} />
             </View>
@@ -338,19 +324,14 @@ function MessageRow({ item, isStreaming, modelInitial, modelType }: MsgProps) {
               <Text style={row.videoLabel}>Video ready</Text>
               <Text style={row.videoSub} numberOfLines={1}>Generated media is available</Text>
             </View>
-          </BlurView>
+          </View>
         ) : (
-          <BlurView
-            tint="systemUltraThinMaterialDark"
-            intensity={24}
-            blurMethod={glassBlurMethod}
-            style={row.asstBubble}
-          >
+          <View style={row.asstBubble}>
             <Text style={row.asstText} selectable>
               {item.text}
               {isStreaming ? <BlinkCursor /> : null}
             </Text>
-          </BlurView>
+          </View>
         )}
       </View>
     </View>
@@ -970,11 +951,6 @@ export default function Explore() {
       style={screen.bg}
       imageStyle={screen.bgImage}
     >
-    <LinearGradient
-      colors={["rgba(7,8,10,0.68)", "rgba(8,9,11,0.92)", C.bg]}
-      locations={[0, 0.46, 1]}
-      style={screen.gradient}
-    >
     <View style={screen.root}>
 
       <StatusBar barStyle="light-content" backgroundColor={C.bg} />
@@ -1000,17 +976,8 @@ export default function Explore() {
               { transform: [{ translateX: sideTranslate }], paddingTop: insets.top + 20 },
             ]}
           >
-            <BlurView
-              tint="systemUltraThinMaterialDark"
-              intensity={42}
-              blurMethod={glassBlurMethod}
-              style={side.panelGlass}
-            >
-            <LinearGradient
-              colors={["rgba(255,255,255,0.09)", "rgba(255,255,255,0.035)", "rgba(7,8,10,0.38)"]}
-              locations={[0, 0.48, 1]}
-              style={side.panelTint}
-            >
+            <View style={side.panelGlass}>
+            <View style={side.panelTint}>
             <View style={side.header}>
               <View>
                 <Text style={side.title}>Models</Text>
@@ -1080,20 +1047,15 @@ export default function Explore() {
                 </View>
               )}
             </ScrollView>
-            </LinearGradient>
-            </BlurView>
+            </View>
+            </View>
           </Animated.View>
         </Animated.View>
       )}
 
       <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
         {/* Top bar */}
-        <BlurView
-          tint="systemUltraThinMaterialDark"
-          intensity={36}
-          blurMethod={glassBlurMethod}
-          style={topbar.root}
-        >
+        <View style={topbar.root}>
           <Pressable
             style={({ pressed }) => [topbar.iconBtn, pressed && topbar.iconPressed]}
             onPress={() => setSidebarOpen(true)}
@@ -1137,31 +1099,21 @@ export default function Explore() {
           >
             <Ionicons name="trash-outline" size={20} color={activeModel ? C.muted : C.dim} />
           </Pressable>
-        </BlurView>
+        </View>
 
         {loadingModels && !activeModel && (
           <View style={empty.root}>
-            <BlurView
-              tint="systemUltraThinMaterialDark"
-              intensity={34}
-              blurMethod={glassBlurMethod}
-              style={empty.card}
-            >
+            <View style={empty.card}>
               <ActivityIndicator color={C.text} />
               <Text style={empty.title}>Loading models</Text>
-            </BlurView>
+            </View>
           </View>
         )}
 
         {/* Empty state */}
         {!loadingModels && models.length === 0 && (
           <View style={empty.root}>
-            <BlurView
-              tint="systemUltraThinMaterialDark"
-              intensity={34}
-              blurMethod={glassBlurMethod}
-              style={empty.card}
-            >
+            <View style={empty.card}>
               <View style={empty.icon}>
                 <Ionicons name="sparkles-outline" size={28} color={C.accent} />
               </View>
@@ -1176,7 +1128,7 @@ export default function Explore() {
                 <Ionicons name="add" size={16} color={C.sendIcon} />
                 <Text style={empty.btnText}>Add a model</Text>
               </Pressable>
-            </BlurView>
+            </View>
           </View>
         )}
 
@@ -1204,12 +1156,7 @@ export default function Explore() {
             />
 
             {/* Input bar */}
-            <BlurView
-              tint="systemUltraThinMaterialDark"
-              intensity={36}
-              blurMethod={glassBlurMethod}
-              style={[inputbar.wrap, { paddingBottom: Math.max(insets.bottom, 14) }]}
-            >
+            <View style={[inputbar.wrap, { paddingBottom: Math.max(insets.bottom, 14) }]}>
               <View style={inputbar.row}>
                 <TextInput
                   value={input}
@@ -1252,7 +1199,7 @@ export default function Explore() {
               <Text style={inputbar.hint} numberOfLines={1}>
                 {activeModel.model || activeModel.api_format} · {activeModel.name}
               </Text>
-            </BlurView>
+            </View>
           </KeyboardAvoidingView>
         )}
       </SafeAreaView>
@@ -1265,7 +1212,6 @@ export default function Explore() {
         />
       )}
     </View>
-    </LinearGradient>
     </ImageBackground>
   );
 }
@@ -1275,8 +1221,7 @@ export default function Explore() {
 const screen = StyleSheet.create({
   bg: { flex: 1, backgroundColor: C.bg },
   bgImage: { opacity: 0.64 },
-  gradient: { flex: 1 },
-  root: { flex: 1, backgroundColor: "rgba(6, 7, 9, 0.04)" },
+  root: { flex: 1, backgroundColor: "rgba(6,7,9,0.18)" },
 });
 
 const topbar = StyleSheet.create({
@@ -1291,8 +1236,8 @@ const topbar = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 24,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.14)",
-    backgroundColor: "rgba(12,13,16,0.48)",
+    borderColor: "rgba(255, 255, 255, 0)",
+    backgroundColor: "rgba(12, 13, 16, 0.48)",
     overflow: "hidden",
   },
   iconBtn: {
@@ -1301,7 +1246,7 @@ const topbar = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(138, 129, 129, 0.06)",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.10)",
   },
@@ -1316,9 +1261,9 @@ const topbar = StyleSheet.create({
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.10)",
-    backgroundColor: "rgba(255,255,255,0.045)",
+    backgroundColor: "rgba(14, 13, 13, 0.04)",
   },
-  centerPressed: { backgroundColor: "rgba(255,255,255,0.08)" },
+  centerPressed: { backgroundColor: "rgba(247, 241, 241, 0.08)" },
   modelGlyph: {
     width: 30,
     height: 30,
@@ -1351,16 +1296,16 @@ const side = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 308,
-    zIndex: 51,
+    zIndex: 59,
   },
   panelGlass: {
     flex: 1,
-    borderTopRightRadius: 28,
-    borderBottomRightRadius: 28,
+    borderTopRightRadius: 2,
+    borderBottomRightRadius: 2,
     borderRightWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.16)",
     overflow: "hidden",
-    backgroundColor: "rgba(12,13,16,0.62)",
+    backgroundColor: "rgb(0, 0, 0)",
   },
   panelTint: { flex: 1 },
   header: {
@@ -1530,8 +1475,8 @@ const inputbar = StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(255, 255, 255, 0)",
-    backgroundColor: "rgba(10, 11, 14, 0)",
+    borderTopColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "rgba(10,11,14,0.46)",
     gap: 8,
     overflow: "hidden",
   },
@@ -1540,7 +1485,7 @@ const inputbar = StyleSheet.create({
     alignItems: "flex-end",
     gap: 8,
     backgroundColor: C.inputBg,
-    borderRadius: 23,//Message input style
+    borderRadius: 25,
     paddingLeft: 17,
     paddingRight: 7,
     paddingTop: 8,
@@ -1618,9 +1563,9 @@ const empty = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(157,230,198,0.10)",
+    backgroundColor: "rgba(14, 15, 14, 0.1)",
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(157,230,198,0.22)",
+    borderColor: "rgba(19, 20, 20, 0.22)",
   },
   title: { color: C.text, fontSize: 20, fontWeight: "800", textAlign: "center" },
   sub: { color: C.muted, fontSize: 14, textAlign: "center", lineHeight: 21 },
