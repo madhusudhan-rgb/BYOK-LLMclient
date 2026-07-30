@@ -86,13 +86,13 @@ export default function AnimatedTabBar(props: TabBarProps) {
   const triggerScl  = useRef(new Animated.Value(1)).current;
 
   // Stop all pill animations so their callbacks don't fire after we've moved on
-  function stopPillAnims() {
+  const stopPillAnims = useCallback(() => {
     pillHeight.stopAnimation();
     iconsOp.stopAnimation();
     iconsScale.stopAnimation();
     triggerOp.stopAnimation();
     triggerScl.stopAnimation();
-  }
+  }, [iconsOp, iconsScale, pillHeight, triggerOp, triggerScl]);
 
   const collapseBar = useCallback(() => {
     // Flip state immediately — pointerEvents switch right away
@@ -111,8 +111,7 @@ export default function AnimatedTabBar(props: TabBarProps) {
     ]).start(() => {
       animating.current = false;
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [iconsOp, iconsScale, pillHeight, stopPillAnims, triggerOp, triggerScl]);
 
   useEffect(() => {
     Animated.parallel([
@@ -120,8 +119,11 @@ export default function AnimatedTabBar(props: TabBarProps) {
       Animated.timing(screenOp,    { toValue: showNavbar ? 1 : 0,     duration: 180,            useNativeDriver: true }),
       Animated.spring(screenScale, { toValue: showNavbar ? 1 : 0.92,  friction: 9, tension: 80, useNativeDriver: true }),
     ]).start();
-    if (!showNavbar) collapseBar();
-  }, [showNavbar, collapseBar]);
+    if (!showNavbar) {
+      const frame = requestAnimationFrame(collapseBar);
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [showNavbar, collapseBar, screenOp, screenScale, screenY]);
 
   function expandBar() {
     if (isOpenRef.current || animating.current) return;

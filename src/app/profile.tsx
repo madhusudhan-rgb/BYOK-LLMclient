@@ -42,7 +42,7 @@ export default function Profile() {
       }
     });
     return () => subscription.unsubscribe();
-  }, []);
+  }, [setShowNavbar]);
 
   async function checkUser() {
     try {

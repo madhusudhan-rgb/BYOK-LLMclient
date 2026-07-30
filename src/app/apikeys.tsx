@@ -3,7 +3,6 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Alert,
-  ImageBackground,
   Modal,
   Pressable,
   ScrollView,

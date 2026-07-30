@@ -1,8 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BlurView, type BlurMethod } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
+import { type ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
+  ActivityIndicator,
   FlatList,
   Image,
   KeyboardAvoidingView,
@@ -16,7 +19,7 @@ import {
   Text,
   TextInput,
   View,
-  ImageBackground
+  ImageBackground,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { supabase } from "../utils/supabase";
@@ -102,19 +105,68 @@ const PRESETS: {
 
 
 const C = {
-  bg:       "#09090971",              
-  surface:  "#191817",              
-  surfaceHigh: "#0f1010",            // elevated surface (active states)
-  border:   "rgba(240, 233, 233, 0)",
-  border2:  "rgba(255,255,255,0.10)",
-  text:     "#eeecea",               // warm off-white
-  muted:    "rgba(240, 231, 231, 0.87)",
-  dim:      "rgba(255, 255, 255, 0.92)",
-  userBg:   "rgba(92, 87, 87, 0.3)",
-  inputBg:  "#0f0f0e",
-  sendBtn:  "#454340",               // off-white send button
-  sendIcon: "#e9e3dd",               // dark icon on send button
+  bg: "#08090b15",
+  surface: "rgba(17, 18, 22, 0.22)",
+  surfaceSolid: "#121318",
+  surfaceHigh: "rgba(255,255,255,0.08)",
+  surfacePressed: "rgba(255,255,255,0.12)",
+  border: "rgba(255,255,255,0.08)",
+  border2: "rgba(255,255,255,0.12)",
+  text: "#f5f2ea",
+  muted: "rgba(245,242,234,0.72)",
+  dim: "rgba(245,242,234,0.45)",
+  userBg: "rgba(157,230,198,0.14)",
+  userBorder: "rgba(157,230,198,0.26)",
+  accent: "#f1fff9",
+  accent2: "#8ea7ff",
+  danger: "#ff6b5f",
+  inputBg: "rgba(10, 11, 14, 0.94)",
+  sendBtn: "#f5f2ea",
+  sendIcon: "#090a0d",
 };
+
+const glassBlurMethod: BlurMethod | undefined = undefined;
+
+type IconName = ComponentProps<typeof Ionicons>["name"];
+
+const TYPE_META: Record<ModelType, {
+  label: string;
+  icon: IconName;
+  accent: string;
+  bg: string;
+  border: string;
+}> = {
+  text: {
+    label: "Text",
+    icon: "chatbubble-ellipses-outline",
+    accent: C.accent,
+    bg: "rgba(157,230,198,0.10)",
+    border: "rgba(157,230,198,0.22)",
+  },
+  image: {
+    label: "Image",
+    icon: "image-outline",
+    accent: C.accent2,
+    bg: "rgba(142,167,255,0.12)",
+    border: "rgba(142,167,255,0.24)",
+  },
+  video: {
+    label: "Video",
+    icon: "videocam-outline",
+    accent: "#ffc08a",
+    bg: "rgba(255,192,138,0.12)",
+    border: "rgba(255,192,138,0.24)",
+  },
+};
+
+function modelSubtitle(model: CustomModel) {
+  return model.model?.trim() || model.api_format;
+}
+
+function providerHost(model: CustomModel) {
+  if (!model.api_url) return model.api_format;
+  return model.api_url.replace(/^https?:\/\//, "").split("/")[0] || model.api_format;
+}
 
 // ─── Supabase helpers ─────────────────────────────────────────────────────────
 
@@ -231,41 +283,74 @@ function BlinkCursor() {
 
 // ─── Message row ──────────────────────────────────────────────────────────────
 
-type MsgProps = { item: Message; isStreaming: boolean; modelInitial: string };
+type MsgProps = {
+  item: Message;
+  isStreaming: boolean;
+  modelInitial: string;
+  modelType: ModelType;
+};
 
-function MessageRow({ item, isStreaming, modelInitial }: MsgProps) {
+function MessageRow({ item, isStreaming, modelInitial, modelType }: MsgProps) {
   const isUser = item.role === "user";
+  const meta = TYPE_META[modelType];
 
   if (isUser) {
     return (
       <View style={row.userWrap}>
-        <View style={row.userBubble}>
+        <BlurView
+          tint="systemUltraThinMaterialDark"
+          intensity={28}
+          blurMethod={glassBlurMethod}
+          style={row.userBubble}
+        >
           <Text style={row.userText} selectable>{item.text}</Text>
-        </View>
+        </BlurView>
       </View>
     );
   }
 
   return (
     <View style={row.asstWrap}>
-      {/* Avatar */}
-      <View style={row.avatar}>
+      <View style={[row.avatar, { borderColor: meta.border, backgroundColor: meta.bg }]}>
         <Text style={row.avatarLetter}>{modelInitial}</Text>
       </View>
 
       <View style={row.asstBody}>
+        <View style={row.asstMeta}>
+          <Ionicons name={meta.icon} size={12} color={meta.accent} />
+          <Text style={row.asstMetaText}>{meta.label}</Text>
+        </View>
         {item.imageUrl ? (
-          <Image source={{ uri: item.imageUrl }} style={row.image} resizeMode="cover" />
-        ) : item.videoUrl ? (
-          <View style={row.videoCard}>
-            <Ionicons name="play-circle-outline" size={22} color={C.muted} />
-            <Text style={row.videoLabel}>Video ready</Text>
+          <View style={row.mediaFrame}>
+            <Image source={{ uri: item.imageUrl }} style={row.image} resizeMode="cover" />
           </View>
+        ) : item.videoUrl ? (
+          <BlurView
+            tint="systemUltraThinMaterialDark"
+            intensity={30}
+            blurMethod={glassBlurMethod}
+            style={row.videoCard}
+          >
+            <View style={row.videoIcon}>
+              <Ionicons name="play" size={15} color={C.text} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={row.videoLabel}>Video ready</Text>
+              <Text style={row.videoSub} numberOfLines={1}>Generated media is available</Text>
+            </View>
+          </BlurView>
         ) : (
-          <Text style={row.asstText} selectable>
-            {item.text}
-            {isStreaming ? <BlinkCursor /> : null}
-          </Text>
+          <BlurView
+            tint="systemUltraThinMaterialDark"
+            intensity={24}
+            blurMethod={glassBlurMethod}
+            style={row.asstBubble}
+          >
+            <Text style={row.asstText} selectable>
+              {item.text}
+              {isStreaming ? <BlinkCursor /> : null}
+            </Text>
+          </BlurView>
         )}
       </View>
     </View>
@@ -541,6 +626,8 @@ export default function Explore() {
 
   const historyRef   = useRef<History[]>([]);
   const messagesRef  = useRef<Message[]>([]);
+  const userIdRef    = useRef<string | null>(null);
+  const activeIdRef  = useRef<string | null>(null);
   const listRef      = useRef<FlatList<Message>>(null);
   const abortRef     = useRef<AbortController | null>(null);
   const sidebarAnim  = useRef(new Animated.Value(0)).current;
@@ -560,6 +647,24 @@ export default function Explore() {
       tension: 80, friction: 14,
     }).start();
   }, [sidebarOpen, sidebarAnim]);
+
+  useEffect(() => { userIdRef.current = userId; }, [userId]);
+  useEffect(() => { activeIdRef.current = activeId; }, [activeId]);
+
+  const switchToModel = useCallback(async (model: CustomModel, uid?: string) => {
+    abortRef.current?.abort();
+    const id = uid ?? userIdRef.current;
+    activeIdRef.current = model.id;
+    setActiveId(model.id); setInput(""); setLoading(false);
+    setStreamingId(null); setSidebarOpen(false);
+    if (id) {
+      const session = await loadSession(id, model.id);
+      if (session) { historyRef.current = session.history; setMessages(session.messages); return; }
+    }
+    const cache = initCache(model);
+    historyRef.current = [...cache.history];
+    setMessages([...cache.messages]);
+  }, []);
 
   // Auth init
   useEffect(() => {
@@ -589,14 +694,15 @@ export default function Explore() {
         const list = await fetchModels(session.user.id);
         if (mounted) {
           setModels(list);
-          if (list.length > 0 && !activeId) switchToModel(list[0], session.user.id);
+          if (list.length > 0 && !activeIdRef.current) switchToModel(list[0], session.user.id);
         }
       } else {
+        activeIdRef.current = null;
         setUserId(null); setModels([]); setActiveId(null);
       }
     });
     return () => { mounted = false; subscription.unsubscribe(); };
-  }, []);
+  }, [switchToModel]);
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
@@ -615,20 +721,6 @@ export default function Explore() {
     const t = streamBuf.current;
     setMessages(prev => prev.map(m => m.id === msgId ? { ...m, text: t } : m));
   }, []);
-
-  const switchToModel = useCallback(async (model: CustomModel, uid?: string) => {
-    abortRef.current?.abort();
-    const id = uid ?? userId;
-    setActiveId(model.id); setInput(""); setLoading(false);
-    setStreamingId(null); setSidebarOpen(false);
-    if (id) {
-      const session = await loadSession(id, model.id);
-      if (session) { historyRef.current = session.history; setMessages(session.messages); return; }
-    }
-    const cache = initCache(model);
-    historyRef.current = [...cache.history];
-    setMessages([...cache.messages]);
-  }, [userId]);
 
   const handleAddModel = useCallback(async (fields: Omit<CustomModel, "id" | "user_id" | "created_at">) => {
     if (!userId) throw new Error("You must be logged in.");
@@ -846,18 +938,21 @@ export default function Explore() {
 
   // ── Derived ───────────────────────────────────────────────────────────────
 
-  const sideTranslate = sidebarAnim.interpolate({ inputRange: [0, 1], outputRange: [-276, 0] });
+  const sideTranslate = sidebarAnim.interpolate({ inputRange: [0, 1], outputRange: [-308, 0] });
   const scrimOpacity  = sidebarAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
 
   const modelInitial = activeModel ? activeModel.name.charAt(0).toUpperCase() : "A";
+  const activeMeta = activeModel ? TYPE_META[activeModel.type] : TYPE_META.text;
+  const activeSubtitle = activeModel ? modelSubtitle(activeModel) : "";
 
   const renderItem = useCallback(({ item }: { item: Message }) => (
     <MessageRow
       item={item}
       isStreaming={streamingId === item.id}
       modelInitial={modelInitial}
+      modelType={activeModel?.type ?? "text"}
     />
-  ), [streamingId, modelInitial]);
+  ), [streamingId, modelInitial, activeModel?.type]);
 
   const keyExtractor = useCallback((item: Message) => item.id, []);
 
@@ -865,12 +960,22 @@ export default function Explore() {
     activeModel?.type === "video" ? "Describe a video…"
     : activeModel?.type === "image" ? "Describe an image…"
     : "Message";
+  const canSend = input.trim().length > 0;
 
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <ImageBackground source = {require("../../assets/images/bgexplore.jpg")} style= {{flex:1}}>
-    <View style={{ flex: 1, backgroundColor: C.bg }}>
+    <ImageBackground
+      source={require("../../assets/images/bgexplore.jpg")}
+      style={screen.bg}
+      imageStyle={screen.bgImage}
+    >
+    <LinearGradient
+      colors={["rgba(7,8,10,0.68)", "rgba(8,9,11,0.92)", C.bg]}
+      locations={[0, 0.46, 1]}
+      style={screen.gradient}
+    >
+    <View style={screen.root}>
 
       <StatusBar barStyle="light-content" backgroundColor={C.bg} />
 
@@ -895,10 +1000,24 @@ export default function Explore() {
               { transform: [{ translateX: sideTranslate }], paddingTop: insets.top + 20 },
             ]}
           >
+            <BlurView
+              tint="systemUltraThinMaterialDark"
+              intensity={42}
+              blurMethod={glassBlurMethod}
+              style={side.panelGlass}
+            >
+            <LinearGradient
+              colors={["rgba(255,255,255,0.09)", "rgba(255,255,255,0.035)", "rgba(7,8,10,0.38)"]}
+              locations={[0, 0.48, 1]}
+              style={side.panelTint}
+            >
             <View style={side.header}>
-              <Text style={side.title}>Models</Text>
+              <View>
+                <Text style={side.title}>Models</Text>
+                <Text style={side.count}>{models.length} saved</Text>
+              </View>
               <Pressable
-                style={side.addBtn}
+                style={({ pressed }) => [side.addBtn, pressed && side.addBtnPressed]}
                 hitSlop={8}
                 onPress={() => {
                   if (!userId) { Alert.alert("Sign in required", "Log in to save models."); return; }
@@ -913,14 +1032,15 @@ export default function Explore() {
             <ScrollView
               style={{ flex: 1 }}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingVertical: 8, paddingBottom: 40 }}
+              contentContainerStyle={side.content}
             >
               {models.map(m => {
                 const isActive = m.id === activeId;
+                const meta = TYPE_META[m.type];
                 return (
                   <Pressable
                     key={m.id}
-                    style={[side.item, isActive && side.itemActive]}
+                    style={({ pressed }) => [side.item, isActive && side.itemActive, pressed && side.itemPressed]}
                     onPress={() => switchToModel(m)}
                     onLongPress={() => {
                       Alert.alert(m.name, undefined, [
@@ -931,71 +1051,132 @@ export default function Explore() {
                     }}
                     delayLongPress={500}
                   >
-                    <View style={[side.itemInitial, isActive && side.itemInitialActive]}>
-                      <Text style={[side.itemInitialText, isActive && side.itemInitialTextActive]}>
-                        {m.name.charAt(0).toUpperCase()}
-                      </Text>
+                    <View style={[side.itemInitial, { backgroundColor: meta.bg, borderColor: meta.border }]}>
+                      <Ionicons name={meta.icon} size={16} color={meta.accent} />
                     </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[side.itemName, isActive && side.itemNameActive]} numberOfLines={1}>
-                        {m.name}
-                      </Text>
+                    <View style={side.itemBody}>
+                      <View style={side.itemTopLine}>
+                        <Text style={[side.itemName, isActive && side.itemNameActive]} numberOfLines={1}>
+                          {m.name}
+                        </Text>
+                        <View style={[side.typePill, { borderColor: meta.border, backgroundColor: meta.bg }]}>
+                          <Text style={[side.typeText, { color: meta.accent }]}>{meta.label}</Text>
+                        </View>
+                      </View>
                       <Text style={side.itemSub} numberOfLines={1}>
-                        {m.model || m.api_format}
+                        {modelSubtitle(m)}
                       </Text>
+                      <Text style={side.itemHost} numberOfLines={1}>{providerHost(m)}</Text>
                     </View>
+                    {isActive && <Ionicons name="checkmark-circle" size={17} color={meta.accent} />}
                   </Pressable>
                 );
               })}
 
               {models.length === 0 && !loadingModels && (
-                <View style={{ alignItems: "center", paddingTop: 48, gap: 8 }}>
-                  <Text style={{ color: C.dim, fontSize: 13 }}>No models yet</Text>
+                <View style={side.empty}>
+                  <Ionicons name="cube-outline" size={24} color={C.dim} />
+                  <Text style={side.emptyText}>No models yet</Text>
                 </View>
               )}
             </ScrollView>
+            </LinearGradient>
+            </BlurView>
           </Animated.View>
         </Animated.View>
       )}
 
       <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
         {/* Top bar */}
-        <View style={topbar.root}>
-          <Pressable style={topbar.iconBtn} onPress={() => setSidebarOpen(true)} hitSlop={8}>
+        <BlurView
+          tint="systemUltraThinMaterialDark"
+          intensity={36}
+          blurMethod={glassBlurMethod}
+          style={topbar.root}
+        >
+          <Pressable
+            style={({ pressed }) => [topbar.iconBtn, pressed && topbar.iconPressed]}
+            onPress={() => setSidebarOpen(true)}
+            hitSlop={8}
+          >
             <Ionicons name="menu-outline" size={21} color={C.muted} />
           </Pressable>
 
-          <Pressable style={topbar.center} onPress={() => setSidebarOpen(true)}>
-            <Text style={topbar.modelName} numberOfLines={1}>
-              {activeModel ? activeModel.name : "Select a model"}
-            </Text>
+          <Pressable
+            style={({ pressed }) => [
+              topbar.center,
+              activeModel && { borderColor: activeMeta.border },
+              pressed && topbar.centerPressed,
+            ]}
+            onPress={() => setSidebarOpen(true)}
+          >
+            <View style={[topbar.modelGlyph, { backgroundColor: activeMeta.bg, borderColor: activeMeta.border }]}>
+              <Ionicons name={activeMeta.icon} size={14} color={activeModel ? activeMeta.accent : C.dim} />
+            </View>
+            <View style={topbar.modelTextBlock}>
+              <Text style={topbar.modelName} numberOfLines={1}>
+                {activeModel ? activeModel.name : "Select a model"}
+              </Text>
+              <Text style={topbar.modelSub} numberOfLines={1}>
+                {activeModel ? activeSubtitle : "Add a model to start"}
+              </Text>
+            </View>
             <Ionicons name="chevron-down" size={12} color={C.dim} style={{ marginTop: 1 }} />
           </Pressable>
 
           <Pressable
-            style={[topbar.iconBtn, !activeModel && { opacity: 0 }]}
+            style={({ pressed }) => [
+              topbar.iconBtn,
+              topbar.resetBtn,
+              !activeModel && topbar.hiddenBtn,
+              pressed && topbar.iconPressed,
+            ]}
             onPress={resetChat}
             disabled={!activeModel}
             hitSlop={8}
           >
-            <Ionicons name="trash-outline" size={20} color={C.muted} />
+            <Ionicons name="trash-outline" size={20} color={activeModel ? C.muted : C.dim} />
           </Pressable>
-        </View>
+        </BlurView>
+
+        {loadingModels && !activeModel && (
+          <View style={empty.root}>
+            <BlurView
+              tint="systemUltraThinMaterialDark"
+              intensity={34}
+              blurMethod={glassBlurMethod}
+              style={empty.card}
+            >
+              <ActivityIndicator color={C.text} />
+              <Text style={empty.title}>Loading models</Text>
+            </BlurView>
+          </View>
+        )}
 
         {/* Empty state */}
         {!loadingModels && models.length === 0 && (
           <View style={empty.root}>
-            <Text style={empty.title}>No models connected</Text>
-            <Text style={empty.sub}>
-              Add any model using your own API key.{"\n"}
-              OpenAI, Anthropic, Groq, Ollama, and more.
-            </Text>
-            <Pressable
-              style={empty.btn}
-              onPress={() => { if (!userId) { Alert.alert("Sign in required"); return; } setAddOpen(true); }}
+            <BlurView
+              tint="systemUltraThinMaterialDark"
+              intensity={34}
+              blurMethod={glassBlurMethod}
+              style={empty.card}
             >
-              <Text style={empty.btnText}>Add a model</Text>
-            </Pressable>
+              <View style={empty.icon}>
+                <Ionicons name="sparkles-outline" size={28} color={C.accent} />
+              </View>
+              <Text style={empty.title}>No models connected</Text>
+              <Text style={empty.sub}>
+                Add a model to begin chatting.
+              </Text>
+              <Pressable
+                style={({ pressed }) => [empty.btn, pressed && { opacity: 0.82 }]}
+                onPress={() => { if (!userId) { Alert.alert("Sign in required"); return; } setAddOpen(true); }}
+              >
+                <Ionicons name="add" size={16} color={C.sendIcon} />
+                <Text style={empty.btnText}>Add a model</Text>
+              </Pressable>
+            </BlurView>
           </View>
         )}
 
@@ -1023,7 +1204,12 @@ export default function Explore() {
             />
 
             {/* Input bar */}
-            <View style={[inputbar.wrap, { paddingBottom: Math.max(insets.bottom, 14) }]}>
+            <BlurView
+              tint="systemUltraThinMaterialDark"
+              intensity={36}
+              blurMethod={glassBlurMethod}
+              style={[inputbar.wrap, { paddingBottom: Math.max(insets.bottom, 14) }]}
+            >
               <View style={inputbar.row}>
                 <TextInput
                   value={input}
@@ -1039,8 +1225,14 @@ export default function Explore() {
                   blurOnSubmit={false}
                 />
                 <Pressable
-                  style={({ pressed }) => [inputbar.sendBtn, loading && inputbar.sendBtnStop, pressed && { opacity: 0.7 }]}
+                  style={({ pressed }) => [
+                    inputbar.sendBtn,
+                    loading && inputbar.sendBtnStop,
+                    !loading && !canSend && inputbar.sendBtnDisabled,
+                    pressed && { opacity: 0.7 },
+                  ]}
                   onPress={loading ? () => abortRef.current?.abort() : sendMessage}
+                  disabled={!loading && !canSend}
                 >
                   {loading ? (
                     <View style={inputbar.stopSquare} />
@@ -1060,7 +1252,7 @@ export default function Explore() {
               <Text style={inputbar.hint} numberOfLines={1}>
                 {activeModel.model || activeModel.api_format} · {activeModel.name}
               </Text>
-            </View>
+            </BlurView>
           </KeyboardAvoidingView>
         )}
       </SafeAreaView>
@@ -1073,165 +1265,376 @@ export default function Explore() {
         />
       )}
     </View>
+    </LinearGradient>
     </ImageBackground>
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
+const screen = StyleSheet.create({
+  bg: { flex: 1, backgroundColor: C.bg },
+  bgImage: { opacity: 0.64 },
+  gradient: { flex: 1 },
+  root: { flex: 1, backgroundColor: "rgba(6, 7, 9, 0.04)" },
+});
+
 const topbar = StyleSheet.create({
   root: {
-    flexDirection: "row", alignItems: "center",
-    paddingHorizontal: 8, paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: C.border,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginHorizontal: 12,
+    marginTop: 8,
+    marginBottom: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    borderRadius: 24,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.14)",
+    backgroundColor: "rgba(12,13,16,0.48)",
+    overflow: "hidden",
   },
   iconBtn: {
-    width: 38, height: 38, borderRadius: 8,
-    alignItems: "center", justifyContent: "center",
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.10)",
   },
+  iconPressed: { backgroundColor: "rgba(255,255,255,0.12)" },
   center: {
-    flex: 1, flexDirection: "row", alignItems: "center",
-    justifyContent: "center", gap: 5,
+    flex: 1,
+    minHeight: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 10,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(255,255,255,0.045)",
   },
+  centerPressed: { backgroundColor: "rgba(255,255,255,0.08)" },
+  modelGlyph: {
+    width: 30,
+    height: 30,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  modelTextBlock: { flex: 1, minWidth: 0 },
   modelName: {
-    color: C.text, fontSize: 15, fontWeight: "600",
-    letterSpacing: -0.2, maxWidth: 200,
+    color: C.text,
+    fontSize: 15,
+    fontWeight: "700",
+    maxWidth: "100%",
   },
+  modelSub: {
+    color: C.dim,
+    fontSize: 11,
+    fontWeight: "500",
+    marginTop: 1,
+  },
+  resetBtn: {},
+  hiddenBtn: { opacity: 0 },
 });
 
 const side = StyleSheet.create({
   panel: {
-    position: "absolute", left: 0, top: 0, bottom: 0, width: 276,
-    backgroundColor: C.surface,
-    borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: C.border2,
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 308,
     zIndex: 51,
   },
+  panelGlass: {
+    flex: 1,
+    borderTopRightRadius: 28,
+    borderBottomRightRadius: 28,
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.16)",
+    overflow: "hidden",
+    backgroundColor: "rgba(12,13,16,0.62)",
+  },
+  panelTint: { flex: 1 },
   header: {
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    paddingHorizontal: 18, paddingBottom: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.border,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
+    paddingBottom: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "rgba(255,255,255,0.10)",
   },
-  title: { color: C.text, fontSize: 16, fontWeight: "700", letterSpacing: -0.3 },
+  title: { color: C.text, fontSize: 20, fontWeight: "800" },
+  count: { color: C.dim, fontSize: 12, marginTop: 2 },
   addBtn: {
-    width: 28, height: 28, borderRadius: 7,
-    backgroundColor: C.surfaceHigh,
-    alignItems: "center", justifyContent: "center",
-    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.09)",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.14)",
   },
+  addBtnPressed: { backgroundColor: "rgba(255,255,255,0.15)" },
+  content: { paddingHorizontal: 10, paddingVertical: 12, paddingBottom: 42, gap: 8 },
   item: {
-    flexDirection: "row", alignItems: "center", gap: 10,
-    paddingHorizontal: 12, paddingVertical: 10,
-    marginHorizontal: 6, borderRadius: 9,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 11,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(255,255,255,0.035)",
   },
-  itemActive: { backgroundColor: C.surfaceHigh },
+  itemActive: {
+    backgroundColor: "rgba(255,255,255,0.095)",
+    borderColor: "rgba(255,255,255,0.18)",
+  },
+  itemPressed: { backgroundColor: "rgba(255,255,255,0.13)" },
   itemInitial: {
-    width: 30, height: 30, borderRadius: 8,
-    backgroundColor: C.surfaceHigh,
-    alignItems: "center", justifyContent: "center",
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: StyleSheet.hairlineWidth,
   },
-  itemInitialActive: { backgroundColor: "rgba(255,255,255,0.12)" },
-  itemInitialText: { color: C.dim, fontSize: 12, fontWeight: "700" },
-  itemInitialTextActive: { color: C.text },
-  itemName: { color: C.muted, fontSize: 14, fontWeight: "500" },
-  itemNameActive: { color: C.text, fontWeight: "600" },
-  itemSub: { color: C.dim, fontSize: 11, marginTop: 1 },
+  itemBody: { flex: 1, minWidth: 0 },
+  itemTopLine: { flexDirection: "row", alignItems: "center", gap: 7 },
+  typePill: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    flexShrink: 0,
+  },
+  typeText: { fontSize: 9, fontWeight: "800" },
+  itemName: { color: C.muted, fontSize: 14, fontWeight: "700", flexShrink: 1 },
+  itemNameActive: { color: C.text },
+  itemSub: { color: C.dim, fontSize: 12, marginTop: 3 },
+  itemHost: { color: "rgba(245,242,234,0.32)", fontSize: 10, marginTop: 2 },
+  empty: { alignItems: "center", paddingTop: 48, gap: 8 },
+  emptyText: { color: C.dim, fontSize: 13 },
 });
 
 const row = StyleSheet.create({
   userWrap: {
-    flexDirection: "row", justifyContent: "flex-end",
-    paddingHorizontal: 16, marginVertical: 3,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    paddingHorizontal: 16,
+    marginVertical: 5,
   },
   userBubble: {
-    maxWidth: "76%",
+    maxWidth: "80%",
     backgroundColor: C.userBg,
-    paddingHorizontal: 14, paddingVertical: 10,
-    borderRadius: 18, borderBottomRightRadius: 4,
-    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+    paddingHorizontal: 15,
+    paddingVertical: 11,
+    borderRadius: 22,
+    borderBottomRightRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: C.userBorder,
+    overflow: "hidden",
   },
   userText: { color: C.text, fontSize: 15, lineHeight: 22 },
-
   asstWrap: {
-    flexDirection: "row", alignItems: "flex-start",
-    paddingHorizontal: 14, paddingVertical: 6, gap: 10,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    gap: 10,
   },
   avatar: {
-    width: 28, height: 28, borderRadius: 8,
-    backgroundColor: C.surfaceHigh,
-    alignItems: "center", justifyContent: "center",
-    flexShrink: 0, marginTop: 3,
+    width: 32,
+    height: 32,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    marginTop: 16,
+    borderWidth: StyleSheet.hairlineWidth,
   },
-  avatarLetter: { color: C.muted, fontSize: 11, fontWeight: "700" },
-
-  asstBody: { flex: 1, paddingTop: 2 },
-  asstText: { color: "rgba(255,255,255,0.86)", fontSize: 15, lineHeight: 24 },
-
-  image: { width: 256, height: 256, borderRadius: 12 },
-  videoCard: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    paddingHorizontal: 14, paddingVertical: 10,
-    backgroundColor: C.surfaceHigh, borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+  avatarLetter: { color: C.text, fontSize: 12, fontWeight: "800" },
+  asstBody: { flex: 1, paddingTop: 2, gap: 6 },
+  asstMeta: { flexDirection: "row", alignItems: "center", gap: 5, paddingLeft: 2 },
+  asstMetaText: {
+    color: C.dim,
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  asstBubble: {
     alignSelf: "flex-start",
+    maxWidth: "96%",
+    backgroundColor: "rgba(255,255,255,0.055)",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderTopLeftRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.13)",
+    overflow: "hidden",
   },
-  videoLabel: { color: C.muted, fontSize: 14 },
+  asstText: { color: "rgba(255,255,255,0.88)", fontSize: 15, lineHeight: 24 },
+  mediaFrame: {
+    alignSelf: "flex-start",
+    borderRadius: 22,
+    padding: 4,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.14)",
+  },
+  image: { width: 256, height: 256, borderRadius: 18 },
+  videoCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 11,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.14)",
+    alignSelf: "flex-start",
+    minWidth: 220,
+    overflow: "hidden",
+  },
+  videoIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.10)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  videoLabel: { color: C.text, fontSize: 14, fontWeight: "700" },
+  videoSub: { color: C.dim, fontSize: 11, marginTop: 1 },
 });
 
 const chat = StyleSheet.create({
-  list: { paddingVertical: 16, flexGrow: 1 },
+  list: { paddingTop: 12, paddingBottom: 18, flexGrow: 1 },
 });
 
 const inputbar = StyleSheet.create({
   wrap: {
-    paddingHorizontal: 12, paddingTop: 10,
-    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.border,
-    backgroundColor: C.bg,
-    gap: 7,
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(255, 255, 255, 0)",
+    backgroundColor: "rgba(10, 11, 14, 0)",
+    gap: 8,
+    overflow: "hidden",
   },
   row: {
-    flexDirection: "row", alignItems: "flex-end", gap: 8,
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 8,
     backgroundColor: C.inputBg,
-    borderRadius: 24,
-    paddingLeft: 16, paddingRight: 6, paddingTop: 8, paddingBottom: 8,
-    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+    borderRadius: 23,//Message input style
+    paddingLeft: 17,
+    paddingRight: 7,
+    paddingTop: 8,
+    paddingBottom: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.15)",
   },
   field: {
-    flex: 1, color: C.text, fontSize: 15, lineHeight: 22,
-    maxHeight: 120, paddingTop: 2, paddingBottom: 2,
+    flex: 1,
+    color: C.text,
+    fontSize: 15,
+    lineHeight: 22,
+    maxHeight: 120,
+    paddingTop: 2,
+    paddingBottom: 2,
   },
   sendBtn: {
-    width: 32, height: 32, borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: C.sendBtn,
-    alignItems: "center", justifyContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
   },
+  sendBtnDisabled: { backgroundColor: "rgba(255,255,255,0.08)" },
   sendBtnStop: {
-    backgroundColor: C.surfaceHigh,
-    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.14)",
   },
   stopSquare: {
-    width: 9, height: 9, borderRadius: 2,
+    width: 9,
+    height: 9,
+    borderRadius: 2,
     backgroundColor: C.muted,
   },
+  hintRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
   hint: {
-    color: C.dim, fontSize: 11,
-    textAlign: "center", letterSpacing: 0.1,
+    color: C.dim,
+    fontSize: 11,
+    textAlign: "center",
   },
 });
 
 const empty = StyleSheet.create({
-  root: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 44, gap: 10 },
-  title: { color: C.text, fontSize: 19, fontWeight: "700", letterSpacing: -0.3 },
-  sub: { color: C.muted, fontSize: 14, textAlign: "center", lineHeight: 22 },
-  btn: {
-    marginTop: 10,
-    paddingHorizontal: 22, paddingVertical: 11,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth, borderColor: C.border2,
-    backgroundColor: C.surfaceHigh,
+  root: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 28,
   },
-  btnText: { color: C.text, fontSize: 14, fontWeight: "600" },
+  card: {
+    width: "100%",
+    maxWidth: 340,
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 26,
+    borderRadius: 28,
+    backgroundColor: "rgba(14,15,19,0.54)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.16)",
+    overflow: "hidden",
+  },
+  icon: {
+    width: 58,
+    height: 58,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(157,230,198,0.10)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(157,230,198,0.22)",
+  },
+  title: { color: C.text, fontSize: 20, fontWeight: "800", textAlign: "center" },
+  sub: { color: C.muted, fontSize: 14, textAlign: "center", lineHeight: 21 },
+  btn: {
+    marginTop: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+    borderRadius: 16,
+    backgroundColor: C.sendBtn,
+  },
+  btnText: { color: C.sendIcon, fontSize: 14, fontWeight: "800" },
 });
 
 const sh = StyleSheet.create({

@@ -76,12 +76,12 @@ function Group({ children }: { children: React.ReactNode }) {
 }
 
 export default function SettingsScreen() {
-  const [profile, setProfile]       = useState<Profile | null>(null);
+  const [, setProfile]              = useState<Profile | null>(null);
   const [haptics, setHaptics]       = useState(true);
   const [timestamps, setTimestamps] = useState(false);
   const [chatCount, setChatCount]   = useState<number | null>(null);
   const [modelCount, setModelCount] = useState<number | null>(null);
-  const [loading, setLoading]       = useState(true);
+  const [, setLoading]              = useState(true);
 
   useEffect(() => {
     (async () => {
