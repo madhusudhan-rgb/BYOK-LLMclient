@@ -1,2 +1,2 @@
-This branch is deprecated and useless. Head to MAIN2 for the updated more recent stuff
+This repo is deprecated and useless. Head to <a href = ""></a> for the updated more recent stuff
 Thank you for visiting
